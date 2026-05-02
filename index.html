@@ -175,6 +175,43 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 .ts-pts{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700}
 .ts-pts.best{color:var(--green)} .ts-pts.worst{color:var(--red)}
 
+/* DISTRIBUTION + PENALTY TABLES */
+.stats-plain-table thead th{font-size:10px;padding:9px 12px;letter-spacing:1.5px}
+.stats-plain-table td{padding:9px 12px;font-family:'DM Mono',monospace;font-size:12px;text-align:right}
+.stats-plain-table td.team-col{text-align:left;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px}
+.stat-highlight-lo{color:var(--green);font-weight:700}   /* low score = good */
+.stat-highlight-hi{color:var(--red);font-weight:700}     /* high score = bad */
+.penalty-note{font-size:11px;color:var(--muted);padding:10px 16px;border-top:1px solid var(--border);font-style:italic}
+
+/* ADVANCED STATS (captain/bench) */
+.adv-load-area{padding:24px;text-align:center;border-bottom:1px solid var(--border)}
+.adv-load-area p{font-size:13px;color:var(--muted);margin-bottom:14px}
+.adv-controls{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+.adv-select{background:var(--surface);border:1px solid var(--border);color:var(--text);
+  font-family:'DM Sans',sans-serif;font-size:13px;padding:6px 10px;border-radius:6px;cursor:pointer}
+.adv-load-btn{background:var(--green-dim);border:1px solid var(--green);color:var(--green);
+  font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:1.5px;padding:7px 18px;
+  border-radius:7px;cursor:pointer;transition:all .2s}
+.adv-load-btn:hover:not(:disabled){background:rgba(16,185,129,.2)}
+.adv-load-btn:disabled{opacity:.4;cursor:not-allowed}
+.adv-progress{padding:16px 24px;display:none}
+.adv-progress-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-bottom:6px}
+.adv-results{display:none}
+.adv-results-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+@media(max-width:800px){.adv-results-grid{grid-template-columns:1fr}}
+.adv-card{background:var(--card);padding:20px}
+.adv-card h3{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:14px}
+.adv-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(30,45,68,.4);font-size:13px}
+.adv-row:last-child{border-bottom:none}
+.adv-pos{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--muted);width:26px}
+.adv-pos.p1{color:var(--gold)} .adv-pos.p2{color:#94a3b8} .adv-pos.p3{color:#b45309}
+.adv-teamdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.adv-info{flex:1}
+.adv-name{font-weight:600;color:#fff;font-size:13px}
+.adv-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
+.adv-val{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700}
+
 /* LOADING OVERLAY */
 #refresh-overlay{display:none;position:fixed;inset:0;z-index:999;background:rgba(8,12,20,.88);
   backdrop-filter:blur(4px);align-items:center;justify-content:center}
@@ -276,9 +313,27 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
   <div class="tab-panel" id="tab-stats">
     <p class="section-title">Stats of Season</p>
 
+    <!-- GW Score Distribution -->
+    <div class="panel" style="margin-bottom:20px">
+      <div class="stat-card-header">GW Score Distribution <span>— across all completed gameweeks</span></div>
+      <div class="table-wrap">
+        <table class="stats-plain-table">
+          <thead><tr>
+            <th style="text-align:left">Team</th>
+            <th class="num">Scores &lt; 20</th>
+            <th class="num">Min Score</th>
+            <th class="num">Max Score</th>
+            <th class="num">Range</th>
+            <th class="num">Scores &gt; 40</th>
+          </tr></thead>
+          <tbody id="dist-body"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Chip Points Table -->
     <div class="panel" style="margin-bottom:20px">
-      <div class="stat-card-header">Chip Points Table <span>— points scored in the GW each chip was played</span></div>
+      <div class="stat-card-header">Chip Points Table <span>— points scored in the GW each chip was played &middot; 👑 = best use of that chip</span></div>
       <div class="table-wrap">
         <table class="chip-table">
           <thead><tr>
@@ -293,15 +348,78 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
       </div>
     </div>
 
+    <!-- Penalty Breakdown -->
+    <div class="panel" style="margin-bottom:20px">
+      <div class="stat-card-header">Penalty Breakdown <span id="pen-note">— hit &#x21bb; Refresh to populate from Anti FPL</span></div>
+      <div class="table-wrap">
+        <table class="stats-plain-table">
+          <thead><tr>
+            <th style="text-align:left">Team</th>
+            <th class="num">C/VC Pens</th>
+            <th class="num">C/VC Pts</th>
+            <th class="num">Transfer Pts</th>
+            <th class="num">Inactive Pens</th>
+            <th class="num">Inactive Pts</th>
+            <th class="num" style="color:var(--red)">Total Pen Pts</th>
+          </tr></thead>
+          <tbody id="penalty-body"></tbody>
+        </table>
+      </div>
+      <div class="penalty-note">Each C/VC and inactive player penalty = 9 pts. Transfer cost shown in points directly. Populates after &#x21bb; Refresh.</div>
+    </div>
+
     <!-- Top/Bottom GW Scores -->
-    <div class="stats-grid">
+    <div class="stats-grid" style="margin-bottom:20px">
       <div class="panel">
-        <div class="stat-card-header">🟢 Top 3 Best GW Scores <span>(lowest pts = Anti FPL gold)</span></div>
+        <div class="stat-card-header">&#x1F7E2; Top 3 Best GW Scores <span>(lowest pts = Anti FPL gold)</span></div>
         <div class="top-score-list" id="best-scores"></div>
       </div>
       <div class="panel">
-        <div class="stat-card-header">🔴 Top 3 Worst GW Scores <span>(highest pts = Anti FPL disaster)</span></div>
+        <div class="stat-card-header">&#x1F534; Top 3 Worst GW Scores <span>(highest pts = Anti FPL disaster)</span></div>
         <div class="top-score-list" id="worst-scores"></div>
+      </div>
+    </div>
+
+    <!-- Captain & Bench Stats -->
+    <div class="panel">
+      <div class="stat-card-header">&#x1F3A9; Captain &amp; Bench Stats <span>— fetched from FPL API on demand</span></div>
+      <div class="adv-load-area" id="adv-load-area">
+        <p>Fetches FPL picks data per gameweek (one API call per GW).<br>Full season ~10&ndash;15 min. Pick a shorter range for a quick look.</p>
+        <div class="adv-controls">
+          <label style="font-size:12px;color:var(--muted)">Load from GW</label>
+          <select class="adv-select" id="adv-from">
+            <option value="1">GW1 (full season)</option>
+            <option value="20">GW20</option>
+            <option value="27" selected>GW27 (last 8)</option>
+            <option value="30">GW30 (last 5)</option>
+          </select>
+          <button class="adv-load-btn" id="adv-load-btn" onclick="loadAdvancedStats()">&#x26A1; Load Stats</button>
+        </div>
+      </div>
+      <div class="adv-progress" id="adv-progress">
+        <div class="adv-progress-label" id="adv-prog-label">Starting…</div>
+        <div class="prog-outer"><div class="prog-inner" id="adv-prog-bar"></div></div>
+      </div>
+      <div class="adv-results" id="adv-results">
+        <div class="adv-results-grid">
+          <div class="adv-card">
+            <h3>&#x1F3A9; Worst Captain Picks <span style="color:var(--muted);font-size:10px">(captain who scored highest FPL pts = most pain)</span></h3>
+            <div id="adv-captains"></div>
+          </div>
+          <div class="adv-card">
+            <h3>&#x1F91D; Total Bench Bummings <span style="color:var(--muted);font-size:10px">(total bench pts that auto-subbed on)</span></h3>
+            <div id="adv-bench-total"></div>
+          </div>
+          <div class="adv-card">
+            <h3>&#x1F4A5; Worst Single Bench Score <span style="color:var(--muted);font-size:10px">(highest auto-sub pts in one GW)</span></h3>
+            <div id="adv-bench-worst"></div>
+          </div>
+          <div class="adv-card">
+            <h3>&#x1F600; 9 Lives Moments <span style="color:var(--muted);font-size:10px">(benched player scored high but didn&apos;t come on)</span></h3>
+            <div id="adv-nine-lives"></div>
+          </div>
+        </div>
+        <div style="padding:10px 16px;font-size:11px;color:var(--muted);border-top:1px solid var(--border)" id="adv-coverage"></div>
       </div>
     </div>
   </div>
@@ -884,8 +1002,105 @@ function toggleDataset(tid) {
 
 // ── STATS OF SEASON ──
 function buildStatsTab() {
+  buildGWDistribution();
   buildChipTable();
+  buildPenaltySummary();
   buildTopScores();
+  // Advanced stats persist across tab switches
+  document.getElementById('adv-to-label').textContent = MAX_GW;
+}
+
+// ── GW SCORE DISTRIBUTION ──
+function buildGWDistribution() {
+  const sorted = getSorted(MAX_GW);
+  const body = document.getElementById('dist-body');
+  body.innerHTML = '';
+
+  // Pre-compute column mins/maxes for highlight
+  const colMin = { lt20:Infinity, min:Infinity, max:-Infinity, range:-Infinity, gt40:Infinity };
+  const colMax = { lt20:-Infinity, max:Infinity }; // "best" depends on column
+
+  sorted.forEach(team => {
+    const pts = team.gws.map(g => g.pts);
+    const lt20 = pts.filter(p => p < 20).length;
+    const gt40 = pts.filter(p => p > 40).length;
+    const mn = Math.min(...pts);
+    const mx = Math.max(...pts);
+    const rng = mx - mn;
+    colMin.lt20  = Math.min(colMin.lt20, lt20);
+    colMax.lt20  = Math.max(colMax.lt20 ?? -Infinity, lt20);
+    colMin.min   = Math.min(colMin.min, mn);
+    colMin.max   = Math.min(colMin.max ?? Infinity, mx);
+    colMax.max   = Math.max(colMax.max ?? -Infinity, mx);
+    colMin.range = Math.min(colMin.range ?? Infinity, rng);
+    colMax.range = Math.max(colMax.range ?? -Infinity, rng);
+    colMax.gt40  = Math.max(colMax.gt40 ?? -Infinity, gt40);
+  });
+
+  sorted.forEach(team => {
+    const pts = team.gws.map(g => g.pts);
+    const lt20 = pts.filter(p => p < 20).length;
+    const gt40 = pts.filter(p => p > 40).length;
+    const mn = Math.min(...pts);
+    const mx = Math.max(...pts);
+    const rng = mx - mn;
+    const mnGW = team.gws.find(g => g.pts === mn)?.gw;
+    const mxGW = team.gws.find(g => g.pts === mx)?.gw;
+
+    // In Anti FPL: low scores = good. Highlights: most lt20 = best, lowest min = best,
+    // lowest max = best (never had a disaster), lowest range = most consistent, fewest gt40 = best
+    const h = (val, bestVal, cls) => val === bestVal ? ` class="${cls}"` : '';
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="team-col" style="display:flex;align-items:center;gap:7px">
+        <span class="dot" style="background:${team.color}"></span>${team.team}
+      </td>
+      <td${h(lt20, colMax.lt20, 'stat-highlight-lo')}>${lt20}</td>
+      <td${h(mn, colMin.min, 'stat-highlight-lo')} title="GW${mnGW}">${mn} <span style="font-size:10px;color:var(--muted)">GW${mnGW}</span></td>
+      <td${h(mx, colMin.max, 'stat-highlight-lo')} title="GW${mxGW}">${mx} <span style="font-size:10px;color:var(--muted)">GW${mxGW}</span></td>
+      <td${h(rng, colMin.range, 'stat-highlight-lo')}>${rng}</td>
+      <td${h(gt40, colMax.gt40, 'stat-highlight-hi')}>${gt40}</td>
+    `;
+    body.appendChild(tr);
+  });
+}
+
+// ── PENALTY SUMMARY ──
+function buildPenaltySummary() {
+  const sorted = getSorted(MAX_GW);
+  const body = document.getElementById('penalty-body');
+  body.innerHTML = '';
+
+  let anyData = false;
+  sorted.forEach(team => {
+    const cvc      = team.gws.reduce((a,g) => a + (g.cvcPens||0), 0);
+    const transfer = team.gws.reduce((a,g) => a + (g.transferCost||0), 0);
+    const inactive = team.gws.reduce((a,g) => a + (g.inactive||0), 0);
+    const cvcPts   = cvc * 9;
+    const inPts    = inactive * 9;
+    const total    = cvcPts + transfer + inPts;
+    if (cvc > 0 || transfer > 0 || inactive > 0) anyData = true;
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="team-col" style="display:flex;align-items:center;gap:7px">
+        <span class="dot" style="background:${team.color}"></span>${team.team}
+      </td>
+      <td>${cvc || '—'}</td>
+      <td>${cvcPts || '—'}</td>
+      <td>${transfer || '—'}</td>
+      <td>${inactive || '—'}</td>
+      <td>${inPts || '—'}</td>
+      <td style="color:${total>0?'var(--red)':'var(--muted)'};font-weight:${total>0?'700':'400'}">${total || '—'}</td>
+    `;
+    body.appendChild(tr);
+  });
+
+  const note = document.getElementById('pen-note');
+  if (note) note.textContent = anyData
+    ? '— penalty data loaded'
+    : '— hit ↻ Refresh to populate from Anti FPL';
 }
 
 function buildChipTable() {
@@ -987,9 +1202,19 @@ async function refreshData() {
     try {
       const raw=await callClaude(
         'Return ONLY a valid JSON array. No prose, no markdown.',
-        `Fetch https://antifpl.pythonanywhere.com/antifpl/manager/${team.id}/ and from the GW table return ONLY: [{"gw":1,"rank":64,"pts":46,"total":46,"chip":""},...]
-Columns: GW Rank | Last Rank | Gameweek | ... | Chip | ... | GW Points (With Pens) | Total
-- gw=gameweek number, rank=GW Rank, pts=GW Points With Pens, total=Total, chip=lowercase chip name or ""`
+`Fetch https://antifpl.pythonanywhere.com/antifpl/manager/${team.id}/ and from the GW table return ONLY a JSON array. Each element:
+{"gw":N,"rank":N,"pts":N,"total":N,"chip":"","sitePts":N,"cvcPens":N,"transferCost":N,"inactive":N}
+
+Table columns (0-indexed): GW Rank(0) | Last Rank(1) | Gameweek(2) | Team Value(3) | Bank(4) | Transfers(5) | Transfer Cost(6) | Chip(7) | C/VC Pens(8) | Inactive Players(9) | Last GW(10) | Site Points(11) | GW Points With Pens(12) | Total(13)
+- gw = integer from col 2 (just the number)
+- rank = col 0 (GW Rank)
+- pts = col 12 (GW Points With Pens)
+- total = col 13 (Total)
+- chip = col 7 lowercase ("wildcard","freehit","bboost","3xc", or "")
+- sitePts = col 11 (Site Points, integer)
+- cvcPens = col 8 (C/VC Pens, integer, 0 if blank)
+- transferCost = col 6 (Transfer Cost, integer, 0 if blank)
+- inactive = col 9 (Inactive Players, integer, 0 if blank)`
       );
       const match=raw.match(/\[[\s\S]*\]/);
       if (match) { const gws=JSON.parse(match[0]); if(gws.length) team.gws=gws; }
@@ -1026,6 +1251,187 @@ Columns: GW Rank | Last Rank | Gameweek | ... | Chip | ... | GW Points (With Pen
 
   overlay.classList.remove('show');
   btn.disabled=false; btn.classList.remove('loading');
+}
+
+// ── ADVANCED STATS (Captain + Bench) ──
+// Accumulates data per team across fetched GWs
+let advData = null; // null = not loaded
+
+async function loadAdvancedStats() {
+  const fromGW = parseInt(document.getElementById('adv-from').value);
+  const btn = document.getElementById('adv-load-btn');
+  const prog = document.getElementById('adv-progress');
+  const results = document.getElementById('adv-results');
+  btn.disabled = true;
+  prog.style.display = 'block';
+  results.style.display = 'none';
+
+  // Accumulators per team
+  const acc = {};
+  TEAMS.forEach(t => {
+    acc[t.id] = {
+      worstCapPts: 0, worstCapName: '—', worstCapGW: 0,
+      benchTotal: 0,
+      worstBenchPts: 0, worstBenchName: '—', worstBenchGW: 0,
+      nineLivesPts: 0, nineLivesName: '—', nineLivesGW: 0
+    };
+  });
+
+  const total = MAX_GW - fromGW + 1;
+  let done = 0;
+
+  // Ensure player names cached
+  await loadPlayerNames();
+
+  for (let gw = fromGW; gw <= MAX_GW; gw++) {
+    document.getElementById('adv-prog-label').textContent = `Fetching GW ${gw} / ${MAX_GW}…`;
+    document.getElementById('adv-prog-bar').style.width = `${(done/total)*100}%`;
+
+    try {
+      const ids = TEAMS.map(t => t.id);
+      const raw = await callClaude(
+        'Return ONLY raw JSON. No markdown, no prose.',
+        `For FPL Gameweek ${gw}, fetch:
+1. https://fantasy.premierleague.com/api/event/${gw}/live/
+   → element id to stats.total_points mapping
+
+2. For EACH team ID, fetch their picks:
+${ids.map(id => `   https://fantasy.premierleague.com/api/entry/${id}/event/${gw}/picks/`).join('\n')}
+   → For each team: captain element id (is_captain=true), plus bench element ids (position 12-15).
+     Also include automatic_subs array (element_in = player who came on).
+
+Return ONLY this JSON:
+{
+  "live": {"elementId": points, ...},
+  "teams": {
+    "${ids[0]}": {"captain": elementId, "bench": [id,id,id,id], "autoSubs": [elementId,...]},
+    ...all ${ids.length} teams...
+  }
+}`
+      );
+
+      const match = raw.match(/\{[\s\S]*\}/);
+      if (!match) { done++; continue; }
+      const parsed = JSON.parse(match[0]);
+      const { live, teams } = parsed;
+      if (!live || !teams) { done++; continue; }
+
+      for (const [tidStr, td] of Object.entries(teams)) {
+        const tid = parseInt(tidStr);
+        const team = TEAMS.find(t => t.id === tid);
+        if (!team || !acc[tid]) continue;
+        const a = acc[tid];
+
+        // Captain
+        if (td.captain) {
+          const capPts = live[String(td.captain)] ?? live[td.captain] ?? 0;
+          if (capPts > a.worstCapPts) {
+            a.worstCapPts = capPts;
+            a.worstCapName = playerCache[String(td.captain)] ?? `#${td.captain}`;
+            a.worstCapGW = gw;
+          }
+        }
+
+        // Bench
+        const benchIds = Array.isArray(td.bench) ? td.bench : [];
+        const autoSubIds = new Set(Array.isArray(td.autoSubs) ? td.autoSubs.map(String) : []);
+
+        benchIds.forEach(eid => {
+          const pts = live[String(eid)] ?? live[eid] ?? 0;
+          const name = playerCache[String(eid)] ?? `#${eid}`;
+          const cameon = autoSubIds.has(String(eid));
+
+          if (cameon) {
+            // Bench bumming — came on and scored
+            a.benchTotal += pts;
+            if (pts > a.worstBenchPts) {
+              a.worstBenchPts = pts; a.worstBenchName = name; a.worstBenchGW = gw;
+            }
+          } else {
+            // 9 lives — stayed on bench
+            if (pts > a.nineLivesPts) {
+              a.nineLivesPts = pts; a.nineLivesName = name; a.nineLivesGW = gw;
+            }
+          }
+        });
+      }
+    } catch(e) { console.warn(`GW${gw} adv stats error:`, e); }
+
+    done++;
+    document.getElementById('adv-prog-bar').style.width = `${(done/total)*100}%`;
+  }
+
+  advData = acc;
+  renderAdvancedStats(fromGW);
+  prog.style.display = 'none';
+  results.style.display = 'block';
+  btn.disabled = false;
+}
+
+function renderAdvancedStats(fromGW) {
+  if (!advData) return;
+  const sorted = getSorted(MAX_GW);
+
+  const makeList = (containerId, accessor, labelFn, valFn, valColor, ascending) => {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    const ranked = [...sorted]
+      .map(t => ({ t, val: accessor(advData[t.id]), label: labelFn(advData[t.id]) }))
+      .filter(x => x.val > 0)
+      .sort((a,b) => ascending ? a.val - b.val : b.val - a.val);
+
+    ranked.forEach((item, i) => {
+      const posCls = i===0?'p1':i===1?'p2':i===2?'p3':'';
+      const div = document.createElement('div');
+      div.className = 'adv-row';
+      div.innerHTML = `
+        <div class="adv-pos ${posCls}">${i+1}</div>
+        <span class="adv-teamdot" style="background:${item.t.color}"></span>
+        <div class="adv-info">
+          <div class="adv-name">${item.t.team}</div>
+          <div class="adv-sub">${item.label}</div>
+        </div>
+        <div class="adv-val" style="color:${valColor}">${valFn(advData[item.t.id])}</div>
+      `;
+      el.appendChild(div);
+    });
+    if (ranked.length === 0) el.innerHTML = '<div style="padding:12px;font-size:12px;color:var(--muted)">No data loaded for this range.</div>';
+  };
+
+  // Worst captain (highest scoring captain = disaster)
+  makeList('adv-captains',
+    d => d.worstCapPts,
+    d => `GW${d.worstCapGW} · ${d.worstCapName}`,
+    d => `${d.worstCapPts} pts`,
+    'var(--red)', false
+  );
+
+  // Total bench bummings
+  makeList('adv-bench-total',
+    d => d.benchTotal,
+    d => 'auto-sub points across loaded GWs',
+    d => `${d.benchTotal} pts`,
+    'var(--red)', false
+  );
+
+  // Worst single bench score
+  makeList('adv-bench-worst',
+    d => d.worstBenchPts,
+    d => `GW${d.worstBenchGW} · ${d.worstBenchName}`,
+    d => `${d.worstBenchPts} pts`,
+    'var(--red)', false
+  );
+
+  // 9 lives (highest pts on bench without coming on)
+  makeList('adv-nine-lives',
+    d => d.nineLivesPts,
+    d => `GW${d.nineLivesGW} · ${d.nineLivesName} sat on bench`,
+    d => `${d.nineLivesPts} pts`,
+    'var(--green)', false
+  );
+
+  document.getElementById('adv-coverage').textContent =
+    `Data loaded for GW${fromGW}–${MAX_GW}. Re-load with a wider range for more complete stats.`;
 }
 
 // ── INIT ──
