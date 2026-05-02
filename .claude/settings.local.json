@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\0134897s\\\\Github\\\\Anti_FPL\" -Recurse -Force)",
+      "Bash(Select-Object -Property FullName, PSIsContainer)",
+      "Bash(Sort-Object FullName)",
+      "Bash(python fetch_data.py)",
+      "Bash(python -c ' *)",
+      "Bash(node --check _tmp_check.js)",
+      "Bash(python -m http.server 8899)",
+      "Bash(curl -s http://localhost:8899/data.json)",
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('teams:', len\\(d['teams']\\), '| current_gw:', d['metadata']['current_gw'], '| last_updated:', d['metadata']['last_updated'][:19]\\)\")"
+    ]
+  }
+}
