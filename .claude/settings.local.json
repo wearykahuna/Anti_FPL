@@ -9,7 +9,15 @@
       "Bash(node --check _tmp_check.js)",
       "Bash(python -m http.server 8899)",
       "Bash(curl -s http://localhost:8899/data.json)",
-      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('teams:', len\\(d['teams']\\), '| current_gw:', d['metadata']['current_gw'], '| last_updated:', d['metadata']['last_updated'][:19]\\)\")"
+      "Bash(python -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\('teams:', len\\(d['teams']\\), '| current_gw:', d['metadata']['current_gw'], '| last_updated:', d['metadata']['last_updated'][:19]\\)\")",
+      "Bash(node --input-type=module)",
+      "Bash(node -e ' *)",
+      "Bash(node --check /tmp/check_syntax.js)",
+      "Bash(node --check _check.js)",
+      "Bash(rm _check.js)",
+      "Bash(del picks_cache.json)",
+      "Bash(python fetch_data.py --picks)",
+      "Bash(del _check.js)"
     ]
   }
 }
