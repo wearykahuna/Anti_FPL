@@ -211,6 +211,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
   <button class="tab" onclick="showTab('gwscores',this)">&#x1F3AF; GW Scores</button>
   <button class="tab" onclick="showTab('chart',this)">&#x1F4C8; Season Chart</button>
   <button class="tab" onclick="showTab('stats',this)">&#x1F3C6; Stats of Season</button>
+  <button class="tab" onclick="showTab('bbpc',this)">&#x1F4A5; BB, Pens &amp; Chips</button>
 </div>
 
 <div id="error-state"></div>
@@ -278,6 +279,18 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
   <div class="tab-panel" id="tab-stats" style="display:none">
     <p class="section-title">Stats of Season</p>
 
+    <!-- Top / Bottom GW Scores -->
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="panel">
+        <div class="stat-card-header">&#x1F7E2; Top 3 Best GW Scores <span>(lowest pts = Anti FPL gold)</span></div>
+        <div class="top-score-list" id="best-scores"></div>
+      </div>
+      <div class="panel">
+        <div class="stat-card-header">&#x1F534; Top 3 Worst GW Scores <span>(highest pts = Anti FPL disaster)</span></div>
+        <div class="top-score-list" id="worst-scores"></div>
+      </div>
+    </div>
+
     <!-- GW Score Distribution -->
     <div class="panel" style="margin-bottom:20px">
       <div class="stat-card-header">GW Score Distribution <span>&#x2014; across all completed gameweeks</span></div>
@@ -298,20 +311,50 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
       </div>
     </div>
 
-    <!-- Chip Points Table -->
-    <div class="panel" style="margin-bottom:20px">
-      <div class="stat-card-header">Chip Points Table <span>&#x2014; pts scored that GW &#xB7; &#x1F451; = best use of that chip (lowest pts)</span></div>
+    <!-- Captain League -->
+    <div class="panel">
+      <div class="stat-card-header">&#x1F3C6; Captain League <span>&#x2014; total pts contributed by captain pick (pts &times; multiplier) &middot; higher = worse</span></div>
       <div class="table-wrap">
-        <table class="chip-table">
+        <table class="stats-plain-table">
           <thead><tr>
             <th style="text-align:left">Team</th>
-            <th class="chip-val wc">WC 1</th><th class="chip-val wc">WC 2</th>
-            <th class="chip-val fh">FH 1</th><th class="chip-val fh">FH 2</th>
-            <th class="chip-val bb">BB 1</th><th class="chip-val bb">BB 2</th>
-            <th class="chip-val tc">TC 1</th><th class="chip-val tc">TC 2</th>
+            <th class="num">Season Total</th>
+            <th class="num">Worst GW</th>
+            <th class="num">Captain (GW)</th>
+            <th class="num">Pts &times; Mult</th>
           </tr></thead>
-          <tbody id="chip-table-body"></tbody>
+          <tbody id="cap-pen-body"></tbody>
         </table>
+      </div>
+      <div class="penalty-note">Captain pts count at &times;2 normally, &times;3 with Triple Captain. Higher = more damage to your score.</div>
+    </div>
+  </div>
+
+  <!-- BBPC -->
+  <div class="tab-panel" id="tab-bbpc" style="display:none">
+    <p class="section-title">Bench Bummings, Penalties &amp; Chips</p>
+
+    <!-- Bench Bummings -->
+    <div class="panel" id="bench-panel" style="margin-bottom:20px">
+      <div class="stat-card-header">&#x1F4A5; Bench Stats <span>&#x2014; auto-subs &amp; lucky escapes</span></div>
+      <div id="bench-content" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
+          <div style="background:var(--card);padding:16px">
+            <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Season Bench Bummings <span style="font-size:9px">(auto-sub pts added)</span></div>
+            <div id="bench-total-list"></div>
+          </div>
+          <div style="background:var(--card);padding:16px">
+            <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Worst Single GW Bumming</div>
+            <div id="bench-worst-list"></div>
+          </div>
+          <div style="background:var(--card);padding:16px">
+            <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Walking Through Traffic <span style="font-size:9px">(lucky escapes)</span></div>
+            <div id="bench-traffic-list"></div>
+          </div>
+        </div>
+      </div>
+      <div id="bench-no-data" style="padding:20px 18px;font-size:12px;color:var(--muted)">
+        Picks data not available. Run <code style="background:var(--surface);padding:1px 5px;border-radius:3px">python fetch_data.py --picks</code> to fetch and cache GW picks data.
       </div>
     </div>
 
@@ -337,57 +380,20 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
       <div class="penalty-note">C/VC pen = +15 pts &middot; Inactive player = +9 pts &middot; Bank &gt;&#xA3;3.0m = +25 pts. All already baked into Anti-FPL scores.</div>
     </div>
 
-    <!-- Captain League -->
-    <div class="panel" style="margin-bottom:20px">
-      <div class="stat-card-header">&#x1F3C6; Captain League <span>&#x2014; total pts contributed by captain pick (pts &times; multiplier) &middot; higher = worse</span></div>
+    <!-- Chip Points Table -->
+    <div class="panel">
+      <div class="stat-card-header">Chip Points Table <span>&#x2014; pts scored that GW &#xB7; &#x1F451; = best use of that chip (lowest pts)</span></div>
       <div class="table-wrap">
-        <table class="stats-plain-table">
+        <table class="chip-table">
           <thead><tr>
             <th style="text-align:left">Team</th>
-            <th class="num">Season Total</th>
-            <th class="num">Worst GW</th>
-            <th class="num">Captain (GW)</th>
-            <th class="num">Pts &times; Mult</th>
+            <th class="chip-val wc">WC 1</th><th class="chip-val wc">WC 2</th>
+            <th class="chip-val fh">FH 1</th><th class="chip-val fh">FH 2</th>
+            <th class="chip-val bb">BB 1</th><th class="chip-val bb">BB 2</th>
+            <th class="chip-val tc">TC 1</th><th class="chip-val tc">TC 2</th>
           </tr></thead>
-          <tbody id="cap-pen-body"></tbody>
+          <tbody id="chip-table-body"></tbody>
         </table>
-      </div>
-      <div class="penalty-note">Captain pts count at &times;2 normally, &times;3 with Triple Captain. Higher = more damage to your score.</div>
-    </div>
-
-    <!-- Bench Bummings -->
-    <div class="panel" id="bench-panel">
-      <div class="stat-card-header">&#x1F4A5; Bench Stats <span id="bench-panel-sub">&#x2014; run <code>fetch_data.py --picks</code> to populate</span></div>
-      <div id="bench-content" style="display:none">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)">
-          <div style="background:var(--card);padding:16px">
-            <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Season Bench Bummings <span style="font-size:9px">(auto-sub pts added)</span></div>
-            <div id="bench-total-list"></div>
-          </div>
-          <div style="background:var(--card);padding:16px">
-            <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Worst Single GW Bumming</div>
-            <div id="bench-worst-list"></div>
-          </div>
-          <div style="background:var(--card);padding:16px">
-            <div style="font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px">Walking Through Traffic <span style="font-size:9px">(lucky escapes)</span></div>
-            <div id="bench-traffic-list"></div>
-          </div>
-        </div>
-      </div>
-      <div id="bench-no-data" style="padding:20px 18px;font-size:12px;color:var(--muted)">
-        Picks data not available. Run <code style="background:var(--surface);padding:1px 5px;border-radius:3px">python fetch_data.py --picks</code> to fetch and cache GW picks data.
-      </div>
-    </div>
-
-    <!-- Top / Bottom GW Scores -->
-    <div class="stats-grid">
-      <div class="panel">
-        <div class="stat-card-header">&#x1F7E2; Top 3 Best GW Scores <span>(lowest pts = Anti FPL gold)</span></div>
-        <div class="top-score-list" id="best-scores"></div>
-      </div>
-      <div class="panel">
-        <div class="stat-card-header">&#x1F534; Top 3 Worst GW Scores <span>(highest pts = Anti FPL disaster)</span></div>
-        <div class="top-score-list" id="worst-scores"></div>
       </div>
     </div>
   </div>
@@ -469,6 +475,7 @@ function renderAll() {
   renderGWScores(CUR_GW);
   renderChart();
   renderStats();
+  renderBBPC();
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -759,12 +766,15 @@ function toggleTeam(teamId, el) {
 
 // ─── STATS ────────────────────────────────────────────────────────────────────
 function renderStats() {
-  renderDistribution();
-  renderChipTable();
-  renderPenalties();
-  renderCaptainPenLeague();
   renderTopScores();
+  renderDistribution();
+  renderCaptainPenLeague();
+}
+
+function renderBBPC() {
   renderBenchBummings();
+  renderPenalties();
+  renderChipTable();
 }
 
 function renderDistribution() {
