@@ -19,7 +19,8 @@
       "Bash(python fetch_data.py --picks)",
       "Bash(del _check.js)",
       "Bash(node --check _c.js)",
-      "Bash(rm _c.js)"
+      "Bash(rm _c.js)",
+      "Bash(python *)"
     ]
   }
 }

@@ -226,6 +226,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
   <button class="tab" onclick="showTab('chart',this)">&#x1F4C8; Season Chart</button>
   <button class="tab" onclick="showTab('stats',this)">&#x1F3C6; Stats of Season</button>
   <button class="tab" onclick="showTab('bbpc',this)">&#x1F4A5; BB, Pens &amp; Chips</button>
+  <button class="tab" onclick="showTab('breakdown',this)">&#x1F9EC; Score Breakdown</button>
 </div>
 
 <div id="error-state"></div>
@@ -287,15 +288,15 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
     <!-- Cumulative chart with dropdown -->
     <div class="panel" style="margin-bottom:20px">
       <div class="stat-card-header" id="cum-chart-title">Cumulative Points &#x2014; Lower is Better</div>
-      <div class="chart-wrap"><canvas id="season-chart"></canvas></div>
       <div class="chart-toolbar">
         <label for="chart-mode">View:</label>
         <select id="chart-mode" onchange="renderChart()">
           <option value="total">Cumulative Total</option>
           <option value="gap-top">Gap to Leader</option>
-          <option value="gap-bottom">Gap to Wooden Spoon</option>
+          <option value="gap-bottom" selected>Gap to the Mic</option>
         </select>
       </div>
+      <div class="chart-wrap"><canvas id="season-chart"></canvas></div>
       <div class="chart-legend" id="chart-legend"></div>
     </div>
 
@@ -309,11 +310,11 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
     <!-- Time at top / bottom -->
     <div class="time-stats-grid">
       <div class="panel">
-        <div class="stat-card-header">&#x1F7E2; Weeks in Top 3 <span>(positions 1&#x2013;3)</span></div>
+        <div class="stat-card-header">&#x1F947; Weeks in 1st Place</div>
         <div id="time-top-list"></div>
       </div>
       <div class="panel">
-        <div class="stat-card-header">&#x1F534; Weeks in Bottom 3 <span>(positions 8&#x2013;10)</span></div>
+        <div class="stat-card-header">&#x1F3A4; Weeks in 10th Place <span>(open mic danger zone)</span></div>
         <div id="time-bottom-list"></div>
       </div>
     </div>
@@ -442,6 +443,27 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
       </div>
     </div>
   </div>
+
+  <!-- SCORE BREAKDOWN -->
+  <div class="tab-panel" id="tab-breakdown" style="display:none">
+    <p class="section-title">Score Breakdown</p>
+
+    <div class="panel" style="margin-bottom:20px">
+      <div class="stat-card-header">Score DNA <span>&#x2014; what makes up each manager&#x2019;s total?</span></div>
+      <div style="font-size:11px;color:var(--muted);padding:8px 20px 0;font-family:'DM Mono',monospace">
+        Regular Picks = all non-captain starters excl. auto-subs &nbsp;&#xB7;&nbsp; Captain = full captain score incl. multiplier &nbsp;&#xB7;&nbsp; Bench Bummings = auto-sub pts &nbsp;&#xB7;&nbsp; Penalties in red/orange/amber
+      </div>
+      <div class="chart-wrap" style="height:360px;padding:12px 8px"><canvas id="dna-chart"></canvas></div>
+    </div>
+
+    <div class="panel">
+      <div class="stat-card-header">Chip Weeks vs Regular Weeks <span>&#x2014; did chips work?</span></div>
+      <div style="font-size:11px;color:var(--muted);padding:8px 20px 0;font-family:'DM Mono',monospace">
+        Chip / regular scores shown as site pts (before penalties) so penalty cost is isolated. Lower total = better.
+      </div>
+      <div class="chart-wrap" style="height:360px;padding:12px 8px"><canvas id="chip-split-chart"></canvas></div>
+    </div>
+  </div>
 </main>
 
 <script>
@@ -453,6 +475,8 @@ let CUR_GW = 1;
 let COMPLETED_GW = 1;  // last fully finished GW (MAX_GW - 1 when GW in progress)
 let CHART_OBJ = null;
 let RANK_CHART_OBJ = null;
+let DNA_CHART = null;
+let CHIP_SPLIT_CHART = null;
 const HIDDEN = new Set();
 
 // ─── bootstrap ────────────────────────────────────────────────────────────────
@@ -524,6 +548,7 @@ function renderAll() {
   renderTimeStats();
   renderStats();
   renderBBPC();
+  renderBreakdown();
 }
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -745,12 +770,12 @@ function renderChart() {
   const yTitles = {
     'total':      'Cumulative Points (lower = better)',
     'gap-top':    'Gap to Leader (pts above 1st place)',
-    'gap-bottom': 'Gap to Wooden Spoon (pts below last place)',
+    'gap-bottom': 'Gap to the Mic (pts below last place)',
   };
   const headings = {
     'total':      'Cumulative Points — Lower is Better',
     'gap-top':    'Gap to Leader — How Far Behind 1st Place',
-    'gap-bottom': 'Gap to Wooden Spoon — How Far Clear of Last Place',
+    'gap-bottom': 'Gap to the Mic — How Far Clear of Last Place',
   };
   document.getElementById('cum-chart-title').textContent = headings[mode] ?? headings['total'];
 
@@ -908,12 +933,12 @@ function renderTimeStats() {
 
   const teamWeeks = TEAMS.map(team => ({
     team,
-    top:    team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing <= 3).length,
-    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing >= 8).length,
+    top:    team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing === 1).length,
+    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing === 10).length,
   }));
 
-  const topList    = [...teamWeeks].sort((a,b) => b.top - a.top).slice(0, 3);
-  const bottomList = [...teamWeeks].sort((a,b) => b.bottom - a.bottom).slice(0, 3);
+  const topList    = [...teamWeeks].filter(x => x.top > 0)   .sort((a,b) => b.top    - a.top).slice(0, 3);
+  const bottomList = [...teamWeeks].filter(x => x.bottom > 0).sort((a,b) => b.bottom - a.bottom).slice(0, 3);
 
   const rowHtml = ({team, val}, i) => `
     <div class="time-stat-row">
@@ -924,9 +949,13 @@ function renderTimeStats() {
     </div>`;
 
   document.getElementById('time-top-list').innerHTML =
-    topList.map(({team, top}, i) => rowHtml({team, val: top}, i)).join('');
+    topList.length
+      ? topList.map(({team, top}, i) => rowHtml({team, val: top}, i)).join('')
+      : '<div style="padding:12px 14px;font-size:12px;color:var(--muted)">No data yet.</div>';
   document.getElementById('time-bottom-list').innerHTML =
-    bottomList.map(({team, bottom}, i) => rowHtml({team, val: bottom}, i)).join('');
+    bottomList.length
+      ? bottomList.map(({team, bottom}, i) => rowHtml({team, val: bottom}, i)).join('')
+      : '<div style="padding:12px 14px;font-size:12px;color:var(--muted)">No data yet.</div>';
 }
 
 // ─── STATS ────────────────────────────────────────────────────────────────────
@@ -977,7 +1006,20 @@ function renderDistribution() {
 
 function renderChipTable() {
   const TYPES = ['wildcard','freehit','bboost','3xc'];
-  const sorted = [...TEAMS].sort((a,b)=>(a.summary?.total_points??99999)-(b.summary?.total_points??99999));
+
+  // Sort by avg chip score ascending (lowest = best in Anti FPL); teams with no chips go last
+  const withAvg = TEAMS.map(team => {
+    const chipGws = (team.summary?.chips_used||[]).filter(c => c.gw <= COMPLETED_GW);
+    const pts = chipGws.map(({gw}) => gwEntry(team, gw)?.pts).filter(p => p != null);
+    const avg = pts.length ? pts.reduce((s,p)=>s+p,0)/pts.length : null;
+    return {team, avg};
+  });
+  const sorted = withAvg.sort((a,b) => {
+    if (a.avg == null && b.avg == null) return 0;
+    if (a.avg == null) return 1;
+    if (b.avg == null) return -1;
+    return a.avg - b.avg;
+  }).map(x => x.team);
 
   // Per chip type, find the minimum pts (all tied = crown for all)
   const bestPts = {};
@@ -1195,6 +1237,108 @@ function renderTopScores() {
 // ─── util ─────────────────────────────────────────────────────────────────────
 function esc(s) {
   return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderBreakdown() {
+  renderScoreDNA();
+  renderChipSplit();
+}
+
+function renderScoreDNA() {
+  if (DNA_CHART) { DNA_CHART.destroy(); DNA_CHART = null; }
+
+  const rows = TEAMS.map(team => {
+    const GWS  = team.gws.filter(g => g.gw <= COMPLETED_GW);
+    const site  = GWS.reduce((s,g) => s + (g.site_pts||0), 0);
+    const cap   = GWS.reduce((s,g) => s + (g.captain ? g.captain.pts * g.captain.multiplier : 0), 0);
+    const bench = GWS.reduce((s,g) => s + (g.benchBummingPts||0), 0);
+    const cvc   = GWS.reduce((s,g) => s + (g.cvc_pen_pts||0), 0);
+    const inac  = GWS.reduce((s,g) => s + (g.inactive_pen_pts||0), 0);
+    const bank  = GWS.reduce((s,g) => s + (g.bank_pen ? 25 : 0), 0);
+    const xfer  = GWS.reduce((s,g) => s + (g.xfer_cost_pens||0), 0);
+    const reg   = site - cap - bench;
+    const total = GWS.reduce((s,g) => s + g.pts, 0);
+    return {label: team.manager, reg, cap, bench, cvc, inac, bankxfer: bank + xfer, total};
+  }).sort((a,b) => a.total - b.total);
+
+  const ttOpts = {
+    backgroundColor:'#0f1623', borderColor:'#1e2d44', borderWidth:1,
+    titleColor:'#e2e8f0', bodyColor:'#94a3b8', padding:10,
+    callbacks: {
+      title: items => `${items[0].label}  —  Total: ${rows.find(r=>r.label===items[0].label)?.total} pts`,
+      label: item => item.raw > 0 ? ` ${item.dataset.label}: ${item.raw} pts` : null,
+    }
+  };
+  const scaleOpts = (stacked, axis) => axis === 'x'
+    ? {stacked, grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}}}
+    : {stacked, grid:{display:false}, ticks:{color:'#e2e8f0',font:{size:12,family:"'DM Sans',sans-serif"}}};
+
+  DNA_CHART = new Chart(document.getElementById('dna-chart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.label),
+      datasets: [
+        {label:'Regular Picks',       data:rows.map(r=>r.reg),     backgroundColor:'#10b981'},
+        {label:'Captain',             data:rows.map(r=>r.cap),     backgroundColor:'#3b82f6'},
+        {label:'Bench Bummings',      data:rows.map(r=>r.bench),   backgroundColor:'#06b6d4'},
+        {label:'C/VC Penalties',      data:rows.map(r=>r.cvc),     backgroundColor:'#ef4444'},
+        {label:'Inactive Penalties',  data:rows.map(r=>r.inac),    backgroundColor:'#f97316'},
+        {label:'Bank/Transfer Pens',  data:rows.map(r=>r.bankxfer),backgroundColor:'#f59e0b'},
+      ]
+    },
+    options: {
+      indexAxis: 'y', responsive:true, maintainAspectRatio:false,
+      scales: {x: scaleOpts(true,'x'), y: scaleOpts(true,'y')},
+      plugins: {legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}, tooltip:ttOpts}
+    }
+  });
+}
+
+function renderChipSplit() {
+  if (CHIP_SPLIT_CHART) { CHIP_SPLIT_CHART.destroy(); CHIP_SPLIT_CHART = null; }
+
+  const rows = TEAMS.map(team => {
+    const GWS       = team.gws.filter(g => g.gw <= COMPLETED_GW);
+    const chip_site = GWS.filter(g => g.chip) .reduce((s,g) => s + (g.site_pts||0), 0);
+    const reg_site  = GWS.filter(g => !g.chip).reduce((s,g) => s + (g.site_pts||0), 0);
+    const pens      = GWS.reduce((s,g) => s + (g.cvc_pen_pts||0) + (g.inactive_pen_pts||0) + (g.bank_pen?25:0) + (g.xfer_cost_pens||0), 0);
+    const total     = GWS.reduce((s,g) => s + g.pts, 0);
+    const n_chips   = GWS.filter(g => g.chip).length;
+    const chip_avg  = n_chips ? (chip_site / n_chips).toFixed(1) : '—';
+    return {label:team.manager, chip_site, reg_site, pens, total, n_chips, chip_avg};
+  }).sort((a,b) => a.total - b.total);
+
+  const ttOpts = {
+    backgroundColor:'#0f1623', borderColor:'#1e2d44', borderWidth:1,
+    titleColor:'#e2e8f0', bodyColor:'#94a3b8', padding:10,
+    callbacks: {
+      title: items => {
+        const r = rows.find(r=>r.label===items[0].label);
+        return `${items[0].label}  —  Total: ${r?.total} pts  ·  ${r?.n_chips} chips used (avg ${r?.chip_avg} pts)`;
+      },
+      label: item => item.raw > 0 ? ` ${item.dataset.label}: ${item.raw} pts` : null,
+    }
+  };
+  const scaleOpts = (stacked, axis) => axis === 'x'
+    ? {stacked, grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}}}
+    : {stacked, grid:{display:false}, ticks:{color:'#e2e8f0',font:{size:12,family:"'DM Sans',sans-serif"}}};
+
+  CHIP_SPLIT_CHART = new Chart(document.getElementById('chip-split-chart').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: rows.map(r => r.label),
+      datasets: [
+        {label:'Chip Week Score',    data:rows.map(r=>r.chip_site), backgroundColor:'#8b5cf6'},
+        {label:'Regular Week Score', data:rows.map(r=>r.reg_site),  backgroundColor:'#10b981'},
+        {label:'Penalties',          data:rows.map(r=>r.pens),      backgroundColor:'#ef4444'},
+      ]
+    },
+    options: {
+      indexAxis: 'y', responsive:true, maintainAspectRatio:false,
+      scales: {x: scaleOpts(true,'x'), y: scaleOpts(true,'y')},
+      plugins: {legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}, tooltip:ttOpts}
+    }
+  });
 }
 
 // ─── go ───────────────────────────────────────────────────────────────────────
