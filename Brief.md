@@ -77,8 +77,9 @@ Each manager gets **2 uses** of each chip across the season (FPL updated rules).
 So 8 chip slots per manager: WC×2, FH×2, BB×2, TC×2.
 
 **Penalty scoring:**
-- Each C/VC pen = **9 points added**
+- Each C/VC pen = **15 points added**
 - Each inactive player = **9 points added**
+- Having >£3.0m in bank = **25 points added** (already baked into GW Points (With Pens))
 - Transfer cost is already in points (shown directly in col 6)
 
 ### 3.2 FPL Official API — bootstrap (player names)
@@ -266,7 +267,7 @@ Empty `—` if chip not yet used.
 
 Per team:
 - C/VC Pen count (total across season)
-- C/VC Pen points (count × 9)
+- C/VC Pen points (count × 15)
 - Transfer cost points (sum of col 6 across season)
 - Inactive player count
 - Inactive player points (count × 9)
