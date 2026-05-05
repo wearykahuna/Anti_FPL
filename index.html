@@ -521,10 +521,11 @@ async function reloadData(btn) {
   const spin = btn.querySelector('.spin');
   spin.style.animation = 'spin 1s linear infinite';
   try {
-    DATA   = await loadData();
-    TEAMS  = DATA.teams;
-    MAX_GW = DATA.metadata.current_gw;
-    CUR_GW = MAX_GW;
+    DATA         = await loadData();
+    TEAMS        = DATA.teams;
+    MAX_GW       = DATA.metadata.current_gw;
+    CUR_GW       = MAX_GW;
+    COMPLETED_GW = DATA.metadata.gw_in_progress ? MAX_GW - 1 : MAX_GW;
     document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + ' ✓';
     document.getElementById('header-sub').textContent =
       '2025/26 Season \xB7 The worst team wins \xB7 Through GW' + MAX_GW +
