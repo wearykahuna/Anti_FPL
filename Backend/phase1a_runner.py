@@ -25,7 +25,7 @@ from anti_fpl_scoring import (
     get_all_team_ids_from_league,
     score_league,
     print_standings,
-    current_gw,
+    detect_live_gw,
 )
 from anti_fpl_cup import (
     run_cup,
@@ -182,8 +182,11 @@ def main() -> None:
         log.error("Bootstrap fetch failed — check your internet connection.")
         raise SystemExit(1)
 
-    last_gw = current_gw(bootstrap)
-    log.info("Current (last finished) GW: %d", last_gw)
+    last_gw, live_gw = detect_live_gw(bootstrap)
+    if live_gw:
+        log.info("GW%d is live (deadline passed, fixtures in progress)", live_gw)
+    else:
+        log.info("Last finished GW: %d", last_gw)
 
     # Team IDs
     if args.league:
@@ -196,7 +199,7 @@ def main() -> None:
 
     # Score league
     log.info("Scoring %d teams for GW1–%d...", len(team_ids), last_gw)
-    teams = score_league(team_ids, last_gw)
+    teams = score_league(team_ids, last_gw, live_gw=live_gw)
     print_standings(teams)
 
     # Cup (optional)

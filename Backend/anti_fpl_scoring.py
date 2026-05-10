@@ -104,6 +104,9 @@ def fetch_league_page(league_id: int, page: int = 1) -> Optional[dict]:
         f"?page_standings={page}"
     )
 
+def fetch_fixtures(gw: int) -> Optional[list]:
+    return _get_json(f"{FPL_BASE}/fixtures/?event={gw}")
+
 
 def get_all_team_ids_from_league(league_id: int) -> list[int]:
     """Pull every team ID from an FPL classic mini-league (handles pagination)."""
@@ -128,6 +131,29 @@ def get_all_team_ids_from_league(league_id: int) -> list[int]:
 def current_gw(bootstrap: dict) -> int:
     finished = [e for e in bootstrap.get("events", []) if e.get("finished")]
     return max((e["id"] for e in finished), default=1) if finished else 1
+
+
+def detect_live_gw(bootstrap: dict) -> tuple[int, int | None]:
+    """
+    Returns (last_gw, live_gw).
+
+    last_gw : highest GW to include in scoring. Equals the live GW if one is
+              in progress, otherwise the last fully finished GW.
+    live_gw : GW currently in progress (deadline passed, not yet finished).
+              None when every played GW is fully confirmed.
+
+    This handles the common case where the team-history API already contains
+    picks for a GW whose deadline has passed but whose fixtures are still
+    being played — without this, live_cache has no data for that GW and every
+    starter would show 0 minutes, producing a false +99 inactive penalty.
+    """
+    events = bootstrap.get("events", [])
+    current = next((e for e in events if e.get("is_current")), None)
+    if current and not current.get("finished"):
+        live_gw = current["id"]
+        return live_gw, live_gw
+    finished = [e["id"] for e in events if e.get("finished")]
+    return (max(finished, default=1) if finished else 1), None
 
 
 def player_minutes(live_data: dict) -> dict[int, int]:
@@ -167,6 +193,72 @@ def unused_chip_penalty(chips_used_in_half: set[str]) -> tuple[int, set[str]]:
     return len(unused) * UNUSED_CHIP_PEN, unused
 
 
+def players_in_finished_fixtures(live_raw: dict, fixtures: list) -> set[int]:
+    """Return player IDs whose fixture is fully finished in a live GW."""
+    finished_ids = {f["id"] for f in fixtures if f.get("finished")}
+    result = set()
+    for elem in live_raw.get("elements", []):
+        for exp in elem.get("explain", []):
+            if exp.get("fixture") in finished_ids:
+                result.add(elem["id"])
+                break
+    return result
+
+
+def build_player_type_map(bootstrap: dict) -> dict[int, int]:
+    """Maps player_id → element_type (1=GK, 2=DEF, 3=MID, 4=FWD)."""
+    return {e["id"]: e["element_type"] for e in bootstrap.get("elements", [])}
+
+
+def _valid_formation(player_ids: list[int], player_type: dict[int, int]) -> bool:
+    """True if the list of player IDs satisfies minimum FPL formation rules."""
+    t = [player_type.get(pid, 3) for pid in player_ids]
+    return (
+        t.count(1) == 1 and   # exactly 1 GK
+        t.count(2) >= 3 and   # min 3 DEF
+        t.count(3) >= 2 and   # min 2 MID
+        t.count(4) >= 1        # min 1 FWD
+    )
+
+
+def infer_live_autosubs(
+    starters: list[dict],
+    bench: list[dict],
+    player_type: dict[int, int],
+    finished_players: set[int],
+    mins: dict[int, int],
+) -> list[dict]:
+    """
+    Infer auto-subs during a live GW. Returns the effective XI after subs.
+
+    Eligible to be subbed OUT : starter whose fixture is finished and minutes == 0.
+    Eligible to come ON       : bench player whose fixture is finished and minutes > 0.
+    Bench priority            : ascending bench position (12 → 13 → 14 → 15).
+    GK rule                   : GK ↔ GK only; outfield ↔ outfield only.
+    Formation rule            : resulting XI must satisfy _valid_formation.
+    """
+    xi = list(starters)
+    for bench_p in sorted(bench, key=lambda p: p["position"]):
+        bp_id = bench_p["element"]
+        if bp_id not in finished_players or mins.get(bp_id, 0) == 0:
+            continue
+        bp_gk = player_type.get(bp_id, 3) == 1
+        for i, starter in enumerate(xi):
+            sp_id = starter["element"]
+            if sp_id not in finished_players or mins.get(sp_id, 0) > 0:
+                continue
+            sp_gk = player_type.get(sp_id, 3) == 1
+            if sp_gk != bp_gk:          # must be same broad type
+                continue
+            test = [p["element"] for p in xi]
+            test[i] = bp_id
+            if not _valid_formation(test, player_type):
+                continue
+            xi[i] = bench_p
+            break                       # bench player used — move to next
+    return xi
+
+
 # ── GW scorer ─────────────────────────────────────────────────────────────────
 
 def score_gw(
@@ -175,74 +267,102 @@ def score_gw(
     hist_gw:    dict,
     picks_data: dict,
     mins:       dict[int, int],
+    pts:        dict[int, int],
+    player_type: dict[int, int],
     first_half_chips:  set[str],
     second_half_chips: set[str],
+    gw_finished: bool = True,
+    finished_players: set[int] | None = None,
 ) -> dict:
     """
     Compute Anti-FPL score for one team for one GW.
-    Chip penalties applied at GW19 (first half) and GW38 (second half).
-    Returns full scoring breakdown dict.
+
+    Finished GW : all penalties applied normally.
+    Live GW     : fpl_raw = current FPL live total.
+                  Bank and hits always apply (known at GW start).
+                  Auto-subs inferred from players with finished fixtures.
+                  Inactive (+9) only for confirmed 0-min players post-auto-sub.
+                  C/VC (+15) only when both fixtures are done and both played 0.
+                  Chip penalties never applied mid-GW.
     """
     picks       = picks_data.get("picks", [])
-    auto_subs   = picks_data.get("automatic_subs", [])
     active_chip = (picks_data.get("active_chip") or "").lower()
     bench_boost = active_chip == "bboost"
 
-    # Final XI / bench after auto-subs (API positions are post-sub)
     starters       = [p for p in picks if p["position"] <= 11]
     bench          = [p for p in picks if p["position"] >  11]
     active_players = picks if bench_boost else starters
 
-    # ── Inactive player penalty ───────────────────────────────────────────────
-    inactive         = [p for p in active_players if mins.get(p["element"], 0) == 0]
-    inactive_pen_pts = len(inactive) * INACTIVE_PEN
-
-    # ── Bank penalty ──────────────────────────────────────────────────────────
-    bank         = hist_gw.get("bank", 0) or 0
-    bank_pen     = bank > BANK_THRESHOLD
-    bank_pen_pts = BANK_PEN if bank_pen else 0
-
-    # ── Hits ──────────────────────────────────────────────────────────────────
-    xfer_cost = hist_gw.get("event_transfers_cost", 0) or 0  # negative in FPL API
-    hit_pts   = abs(xfer_cost)
-
-    # ── C/VC penalty ─────────────────────────────────────────────────────────
     captain = next((p for p in picks if p.get("is_captain")),     None)
     vice    = next((p for p in picks if p.get("is_vice_captain")), None)
-
-    cap_mins  = mins.get(captain["element"], 0) if captain else 0
-    vice_mins = mins.get(vice["element"],    0) if vice    else 0
-    cvc_pen_pts = CVC_PEN if (cap_mins == 0 and vice_mins == 0) else 0
-
-    # Captain points for tiebreaker (boosted: 2x normal, 3x if TC active)
-    cap_raw_pts = 0
-    if captain:
-        # mins_map doesn't have points; caller should pass pts_map separately
-        # for now store element id — caller merges actual pts later
-        pass
-
-    # Captain multiplier for tiebreaker
     cap_multiplier = captain.get("multiplier", 1) if captain else 1
 
-    # ── Chip penalties (GW19 and GW38 only) ──────────────────────────────────
-    chip_pen_pts   = 0
-    unused_chips   = set()
-    if gw == FIRST_HALF_END:
-        chip_pen_pts, unused_chips = unused_chip_penalty(first_half_chips)
-        if unused_chips:
-            log.info("  GW19 chip penalty team=%d unused=%s pts=%d",
-                     team_id, unused_chips, chip_pen_pts)
-    elif gw == LAST_GW:
-        chip_pen_pts, unused_chips = unused_chip_penalty(second_half_chips)
-        if unused_chips:
-            log.info("  GW38 chip penalty team=%d unused=%s pts=%d",
-                     team_id, unused_chips, chip_pen_pts)
+    xfer_cost = hist_gw.get("event_transfers_cost", 0) or 0
 
-    # ── Anti-FPL GW score ─────────────────────────────────────────────────────
-    fpl_raw   = hist_gw.get("points", 0) or 0
-    anti_gw   = fpl_raw + hit_pts + inactive_pen_pts + bank_pen_pts + cvc_pen_pts + chip_pen_pts
+    if not gw_finished:
+        # ── Live GW ───────────────────────────────────────────────────────────
+        fpl_raw = hist_gw.get("points", 0) or 0      # current live FPL total
 
-    # Total penalties this GW (used as cup tiebreaker)
+        # Bank and hits: always confirmed at GW start
+        bank         = hist_gw.get("bank", 0) or 0
+        bank_pen     = bank > BANK_THRESHOLD
+        bank_pen_pts = BANK_PEN if bank_pen else 0
+        hit_pts      = abs(xfer_cost)
+
+        played = finished_players or set()
+
+        # Infer auto-subs from players with finished fixtures
+        if bench_boost:
+            effective_xi = active_players        # all 15 in play, no auto-subs
+        else:
+            effective_xi = infer_live_autosubs(starters, bench, player_type, played, mins)
+
+        # Inactive penalty: only confirmed (fixture done, played 0)
+        inactive         = [p for p in effective_xi
+                            if p["element"] in played and mins.get(p["element"], 0) == 0]
+        inactive_pen_pts = len(inactive) * INACTIVE_PEN
+
+        # C/VC penalty: only when both fixtures are finished and both played 0
+        cap_id   = captain["element"] if captain else None
+        vice_id  = vice["element"]    if vice    else None
+        cap_done = cap_id  in played if cap_id  else False
+        vc_done  = vice_id in played if vice_id else False
+        cap_mins = mins.get(cap_id,  0) if cap_id  else 0
+        vc_mins  = mins.get(vice_id, 0) if vice_id else 0
+        cvc_pen_pts = CVC_PEN if (cap_done and vc_done and cap_mins == 0 and vc_mins == 0) else 0
+
+        chip_pen_pts, unused_chips = 0, set()
+
+    else:
+        # ── Finished GW: apply all penalties ─────────────────────────────────
+        inactive         = [p for p in active_players if mins.get(p["element"], 0) == 0]
+        inactive_pen_pts = len(inactive) * INACTIVE_PEN
+
+        bank         = hist_gw.get("bank", 0) or 0
+        bank_pen     = bank > BANK_THRESHOLD
+        bank_pen_pts = BANK_PEN if bank_pen else 0
+
+        hit_pts = abs(xfer_cost)
+
+        cap_mins  = mins.get(captain["element"], 0) if captain else 0
+        vice_mins = mins.get(vice["element"],    0) if vice    else 0
+        cvc_pen_pts = CVC_PEN if (cap_mins == 0 and vice_mins == 0) else 0
+
+        chip_pen_pts, unused_chips = 0, set()
+        if gw == FIRST_HALF_END:
+            chip_pen_pts, unused_chips = unused_chip_penalty(first_half_chips)
+            if unused_chips:
+                log.info("  GW19 chip penalty team=%d unused=%s pts=%d",
+                         team_id, unused_chips, chip_pen_pts)
+        elif gw == LAST_GW:
+            chip_pen_pts, unused_chips = unused_chip_penalty(second_half_chips)
+            if unused_chips:
+                log.info("  GW38 chip penalty team=%d unused=%s pts=%d",
+                         team_id, unused_chips, chip_pen_pts)
+
+        fpl_raw = hist_gw.get("points", 0) or 0
+
+    anti_gw       = fpl_raw + hit_pts + inactive_pen_pts + bank_pen_pts + cvc_pen_pts + chip_pen_pts
     total_pens_gw = hit_pts + inactive_pen_pts + bank_pen_pts + cvc_pen_pts + chip_pen_pts
 
     return {
@@ -280,12 +400,15 @@ def score_gw(
 # ── Team scorer ───────────────────────────────────────────────────────────────
 
 def score_team_season(
-    team_id:     int,
-    history:     dict,
-    live_cache:  dict[int, dict[int, int]],   # gw → {player_id: minutes}
-    pts_cache:   dict[int, dict[int, int]],   # gw → {player_id: total_points}
-    picks_cache: dict[int, dict],
-    last_gw:     int,
+    team_id:          int,
+    history:          dict,
+    live_cache:       dict[int, dict[int, int]],   # gw → {player_id: minutes}
+    pts_cache:        dict[int, dict[int, int]],   # gw → {player_id: total_points}
+    picks_cache:      dict[int, dict],
+    last_gw:          int,
+    player_type:      dict[int, int],
+    live_gw:          int | None = None,           # GW currently in progress (if any)
+    finished_players: set[int] | None = None,      # players in finished fixtures for live_gw
 ) -> list[dict]:
     chips = history.get("chips", [])
     first_half_chips, second_half_chips = split_chips_by_half(chips)
@@ -299,8 +422,9 @@ def score_team_season(
             log.warning("  No picks for team=%d GW=%d — skipping", team_id, gw)
             continue
 
-        mins = live_cache.get(gw, {})
-        pts  = pts_cache.get(gw, {})
+        mins        = live_cache.get(gw, {})
+        pts         = pts_cache.get(gw, {})
+        gw_finished = (gw != live_gw)
 
         result = score_gw(
             team_id           = team_id,
@@ -308,8 +432,12 @@ def score_team_season(
             hist_gw           = gw_rows[gw],
             picks_data        = picks_data,
             mins              = mins,
+            pts               = pts,
+            player_type       = player_type,
             first_half_chips  = first_half_chips,
             second_half_chips = second_half_chips,
+            gw_finished       = gw_finished,
+            finished_players  = finished_players if not gw_finished else None,
         )
 
         # Fill captain / VC boosted pts for cup tiebreaker
@@ -331,20 +459,41 @@ def score_team_season(
 
 # ── League scorer ─────────────────────────────────────────────────────────────
 
-def score_league(team_ids: list[int], last_gw: int) -> list[dict]:
-    """Score all teams. Returns list sorted lowest → highest (lowest wins)."""
+def score_league(team_ids: list[int], last_gw: int, live_gw: int | None = None) -> list[dict]:
+    """
+    Score all teams. Returns list sorted lowest → highest (lowest wins).
+    live_gw: if a GW is currently in progress, pass its number here.
+             That GW will use real-time points with no penalties applied.
+    """
+    if live_gw:
+        log.info("Live GW%d detected — conditional penalty logic active.", live_gw)
+
+    # Player position types (needed for auto-sub formation checks)
+    bootstrap = fetch_bootstrap()
+    player_type = build_player_type_map(bootstrap) if bootstrap else {}
 
     # Fetch live data once for all GWs — minutes AND points per player
     log.info("Fetching live data for GW1–%d...", last_gw)
     live_cache: dict[int, dict[int, int]] = {}
     pts_cache:  dict[int, dict[int, int]] = {}
+    live_raw_for_live_gw: dict | None = None
     for gw in range(1, last_gw + 1):
         raw = fetch_live(gw)
         if raw:
-            live_cache[gw] = {e["id"]: e["stats"].get("minutes", 0)     for e in raw.get("elements", [])}
-            pts_cache[gw]  = {e["id"]: e["stats"].get("total_points", 0) for e in raw.get("elements", [])}
+            live_cache[gw] = {e["id"]: e["stats"].get("minutes", 0)      for e in raw.get("elements", [])}
+            pts_cache[gw]  = {e["id"]: e["stats"].get("total_points", 0)  for e in raw.get("elements", [])}
+            if gw == live_gw:
+                live_raw_for_live_gw = raw
             log.info("  GW%d: %d players", gw, len(live_cache[gw]))
         time.sleep(0.3)
+
+    # For a live GW, determine which players are in already-finished fixtures
+    finished_players: set[int] | None = None
+    if live_gw and live_raw_for_live_gw:
+        fixtures = fetch_fixtures(live_gw)
+        if fixtures:
+            finished_players = players_in_finished_fixtures(live_raw_for_live_gw, fixtures)
+            log.info("Live GW%d: %d players in finished fixtures", live_gw, len(finished_players))
 
     results = []
     for i, tid in enumerate(team_ids, 1):
@@ -364,12 +513,15 @@ def score_league(team_ids: list[int], last_gw: int) -> list[dict]:
             time.sleep(0.3)
 
         scored = score_team_season(
-            team_id     = tid,
-            history     = history,
-            live_cache  = live_cache,
-            pts_cache   = pts_cache,
-            picks_cache = picks_cache,
-            last_gw     = last_gw,
+            team_id          = tid,
+            history          = history,
+            live_cache       = live_cache,
+            pts_cache        = pts_cache,
+            picks_cache      = picks_cache,
+            last_gw          = last_gw,
+            player_type      = player_type,
+            live_gw          = live_gw,
+            finished_players = finished_players,
         )
 
         latest = scored[-1] if scored else {}
