@@ -20,7 +20,10 @@
       "Bash(del _check.js)",
       "Bash(node --check _c.js)",
       "Bash(rm _c.js)",
-      "Bash(python *)"
+      "Bash(python *)",
+      "WebFetch(domain:antifpl.pythonanywhere.com)",
+      "Bash(git fetch *)",
+      "Bash(git pull *)"
     ]
   }
 }
