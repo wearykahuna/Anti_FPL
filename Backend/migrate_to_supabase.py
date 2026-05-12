@@ -19,7 +19,7 @@ import sys
 from datetime import datetime, timezone
 
 from dotenv import load_dotenv
-from supabase import create_client, Client
+from postgrest import SyncPostgrestClient
 
 from anti_fpl_scoring import (
     fetch_bootstrap,
@@ -51,7 +51,7 @@ log = logging.getLogger(__name__)
 
 # ── Supabase client ───────────────────────────────────────────────────────────
 
-def get_supabase() -> Client:
+def get_supabase() -> SyncPostgrestClient:
     load_dotenv()
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_KEY")
@@ -59,24 +59,31 @@ def get_supabase() -> Client:
         log.error("Missing SUPABASE_URL or SUPABASE_KEY in .env file.")
         sys.exit(1)
     log.info("Connecting to Supabase: %s", url)
-    return create_client(url, key)
+    # postgrest endpoint is at /rest/v1
+    return SyncPostgrestClient(
+        f"{url}/rest/v1",
+        headers={
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+        },
+    )
 
 
 # ── Wipe season data (use with --reset) ───────────────────────────────────────
 
-def reset_season(sb: Client, season: str) -> None:
+def reset_season(sb: SyncPostgrestClient, season: str) -> None:
     log.warning("Wiping all data for season %s ...", season)
     for tbl in ("gw_scores", "cup_fixtures", "mini_league_members", "teams", "gameweeks"):
-        sb.table(tbl).delete().eq("season", season).execute()
+        sb.from_(tbl).delete().eq("season", season).execute()
         log.info("  Cleared %s", tbl)
     # mini_leagues last (FK from members)
-    sb.table("mini_leagues").delete().eq("season", season).execute()
+    sb.from_("mini_leagues").delete().eq("season", season).execute()
     log.info("  Cleared mini_leagues")
 
 
 # ── Upsert helpers ────────────────────────────────────────────────────────────
 
-def upsert_in_batches(sb: Client, table: str, rows: list[dict], on_conflict: str) -> None:
+def upsert_in_batches(sb: SyncPostgrestClient, table: str, rows: list[dict], on_conflict: str) -> None:
     """Insert/update rows in batches to avoid hitting payload limits."""
     if not rows:
         log.info("  %s: nothing to upsert", table)
@@ -84,7 +91,7 @@ def upsert_in_batches(sb: Client, table: str, rows: list[dict], on_conflict: str
     total = len(rows)
     for i in range(0, total, BATCH_SIZE):
         batch = rows[i : i + BATCH_SIZE]
-        sb.table(table).upsert(batch, on_conflict=on_conflict).execute()
+        sb.from_(table).upsert(batch, on_conflict=on_conflict).execute()
         log.info("  %s: upserted %d / %d", table, min(i + BATCH_SIZE, total), total)
 
 

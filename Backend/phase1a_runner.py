@@ -166,6 +166,7 @@ def build_scored_gws_index(teams: list[dict]) -> dict[int, dict[int, dict]]:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--league", type=int,            help="FPL mini-league ID to pull team IDs from")
+    parser.add_argument("--team",   type=int,            help="Score only this single team ID (skips league/founders)")
     parser.add_argument("--out",    type=str,            help="Save full results to this JSON file")
     parser.add_argument("--cup",    action="store_true", help="Simulate the cup (needs GW29+ data)")
     parser.add_argument("--seed",   type=int, default=42, help="Random seed for cup draw (default: 42)")
@@ -189,7 +190,10 @@ def main() -> None:
         log.info("Last finished GW: %d", last_gw)
 
     # Team IDs
-    if args.league:
+    if args.team:
+        team_ids = [args.team]
+        log.info("Single-team mode: scoring team %d only.", args.team)
+    elif args.league:
         log.info("Pulling team IDs from mini-league %d...", args.league)
         team_ids = get_all_team_ids_from_league(args.league)
         log.info("Found %d teams.", len(team_ids))
