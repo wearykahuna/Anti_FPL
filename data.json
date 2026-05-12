@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2026-05-11T17:14:31.126611+00:00",
+    "last_updated": "2026-05-12T09:27:21.210186+00:00",
     "current_gw": 36,
     "gw_in_progress": true,
     "season": "2025/26",
@@ -459,6 +459,8 @@
     "706": "Justin",
     "741": "Gray",
     "787": "Chambers",
+    "837": "Lienou",
+    "838": "Chadwick",
     "366": "A.Becker",
     "367": "Mamardashvili",
     "368": "Pécsi",
@@ -849,7 +851,7 @@
       "id": 911549,
       "manager": "ross farrugia",
       "team_name": "Man Utd’s dream XI",
-      "fpl_overall_rank": 12272815,
+      "fpl_overall_rank": 12274246,
       "fpl_overall_pts": 1080,
       "color": "#facc15",
       "gws": [
@@ -3114,7 +3116,7 @@
           "fpl_net_pts": 18,
           "fpl_xfer_cost": 4,
           "fpl_total": 1080,
-          "fpl_gw_rank": 11948773,
+          "fpl_gw_rank": 12109719,
           "standing": 1
         }
       ],
@@ -3169,7 +3171,7 @@
       "id": 3155889,
       "manager": "James Elgar",
       "team_name": "Saka on Wood",
-      "fpl_overall_rank": 12172837,
+      "fpl_overall_rank": 12174668,
       "fpl_overall_pts": 1143,
       "color": "#e879f9",
       "gws": [
@@ -5415,7 +5417,7 @@
           "pts": 17,
           "total": 1210,
           "chip": "",
-          "mini_rank": 10,
+          "mini_rank": 9,
           "last_rank": 12,
           "site_pts": 17,
           "cvc_pens": 0,
@@ -5431,7 +5433,7 @@
           "fpl_net_pts": 17,
           "fpl_xfer_cost": 0,
           "fpl_total": 1143,
-          "fpl_gw_rank": 12466419,
+          "fpl_gw_rank": 12580858,
           "standing": 2
         }
       ],
@@ -5486,7 +5488,7 @@
       "id": 1610262,
       "manager": "Joe Stout",
       "team_name": "Utter Tripe",
-      "fpl_overall_rank": 12098343,
+      "fpl_overall_rank": 12100617,
       "fpl_overall_pts": 1181,
       "color": "#38bdf8",
       "gws": [
@@ -7735,7 +7737,7 @@
           "pts": 20,
           "total": 1216,
           "chip": "",
-          "mini_rank": 14,
+          "mini_rank": 12,
           "last_rank": 13,
           "site_pts": 20,
           "cvc_pens": 0,
@@ -7751,7 +7753,7 @@
           "fpl_net_pts": 20,
           "fpl_xfer_cost": 0,
           "fpl_total": 1181,
-          "fpl_gw_rank": 12067795,
+          "fpl_gw_rank": 12220194,
           "standing": 3
         }
       ],
@@ -7806,8 +7808,8 @@
       "id": 7667159,
       "manager": "Ellison Griffiths",
       "team_name": "Funny loser!",
-      "fpl_overall_rank": 11962851,
-      "fpl_overall_pts": 1236,
+      "fpl_overall_rank": 11960244,
+      "fpl_overall_pts": 1238,
       "color": "#fb923c",
       "gws": [
         {
@@ -10049,12 +10051,12 @@
         },
         {
           "gw": 36,
-          "pts": 23,
-          "total": 1313,
+          "pts": 25,
+          "total": 1315,
           "chip": "",
           "mini_rank": 32,
           "last_rank": 31,
-          "site_pts": 23,
+          "site_pts": 25,
           "cvc_pens": 0,
           "cvc_pen_pts": 0,
           "inactive_pens": 0,
@@ -10064,16 +10066,16 @@
           "bank_pen": false,
           "team_value": 917,
           "transfers": 2,
-          "fpl_raw_pts": 23,
-          "fpl_net_pts": 23,
+          "fpl_raw_pts": 25,
+          "fpl_net_pts": 25,
           "fpl_xfer_cost": 0,
-          "fpl_total": 1236,
-          "fpl_gw_rank": 11822583,
+          "fpl_total": 1238,
+          "fpl_gw_rank": 11729370,
           "standing": 4
         }
       ],
       "summary": {
-        "total_points": 1313,
+        "total_points": 1315,
         "current_standing": 4,
         "last_gw": 36,
         "best_gw": 15,
@@ -10120,2330 +10122,10 @@
       }
     },
     {
-      "id": 6654853,
-      "manager": "Richard Owen",
-      "team_name": "Cunha Afford Him",
-      "fpl_overall_rank": 11928457,
-      "fpl_overall_pts": 1248,
-      "color": "#34d399",
-      "gws": [
-        {
-          "gw": 1,
-          "pts": 26,
-          "total": 26,
-          "chip": "",
-          "mini_rank": 14,
-          "last_rank": 0,
-          "site_pts": 26,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 1000,
-          "transfers": null,
-          "fpl_raw_pts": 26,
-          "fpl_net_pts": 26,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 26,
-          "fpl_gw_rank": 9384479,
-          "bestPick": {
-            "name": "Agbadou",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Struijk",
-            "pts": 8
-          },
-          "captain": {
-            "name": "Senesi",
-            "pts": 2,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Gyökeres",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Onana",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Palmer",
-              "pts": 3,
-              "autoSubbed": false
-            },
-            {
-              "name": "Watkins",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Palmer",
-            "pts": 3
-          },
-          "standing": 3
-        },
-        {
-          "gw": 2,
-          "pts": 36,
-          "total": 62,
-          "chip": "3xc",
-          "mini_rank": 17,
-          "last_rank": 14,
-          "site_pts": 36,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 996,
-          "transfers": 1,
-          "fpl_raw_pts": 36,
-          "fpl_net_pts": 36,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 62,
-          "fpl_gw_rank": 9439130,
-          "bestPick": {
-            "name": "Gordon",
-            "pts": -2
-          },
-          "worstPick": {
-            "name": "Senesi",
-            "pts": 9
-          },
-          "captain": {
-            "name": "Struijk",
-            "pts": 0,
-            "multiplier": 3
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Onana",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Watkins",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 12,
-              "autoSubbed": false
-            },
-            {
-              "name": "Palmer",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Gyökeres",
-            "pts": 12
-          },
-          "standing": 2
-        },
-        {
-          "gw": 3,
-          "pts": 37,
-          "total": 99,
-          "chip": "freehit",
-          "mini_rank": 18,
-          "last_rank": 17,
-          "site_pts": 37,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 992,
-          "transfers": null,
-          "fpl_raw_pts": 37,
-          "fpl_net_pts": 37,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 99,
-          "fpl_gw_rank": 9244277,
-          "bestPick": {
-            "name": "Walker",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Hermansen",
-            "pts": 7
-          },
-          "captain": {
-            "name": "Hermansen",
-            "pts": 7,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Gyökeres",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Foden",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 9,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 9
-          },
-          "standing": 3
-        },
-        {
-          "gw": 4,
-          "pts": 33,
-          "total": 132,
-          "chip": "wildcard",
-          "mini_rank": 9,
-          "last_rank": 18,
-          "site_pts": 33,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 987,
-          "transfers": null,
-          "fpl_raw_pts": 33,
-          "fpl_net_pts": 33,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 132,
-          "fpl_gw_rank": 11483405,
-          "bestPick": {
-            "name": "Souček",
-            "pts": -2
-          },
-          "worstPick": {
-            "name": "Tarkowski",
-            "pts": 8
-          },
-          "captain": {
-            "name": "Walker",
-            "pts": 2,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 6,
-              "autoSubbed": false
-            },
-            {
-              "name": "Richarlison",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 6,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 9,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "M.Salah",
-            "pts": 9
-          },
-          "standing": 3
-        },
-        {
-          "gw": 5,
-          "pts": 45,
-          "total": 177,
-          "chip": "",
-          "mini_rank": 20,
-          "last_rank": 9,
-          "site_pts": 45,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 987,
-          "transfers": 1,
-          "fpl_raw_pts": 45,
-          "fpl_net_pts": 45,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 177,
-          "fpl_gw_rank": 4924765,
-          "bestPick": {
-            "name": "Kluivert",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Reijnders",
-            "pts": 9
-          },
-          "captain": {
-            "name": "Tarkowski",
-            "pts": 3,
-            "multiplier": 2
-          },
-          "benchBummingPts": 9,
-          "benchPlayers": [
-            {
-              "name": "Richarlison",
-              "pts": 9,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 5,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "M.Salah",
-            "pts": 5
-          },
-          "standing": 3
-        },
-        {
-          "gw": 6,
-          "pts": 32,
-          "total": 209,
-          "chip": "",
-          "mini_rank": 23,
-          "last_rank": 20,
-          "site_pts": 32,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 986,
-          "transfers": 1,
-          "fpl_raw_pts": 32,
-          "fpl_net_pts": 32,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 209,
-          "fpl_gw_rank": 8919225,
-          "bestPick": {
-            "name": "Walker",
-            "pts": -1
-          },
-          "worstPick": {
-            "name": "Welbeck",
-            "pts": 11
-          },
-          "captain": {
-            "name": "Walker",
-            "pts": -1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Tarkowski",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 2
-          },
-          "standing": 3
-        },
-        {
-          "gw": 7,
-          "pts": 36,
-          "total": 245,
-          "chip": "",
-          "mini_rank": 30,
-          "last_rank": 23,
-          "site_pts": 36,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 986,
-          "transfers": null,
-          "fpl_raw_pts": 36,
-          "fpl_net_pts": 36,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 245,
-          "fpl_gw_rank": 11150205,
-          "bestPick": {
-            "name": "Struijk",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Bruno G.",
-            "pts": 14
-          },
-          "captain": {
-            "name": "Walker",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 3,
-              "autoSubbed": false
-            },
-            {
-              "name": "Tarkowski",
-              "pts": 5,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Tarkowski",
-            "pts": 5
-          },
-          "standing": 4
-        },
-        {
-          "gw": 8,
-          "pts": 87,
-          "total": 332,
-          "chip": "bboost",
-          "mini_rank": 63,
-          "last_rank": 30,
-          "site_pts": 78,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 1,
-          "inactive_pen_pts": 9,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 982,
-          "transfers": null,
-          "fpl_raw_pts": 78,
-          "fpl_net_pts": 78,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 323,
-          "fpl_gw_rank": 795437,
-          "bestPick": {
-            "name": "Struijk",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Walker",
-            "pts": 14
-          },
-          "captain": {
-            "name": "Tarkowski",
-            "pts": 3,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Richarlison",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 2
-          },
-          "standing": 6
-        },
-        {
-          "gw": 9,
-          "pts": 34,
-          "total": 366,
-          "chip": "",
-          "mini_rank": 62,
-          "last_rank": 63,
-          "site_pts": 34,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 978,
-          "transfers": 2,
-          "fpl_raw_pts": 34,
-          "fpl_net_pts": 34,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 357,
-          "fpl_gw_rank": 10594094,
-          "bestPick": {
-            "name": "Tarkowski",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Bruno G.",
-            "pts": 10
-          },
-          "captain": {
-            "name": "Hume",
-            "pts": 2,
-            "multiplier": 2
-          },
-          "benchBummingPts": 4,
-          "benchPlayers": [
-            {
-              "name": "Beto",
-              "pts": 2,
-              "autoSubbed": true
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 2,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 6,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "M.Salah",
-            "pts": 6
-          },
-          "standing": 5
-        },
-        {
-          "gw": 10,
-          "pts": 16,
-          "total": 382,
-          "chip": "",
-          "mini_rank": 44,
-          "last_rank": 62,
-          "site_pts": 16,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 975,
-          "transfers": 2,
-          "fpl_raw_pts": 16,
-          "fpl_net_pts": 16,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 373,
-          "fpl_gw_rank": 12272231,
-          "bestPick": {
-            "name": "Kluivert",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Iwobi",
-            "pts": 3
-          },
-          "captain": {
-            "name": "Struijk",
-            "pts": 0,
-            "multiplier": 0
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Richarlison",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 7,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 10,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "M.Salah",
-            "pts": 10
-          },
-          "standing": 4
-        },
-        {
-          "gw": 11,
-          "pts": 27,
-          "total": 409,
-          "chip": "",
-          "mini_rank": 45,
-          "last_rank": 44,
-          "site_pts": 27,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 971,
-          "transfers": 1,
-          "fpl_raw_pts": 27,
-          "fpl_net_pts": 27,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 400,
-          "fpl_gw_rank": 11200017,
-          "bestPick": {
-            "name": "Yoro",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Richarlison",
-            "pts": 6
-          },
-          "captain": {
-            "name": "Hume",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 7,
-              "autoSubbed": false
-            },
-            {
-              "name": "Beto",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 7
-          },
-          "standing": 4
-        },
-        {
-          "gw": 12,
-          "pts": 57,
-          "total": 466,
-          "chip": "",
-          "mini_rank": 65,
-          "last_rank": 45,
-          "site_pts": 57,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 970,
-          "transfers": 1,
-          "fpl_raw_pts": 57,
-          "fpl_net_pts": 57,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 457,
-          "fpl_gw_rank": 972746,
-          "bestPick": {
-            "name": "Walker",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Rogers",
-            "pts": 15
-          },
-          "captain": {
-            "name": "Milenković",
-            "pts": 8,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 10,
-              "autoSubbed": false
-            },
-            {
-              "name": "Beto",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 10
-          },
-          "standing": 7
-        },
-        {
-          "gw": 13,
-          "pts": 21,
-          "total": 487,
-          "chip": "",
-          "mini_rank": 55,
-          "last_rank": 65,
-          "site_pts": 21,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 969,
-          "transfers": 1,
-          "fpl_raw_pts": 21,
-          "fpl_net_pts": 21,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 478,
-          "fpl_gw_rank": 11436181,
-          "bestPick": {
-            "name": "Hume",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Damsgaard",
-            "pts": 4
-          },
-          "captain": {
-            "name": "Savinho",
-            "pts": 0,
-            "multiplier": 0
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Richarlison",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 1
-          },
-          "standing": 6
-        },
-        {
-          "gw": 14,
-          "pts": 35,
-          "total": 522,
-          "chip": "",
-          "mini_rank": 55,
-          "last_rank": 55,
-          "site_pts": 35,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 967,
-          "transfers": null,
-          "fpl_raw_pts": 35,
-          "fpl_net_pts": 35,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 513,
-          "fpl_gw_rank": 11215881,
-          "bestPick": {
-            "name": "Yoro",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Tarkowski",
-            "pts": 10
-          },
-          "captain": {
-            "name": "Savinho",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 7,
-              "autoSubbed": false
-            },
-            {
-              "name": "Richarlison",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 1,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 7
-          },
-          "standing": 6
-        },
-        {
-          "gw": 15,
-          "pts": 17,
-          "total": 539,
-          "chip": "",
-          "mini_rank": 51,
-          "last_rank": 55,
-          "site_pts": 17,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 967,
-          "transfers": 2,
-          "fpl_raw_pts": 17,
-          "fpl_net_pts": 17,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 530,
-          "fpl_gw_rank": 12452706,
-          "bestPick": {
-            "name": "Walker",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Dúbravka",
-            "pts": 3
-          },
-          "captain": {
-            "name": "Hume",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 6,
-              "autoSubbed": false
-            },
-            {
-              "name": "Richarlison",
-              "pts": 8,
-              "autoSubbed": false
-            },
-            {
-              "name": "Gyökeres",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Richarlison",
-            "pts": 8
-          },
-          "standing": 6
-        },
-        {
-          "gw": 16,
-          "pts": 22,
-          "total": 561,
-          "chip": "",
-          "mini_rank": 39,
-          "last_rank": 51,
-          "site_pts": 22,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 23,
-          "bank_pen": false,
-          "team_value": 965,
-          "transfers": 5,
-          "fpl_raw_pts": 22,
-          "fpl_net_pts": 22,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 552,
-          "fpl_gw_rank": 12522210,
-          "bestPick": {
-            "name": "Dúbravka",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "M.Salah",
-            "pts": 7
-          },
-          "captain": {
-            "name": "S.Bueno",
-            "pts": 0,
-            "multiplier": 0
-          },
-          "benchBummingPts": 7,
-          "benchPlayers": [
-            {
-              "name": "M.Salah",
-              "pts": 7,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Walker",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 13,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 13
-          },
-          "standing": 4
-        },
-        {
-          "gw": 17,
-          "pts": 35,
-          "total": 596,
-          "chip": "",
-          "mini_rank": 37,
-          "last_rank": 39,
-          "site_pts": 35,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 19,
-          "bank_pen": false,
-          "team_value": 965,
-          "transfers": 1,
-          "fpl_raw_pts": 35,
-          "fpl_net_pts": 35,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 587,
-          "fpl_gw_rank": 11950624,
-          "bestPick": {
-            "name": "Schär",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Hume",
-            "pts": 10
-          },
-          "captain": {
-            "name": "Yoro",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Iwobi",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 16,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 16
-          },
-          "standing": 4
-        },
-        {
-          "gw": 18,
-          "pts": 49,
-          "total": 645,
-          "chip": "",
-          "mini_rank": 47,
-          "last_rank": 37,
-          "site_pts": 49,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 964,
-          "transfers": 1,
-          "fpl_raw_pts": 49,
-          "fpl_net_pts": 49,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 636,
-          "fpl_gw_rank": 4154504,
-          "bestPick": {
-            "name": "Yoro",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Dúbravka",
-            "pts": 11
-          },
-          "captain": {
-            "name": "S.Bueno",
-            "pts": 7,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 6,
-              "autoSubbed": false
-            },
-            {
-              "name": "Beto",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 6
-          },
-          "standing": 6
-        },
-        {
-          "gw": 19,
-          "pts": 47,
-          "total": 692,
-          "chip": "",
-          "mini_rank": 45,
-          "last_rank": 47,
-          "site_pts": 23,
-          "cvc_pens": 1,
-          "cvc_pen_pts": 15,
-          "inactive_pens": 1,
-          "inactive_pen_pts": 9,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 965,
-          "transfers": null,
-          "fpl_raw_pts": 23,
-          "fpl_net_pts": 23,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 659,
-          "fpl_gw_rank": 12215404,
-          "bestPick": {
-            "name": "Walker",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Hume",
-            "pts": 6
-          },
-          "captain": {
-            "name": "S.Bueno",
-            "pts": 0,
-            "multiplier": 0
-          },
-          "benchBummingPts": 3,
-          "benchPlayers": [
-            {
-              "name": "Beto",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Haaland",
-              "pts": 2,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 10,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 10
-          },
-          "standing": 6
-        },
-        {
-          "gw": 20,
-          "pts": 31,
-          "total": 723,
-          "chip": "",
-          "mini_rank": 42,
-          "last_rank": 45,
-          "site_pts": 31,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 964,
-          "transfers": 2,
-          "fpl_raw_pts": 31,
-          "fpl_net_pts": 31,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 690,
-          "fpl_gw_rank": 10208505,
-          "bestPick": {
-            "name": "Walker",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Schär",
-            "pts": 8
-          },
-          "captain": {
-            "name": "Yoro",
-            "pts": 2,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Strand Larsen",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 2
-          },
-          "standing": 6
-        },
-        {
-          "gw": 21,
-          "pts": 23,
-          "total": 746,
-          "chip": "",
-          "mini_rank": 36,
-          "last_rank": 71,
-          "site_pts": 23,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 965,
-          "transfers": 1,
-          "fpl_raw_pts": 23,
-          "fpl_net_pts": 23,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 713,
-          "fpl_gw_rank": 12324944,
-          "bestPick": {
-            "name": "Hume",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Souček",
-            "pts": 6
-          },
-          "captain": {
-            "name": "Hume",
-            "pts": 0,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 3,
-              "autoSubbed": false
-            },
-            {
-              "name": "Strand Larsen",
-              "pts": 4,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 6,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 6
-          },
-          "standing": 5
-        },
-        {
-          "gw": 22,
-          "pts": 34,
-          "total": 780,
-          "chip": "",
-          "mini_rank": 31,
-          "last_rank": 36,
-          "site_pts": 34,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 965,
-          "transfers": 1,
-          "fpl_raw_pts": 34,
-          "fpl_net_pts": 34,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 747,
-          "fpl_gw_rank": 9580492,
-          "bestPick": {
-            "name": "Hume",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Hall",
-            "pts": 9
-          },
-          "captain": {
-            "name": "Wharton",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 3,
-          "benchPlayers": [
-            {
-              "name": "Strand Larsen",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Haaland",
-              "pts": 2,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 10,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 10
-          },
-          "standing": 4
-        },
-        {
-          "gw": 23,
-          "pts": 20,
-          "total": 800,
-          "chip": "3xc",
-          "mini_rank": 27,
-          "last_rank": 31,
-          "site_pts": 20,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 965,
-          "transfers": 1,
-          "fpl_raw_pts": 20,
-          "fpl_net_pts": 20,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 767,
-          "fpl_gw_rank": 12643968,
-          "bestPick": {
-            "name": "Wharton",
-            "pts": -1
-          },
-          "worstPick": {
-            "name": "Richards",
-            "pts": 7
-          },
-          "captain": {
-            "name": "Wharton",
-            "pts": -1,
-            "multiplier": 3
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 3,
-              "autoSubbed": false
-            },
-            {
-              "name": "Stach",
-              "pts": 8,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 5,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 1,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Stach",
-            "pts": 8
-          },
-          "standing": 4
-        },
-        {
-          "gw": 24,
-          "pts": 41,
-          "total": 841,
-          "chip": "freehit",
-          "mini_rank": 29,
-          "last_rank": 27,
-          "site_pts": 41,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 963,
-          "transfers": null,
-          "fpl_raw_pts": 41,
-          "fpl_net_pts": 41,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 808,
-          "fpl_gw_rank": 11149034,
-          "bestPick": {
-            "name": "Andersen",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Scott",
-            "pts": 13
-          },
-          "captain": {
-            "name": "Souček",
-            "pts": 2,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Raúl",
-              "pts": 6,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 5,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 5,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Raúl",
-            "pts": 6
-          },
-          "standing": 4
-        },
-        {
-          "gw": 25,
-          "pts": 25,
-          "total": 866,
-          "chip": "",
-          "mini_rank": 26,
-          "last_rank": 29,
-          "site_pts": 25,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 962,
-          "transfers": null,
-          "fpl_raw_pts": 25,
-          "fpl_net_pts": 25,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 833,
-          "fpl_gw_rank": 12622554,
-          "bestPick": {
-            "name": "Hall",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Richards",
-            "pts": 8
-          },
-          "captain": {
-            "name": "Wharton",
-            "pts": 3,
-            "multiplier": 2
-          },
-          "benchBummingPts": 2,
-          "benchPlayers": [
-            {
-              "name": "M.Salah",
-              "pts": 2,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Stach",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 11,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 11
-          },
-          "standing": 4
-        },
-        {
-          "gw": 26,
-          "pts": 53,
-          "total": 919,
-          "chip": "",
-          "mini_rank": 34,
-          "last_rank": 26,
-          "site_pts": 53,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 962,
-          "transfers": 2,
-          "fpl_raw_pts": 53,
-          "fpl_net_pts": 53,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 886,
-          "fpl_gw_rank": 8637471,
-          "bestPick": {
-            "name": "Richards",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Strand Larsen",
-            "pts": 13
-          },
-          "captain": {
-            "name": "J.Gomes",
-            "pts": 5,
-            "multiplier": 2
-          },
-          "benchBummingPts": 13,
-          "benchPlayers": [
-            {
-              "name": "Strand Larsen",
-              "pts": 13,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 6,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 5,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "M.Salah",
-            "pts": 6
-          },
-          "standing": 5
-        },
-        {
-          "gw": 27,
-          "pts": 36,
-          "total": 955,
-          "chip": "",
-          "mini_rank": 32,
-          "last_rank": 34,
-          "site_pts": 36,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 27,
-          "bank_pen": false,
-          "team_value": 962,
-          "transfers": 1,
-          "fpl_raw_pts": 36,
-          "fpl_net_pts": 36,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 922,
-          "fpl_gw_rank": 10888719,
-          "bestPick": {
-            "name": "Hume",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Hall",
-            "pts": 7
-          },
-          "captain": {
-            "name": "Hall",
-            "pts": 7,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Strand Larsen",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 3,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 6,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 6
-          },
-          "standing": 5
-        },
-        {
-          "gw": 28,
-          "pts": 33,
-          "total": 988,
-          "chip": "",
-          "mini_rank": 30,
-          "last_rank": 32,
-          "site_pts": 33,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 27,
-          "bank_pen": false,
-          "team_value": 962,
-          "transfers": null,
-          "fpl_raw_pts": 33,
-          "fpl_net_pts": 33,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 955,
-          "fpl_gw_rank": 11256518,
-          "bestPick": {
-            "name": "Dúbravka",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Beto",
-            "pts": 9
-          },
-          "captain": {
-            "name": "Hall",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 3,
-          "benchPlayers": [
-            {
-              "name": "M.Salah",
-              "pts": 2,
-              "autoSubbed": true
-            },
-            {
-              "name": "Strand Larsen",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 2
-          },
-          "standing": 4
-        },
-        {
-          "gw": 29,
-          "pts": 47,
-          "total": 1035,
-          "chip": "",
-          "mini_rank": 34,
-          "last_rank": 30,
-          "site_pts": 47,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 960,
-          "transfers": 2,
-          "fpl_raw_pts": 47,
-          "fpl_net_pts": 47,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 1002,
-          "fpl_gw_rank": 8639753,
-          "bestPick": {
-            "name": "S.Bueno",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Wharton",
-            "pts": 10
-          },
-          "captain": {
-            "name": "Hutchinson",
-            "pts": 0,
-            "multiplier": 0
-          },
-          "benchBummingPts": 5,
-          "benchPlayers": [
-            {
-              "name": "Strand Larsen",
-              "pts": 5,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 6,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 9,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "M.Salah",
-            "pts": 9
-          },
-          "standing": 4
-        },
-        {
-          "gw": 30,
-          "pts": 40,
-          "total": 1075,
-          "chip": "",
-          "mini_rank": 35,
-          "last_rank": 34,
-          "site_pts": 40,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 959,
-          "transfers": null,
-          "fpl_raw_pts": 40,
-          "fpl_net_pts": 40,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 1042,
-          "fpl_gw_rank": 7493806,
-          "bestPick": {
-            "name": "S.Bueno",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Richards",
-            "pts": 10
-          },
-          "captain": {
-            "name": "Hutchinson",
-            "pts": 1,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Strand Larsen",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 2,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 2
-          },
-          "standing": 5
-        },
-        {
-          "gw": 31,
-          "pts": 42,
-          "total": 1117,
-          "chip": "wildcard",
-          "mini_rank": 32,
-          "last_rank": 35,
-          "site_pts": 42,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 27,
-          "bank_pen": false,
-          "team_value": 958,
-          "transfers": null,
-          "fpl_raw_pts": 42,
-          "fpl_net_pts": 42,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 1084,
-          "fpl_gw_rank": 5155868,
-          "bestPick": {
-            "name": "Hume",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Beto",
-            "pts": 16
-          },
-          "captain": {
-            "name": "Hutchinson",
-            "pts": 3,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Delap",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 7,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 7
-          },
-          "standing": 4
-        },
-        {
-          "gw": 32,
-          "pts": 34,
-          "total": 1151,
-          "chip": "",
-          "mini_rank": 35,
-          "last_rank": 32,
-          "site_pts": 34,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 26,
-          "bank_pen": false,
-          "team_value": 958,
-          "transfers": 2,
-          "fpl_raw_pts": 34,
-          "fpl_net_pts": 34,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 1118,
-          "fpl_gw_rank": 10709768,
-          "bestPick": {
-            "name": "Hume",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Hudson-Odoi",
-            "pts": 7
-          },
-          "captain": {
-            "name": "Bogle",
-            "pts": 6,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "Delap",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 8,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 2,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "M.Salah",
-            "pts": 8
-          },
-          "standing": 5
-        },
-        {
-          "gw": 33,
-          "pts": 64,
-          "total": 1215,
-          "chip": "",
-          "mini_rank": 36,
-          "last_rank": 35,
-          "site_pts": 64,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 29,
-          "bank_pen": false,
-          "team_value": 959,
-          "transfers": 1,
-          "fpl_raw_pts": 64,
-          "fpl_net_pts": 64,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 1182,
-          "fpl_gw_rank": 6404964,
-          "bestPick": {
-            "name": "Walker",
-            "pts": 1
-          },
-          "worstPick": {
-            "name": "Tavernier",
-            "pts": 9
-          },
-          "captain": {
-            "name": "Hume",
-            "pts": 7,
-            "multiplier": 2
-          },
-          "benchBummingPts": 4,
-          "benchPlayers": [
-            {
-              "name": "Delap",
-              "pts": 4,
-              "autoSubbed": true
-            },
-            {
-              "name": "Pickford",
-              "pts": 1,
-              "autoSubbed": false
-            },
-            {
-              "name": "M.Salah",
-              "pts": 10,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 13,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Haaland",
-            "pts": 13
-          },
-          "standing": 5
-        },
-        {
-          "gw": 34,
-          "pts": 49,
-          "total": 1264,
-          "chip": "",
-          "mini_rank": 35,
-          "last_rank": 36,
-          "site_pts": 32,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 1,
-          "inactive_pen_pts": 9,
-          "xfer_cost_pens": 8,
-          "bank": 30,
-          "bank_pen": false,
-          "team_value": 959,
-          "transfers": 3,
-          "fpl_raw_pts": 32,
-          "fpl_net_pts": 24,
-          "fpl_xfer_cost": 8,
-          "fpl_total": 1206,
-          "fpl_gw_rank": 7611064,
-          "bestPick": {
-            "name": "Hume",
-            "pts": -2
-          },
-          "worstPick": {
-            "name": "Andersen",
-            "pts": 11
-          },
-          "captain": {
-            "name": "Wharton",
-            "pts": 2,
-            "multiplier": 2
-          },
-          "benchBummingPts": 1,
-          "benchPlayers": [
-            {
-              "name": "M.Salah",
-              "pts": 1,
-              "autoSubbed": true
-            },
-            {
-              "name": "Dúbravka",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Delap",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Dúbravka",
-            "pts": 0
-          },
-          "standing": 5
-        },
-        {
-          "gw": 35,
-          "pts": 32,
-          "total": 1296,
-          "chip": "",
-          "mini_rank": 33,
-          "last_rank": 35,
-          "site_pts": 28,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": 4,
-          "bank": 27,
-          "bank_pen": false,
-          "team_value": 960,
-          "transfers": 2,
-          "fpl_raw_pts": 28,
-          "fpl_net_pts": 24,
-          "fpl_xfer_cost": 4,
-          "fpl_total": 1230,
-          "fpl_gw_rank": 12423663,
-          "bestPick": {
-            "name": "Richards",
-            "pts": 0
-          },
-          "worstPick": {
-            "name": "Andersen",
-            "pts": 3
-          },
-          "captain": {
-            "name": "Dúbravka",
-            "pts": 2,
-            "multiplier": 2
-          },
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            {
-              "name": "Pickford",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Watkins",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Palmer",
-              "pts": 0,
-              "autoSubbed": false
-            },
-            {
-              "name": "Haaland",
-              "pts": 0,
-              "autoSubbed": false
-            }
-          ],
-          "walkingThruTraffic": {
-            "name": "Pickford",
-            "pts": 0
-          },
-          "standing": 5
-        },
-        {
-          "gw": 36,
-          "pts": 18,
-          "total": 1314,
-          "chip": "",
-          "mini_rank": 33,
-          "last_rank": 33,
-          "site_pts": 18,
-          "cvc_pens": 0,
-          "cvc_pen_pts": 0,
-          "inactive_pens": 0,
-          "inactive_pen_pts": 0,
-          "xfer_cost_pens": null,
-          "bank": 28,
-          "bank_pen": false,
-          "team_value": 957,
-          "transfers": 1,
-          "fpl_raw_pts": 18,
-          "fpl_net_pts": 18,
-          "fpl_xfer_cost": 0,
-          "fpl_total": 1248,
-          "fpl_gw_rank": 12378931,
-          "standing": 5
-        }
-      ],
-      "summary": {
-        "total_points": 1314,
-        "current_standing": 5,
-        "last_gw": 36,
-        "best_gw": 16,
-        "worst_gw": 87,
-        "avg_gw": 36.5,
-        "total_cvc_pens": 1,
-        "total_cvc_pen_pts": 15,
-        "total_inactive_pens": 3,
-        "total_inactive_pen_pts": 27,
-        "total_bank_pens": 0,
-        "total_bank_pen_pts": 0,
-        "total_xfer_pts": 12,
-        "total_pen_pts": 54,
-        "chips_used": [
-          {
-            "gw": 2,
-            "chip": "3xc"
-          },
-          {
-            "gw": 3,
-            "chip": "freehit"
-          },
-          {
-            "gw": 4,
-            "chip": "wildcard"
-          },
-          {
-            "gw": 8,
-            "chip": "bboost"
-          },
-          {
-            "gw": 23,
-            "chip": "3xc"
-          },
-          {
-            "gw": 24,
-            "chip": "freehit"
-          },
-          {
-            "gw": 31,
-            "chip": "wildcard"
-          }
-        ]
-      }
-    },
-    {
       "id": 3640882,
       "manager": "JASON Farrugia",
       "team_name": "Losing Comes Easy",
-      "fpl_overall_rank": 11976623,
+      "fpl_overall_rank": 11979406,
       "fpl_overall_pts": 1231,
       "color": "#f87171",
       "gws": [
@@ -14692,7 +12374,7 @@
           "pts": 18,
           "total": 1334,
           "chip": "",
-          "mini_rank": 39,
+          "mini_rank": 38,
           "last_rank": 39,
           "site_pts": 18,
           "cvc_pens": 0,
@@ -14708,13 +12390,13 @@
           "fpl_net_pts": 18,
           "fpl_xfer_cost": 0,
           "fpl_total": 1231,
-          "fpl_gw_rank": 12378931,
-          "standing": 6
+          "fpl_gw_rank": 12502452,
+          "standing": 5
         }
       ],
       "summary": {
         "total_points": 1334,
-        "current_standing": 6,
+        "current_standing": 5,
         "last_gw": 36,
         "best_gw": 17,
         "worst_gw": 60,
@@ -14760,10 +12442,2330 @@
       }
     },
     {
+      "id": 6654853,
+      "manager": "Richard Owen",
+      "team_name": "Cunha Afford Him",
+      "fpl_overall_rank": 11869756,
+      "fpl_overall_pts": 1268,
+      "color": "#34d399",
+      "gws": [
+        {
+          "gw": 1,
+          "pts": 26,
+          "total": 26,
+          "chip": "",
+          "mini_rank": 14,
+          "last_rank": 0,
+          "site_pts": 26,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 1000,
+          "transfers": null,
+          "fpl_raw_pts": 26,
+          "fpl_net_pts": 26,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 26,
+          "fpl_gw_rank": 9384479,
+          "bestPick": {
+            "name": "Agbadou",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Struijk",
+            "pts": 8
+          },
+          "captain": {
+            "name": "Senesi",
+            "pts": 2,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Gyökeres",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Onana",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Palmer",
+              "pts": 3,
+              "autoSubbed": false
+            },
+            {
+              "name": "Watkins",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Palmer",
+            "pts": 3
+          },
+          "standing": 3
+        },
+        {
+          "gw": 2,
+          "pts": 36,
+          "total": 62,
+          "chip": "3xc",
+          "mini_rank": 17,
+          "last_rank": 14,
+          "site_pts": 36,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 996,
+          "transfers": 1,
+          "fpl_raw_pts": 36,
+          "fpl_net_pts": 36,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 62,
+          "fpl_gw_rank": 9439130,
+          "bestPick": {
+            "name": "Gordon",
+            "pts": -2
+          },
+          "worstPick": {
+            "name": "Senesi",
+            "pts": 9
+          },
+          "captain": {
+            "name": "Struijk",
+            "pts": 0,
+            "multiplier": 3
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Onana",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Watkins",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 12,
+              "autoSubbed": false
+            },
+            {
+              "name": "Palmer",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Gyökeres",
+            "pts": 12
+          },
+          "standing": 2
+        },
+        {
+          "gw": 3,
+          "pts": 37,
+          "total": 99,
+          "chip": "freehit",
+          "mini_rank": 18,
+          "last_rank": 17,
+          "site_pts": 37,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 992,
+          "transfers": null,
+          "fpl_raw_pts": 37,
+          "fpl_net_pts": 37,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 99,
+          "fpl_gw_rank": 9244277,
+          "bestPick": {
+            "name": "Walker",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Hermansen",
+            "pts": 7
+          },
+          "captain": {
+            "name": "Hermansen",
+            "pts": 7,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Gyökeres",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Foden",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 9,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 9
+          },
+          "standing": 3
+        },
+        {
+          "gw": 4,
+          "pts": 33,
+          "total": 132,
+          "chip": "wildcard",
+          "mini_rank": 9,
+          "last_rank": 18,
+          "site_pts": 33,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 987,
+          "transfers": null,
+          "fpl_raw_pts": 33,
+          "fpl_net_pts": 33,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 132,
+          "fpl_gw_rank": 11483405,
+          "bestPick": {
+            "name": "Souček",
+            "pts": -2
+          },
+          "worstPick": {
+            "name": "Tarkowski",
+            "pts": 8
+          },
+          "captain": {
+            "name": "Walker",
+            "pts": 2,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 6,
+              "autoSubbed": false
+            },
+            {
+              "name": "Richarlison",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 6,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 9,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "M.Salah",
+            "pts": 9
+          },
+          "standing": 3
+        },
+        {
+          "gw": 5,
+          "pts": 45,
+          "total": 177,
+          "chip": "",
+          "mini_rank": 20,
+          "last_rank": 9,
+          "site_pts": 45,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 987,
+          "transfers": 1,
+          "fpl_raw_pts": 45,
+          "fpl_net_pts": 45,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 177,
+          "fpl_gw_rank": 4924765,
+          "bestPick": {
+            "name": "Kluivert",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Reijnders",
+            "pts": 9
+          },
+          "captain": {
+            "name": "Tarkowski",
+            "pts": 3,
+            "multiplier": 2
+          },
+          "benchBummingPts": 9,
+          "benchPlayers": [
+            {
+              "name": "Richarlison",
+              "pts": 9,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 5,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "M.Salah",
+            "pts": 5
+          },
+          "standing": 3
+        },
+        {
+          "gw": 6,
+          "pts": 32,
+          "total": 209,
+          "chip": "",
+          "mini_rank": 23,
+          "last_rank": 20,
+          "site_pts": 32,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 986,
+          "transfers": 1,
+          "fpl_raw_pts": 32,
+          "fpl_net_pts": 32,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 209,
+          "fpl_gw_rank": 8919225,
+          "bestPick": {
+            "name": "Walker",
+            "pts": -1
+          },
+          "worstPick": {
+            "name": "Welbeck",
+            "pts": 11
+          },
+          "captain": {
+            "name": "Walker",
+            "pts": -1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Tarkowski",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 2
+          },
+          "standing": 3
+        },
+        {
+          "gw": 7,
+          "pts": 36,
+          "total": 245,
+          "chip": "",
+          "mini_rank": 30,
+          "last_rank": 23,
+          "site_pts": 36,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 986,
+          "transfers": null,
+          "fpl_raw_pts": 36,
+          "fpl_net_pts": 36,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 245,
+          "fpl_gw_rank": 11150205,
+          "bestPick": {
+            "name": "Struijk",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Bruno G.",
+            "pts": 14
+          },
+          "captain": {
+            "name": "Walker",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 3,
+              "autoSubbed": false
+            },
+            {
+              "name": "Tarkowski",
+              "pts": 5,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Tarkowski",
+            "pts": 5
+          },
+          "standing": 4
+        },
+        {
+          "gw": 8,
+          "pts": 87,
+          "total": 332,
+          "chip": "bboost",
+          "mini_rank": 63,
+          "last_rank": 30,
+          "site_pts": 78,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 1,
+          "inactive_pen_pts": 9,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 982,
+          "transfers": null,
+          "fpl_raw_pts": 78,
+          "fpl_net_pts": 78,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 323,
+          "fpl_gw_rank": 795437,
+          "bestPick": {
+            "name": "Struijk",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Walker",
+            "pts": 14
+          },
+          "captain": {
+            "name": "Tarkowski",
+            "pts": 3,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Richarlison",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 2
+          },
+          "standing": 6
+        },
+        {
+          "gw": 9,
+          "pts": 34,
+          "total": 366,
+          "chip": "",
+          "mini_rank": 62,
+          "last_rank": 63,
+          "site_pts": 34,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 978,
+          "transfers": 2,
+          "fpl_raw_pts": 34,
+          "fpl_net_pts": 34,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 357,
+          "fpl_gw_rank": 10594094,
+          "bestPick": {
+            "name": "Tarkowski",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Bruno G.",
+            "pts": 10
+          },
+          "captain": {
+            "name": "Hume",
+            "pts": 2,
+            "multiplier": 2
+          },
+          "benchBummingPts": 4,
+          "benchPlayers": [
+            {
+              "name": "Beto",
+              "pts": 2,
+              "autoSubbed": true
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 2,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 6,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "M.Salah",
+            "pts": 6
+          },
+          "standing": 5
+        },
+        {
+          "gw": 10,
+          "pts": 16,
+          "total": 382,
+          "chip": "",
+          "mini_rank": 44,
+          "last_rank": 62,
+          "site_pts": 16,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 975,
+          "transfers": 2,
+          "fpl_raw_pts": 16,
+          "fpl_net_pts": 16,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 373,
+          "fpl_gw_rank": 12272231,
+          "bestPick": {
+            "name": "Kluivert",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Iwobi",
+            "pts": 3
+          },
+          "captain": {
+            "name": "Struijk",
+            "pts": 0,
+            "multiplier": 0
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Richarlison",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 7,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 10,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "M.Salah",
+            "pts": 10
+          },
+          "standing": 4
+        },
+        {
+          "gw": 11,
+          "pts": 27,
+          "total": 409,
+          "chip": "",
+          "mini_rank": 45,
+          "last_rank": 44,
+          "site_pts": 27,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 971,
+          "transfers": 1,
+          "fpl_raw_pts": 27,
+          "fpl_net_pts": 27,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 400,
+          "fpl_gw_rank": 11200017,
+          "bestPick": {
+            "name": "Yoro",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Richarlison",
+            "pts": 6
+          },
+          "captain": {
+            "name": "Hume",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 7,
+              "autoSubbed": false
+            },
+            {
+              "name": "Beto",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 7
+          },
+          "standing": 4
+        },
+        {
+          "gw": 12,
+          "pts": 57,
+          "total": 466,
+          "chip": "",
+          "mini_rank": 65,
+          "last_rank": 45,
+          "site_pts": 57,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 970,
+          "transfers": 1,
+          "fpl_raw_pts": 57,
+          "fpl_net_pts": 57,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 457,
+          "fpl_gw_rank": 972746,
+          "bestPick": {
+            "name": "Walker",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Rogers",
+            "pts": 15
+          },
+          "captain": {
+            "name": "Milenković",
+            "pts": 8,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 10,
+              "autoSubbed": false
+            },
+            {
+              "name": "Beto",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 10
+          },
+          "standing": 7
+        },
+        {
+          "gw": 13,
+          "pts": 21,
+          "total": 487,
+          "chip": "",
+          "mini_rank": 55,
+          "last_rank": 65,
+          "site_pts": 21,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 969,
+          "transfers": 1,
+          "fpl_raw_pts": 21,
+          "fpl_net_pts": 21,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 478,
+          "fpl_gw_rank": 11436181,
+          "bestPick": {
+            "name": "Hume",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Damsgaard",
+            "pts": 4
+          },
+          "captain": {
+            "name": "Savinho",
+            "pts": 0,
+            "multiplier": 0
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Richarlison",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 1
+          },
+          "standing": 6
+        },
+        {
+          "gw": 14,
+          "pts": 35,
+          "total": 522,
+          "chip": "",
+          "mini_rank": 55,
+          "last_rank": 55,
+          "site_pts": 35,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 967,
+          "transfers": null,
+          "fpl_raw_pts": 35,
+          "fpl_net_pts": 35,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 513,
+          "fpl_gw_rank": 11215881,
+          "bestPick": {
+            "name": "Yoro",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Tarkowski",
+            "pts": 10
+          },
+          "captain": {
+            "name": "Savinho",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 7,
+              "autoSubbed": false
+            },
+            {
+              "name": "Richarlison",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 1,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 7
+          },
+          "standing": 6
+        },
+        {
+          "gw": 15,
+          "pts": 17,
+          "total": 539,
+          "chip": "",
+          "mini_rank": 51,
+          "last_rank": 55,
+          "site_pts": 17,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 967,
+          "transfers": 2,
+          "fpl_raw_pts": 17,
+          "fpl_net_pts": 17,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 530,
+          "fpl_gw_rank": 12452706,
+          "bestPick": {
+            "name": "Walker",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Dúbravka",
+            "pts": 3
+          },
+          "captain": {
+            "name": "Hume",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 6,
+              "autoSubbed": false
+            },
+            {
+              "name": "Richarlison",
+              "pts": 8,
+              "autoSubbed": false
+            },
+            {
+              "name": "Gyökeres",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Richarlison",
+            "pts": 8
+          },
+          "standing": 6
+        },
+        {
+          "gw": 16,
+          "pts": 22,
+          "total": 561,
+          "chip": "",
+          "mini_rank": 39,
+          "last_rank": 51,
+          "site_pts": 22,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 23,
+          "bank_pen": false,
+          "team_value": 965,
+          "transfers": 5,
+          "fpl_raw_pts": 22,
+          "fpl_net_pts": 22,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 552,
+          "fpl_gw_rank": 12522210,
+          "bestPick": {
+            "name": "Dúbravka",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "M.Salah",
+            "pts": 7
+          },
+          "captain": {
+            "name": "S.Bueno",
+            "pts": 0,
+            "multiplier": 0
+          },
+          "benchBummingPts": 7,
+          "benchPlayers": [
+            {
+              "name": "M.Salah",
+              "pts": 7,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Walker",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 13,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 13
+          },
+          "standing": 4
+        },
+        {
+          "gw": 17,
+          "pts": 35,
+          "total": 596,
+          "chip": "",
+          "mini_rank": 37,
+          "last_rank": 39,
+          "site_pts": 35,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 19,
+          "bank_pen": false,
+          "team_value": 965,
+          "transfers": 1,
+          "fpl_raw_pts": 35,
+          "fpl_net_pts": 35,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 587,
+          "fpl_gw_rank": 11950624,
+          "bestPick": {
+            "name": "Schär",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Hume",
+            "pts": 10
+          },
+          "captain": {
+            "name": "Yoro",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Iwobi",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 16,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 16
+          },
+          "standing": 4
+        },
+        {
+          "gw": 18,
+          "pts": 49,
+          "total": 645,
+          "chip": "",
+          "mini_rank": 47,
+          "last_rank": 37,
+          "site_pts": 49,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 964,
+          "transfers": 1,
+          "fpl_raw_pts": 49,
+          "fpl_net_pts": 49,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 636,
+          "fpl_gw_rank": 4154504,
+          "bestPick": {
+            "name": "Yoro",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Dúbravka",
+            "pts": 11
+          },
+          "captain": {
+            "name": "S.Bueno",
+            "pts": 7,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 6,
+              "autoSubbed": false
+            },
+            {
+              "name": "Beto",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 6
+          },
+          "standing": 6
+        },
+        {
+          "gw": 19,
+          "pts": 47,
+          "total": 692,
+          "chip": "",
+          "mini_rank": 45,
+          "last_rank": 47,
+          "site_pts": 23,
+          "cvc_pens": 1,
+          "cvc_pen_pts": 15,
+          "inactive_pens": 1,
+          "inactive_pen_pts": 9,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 965,
+          "transfers": null,
+          "fpl_raw_pts": 23,
+          "fpl_net_pts": 23,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 659,
+          "fpl_gw_rank": 12215404,
+          "bestPick": {
+            "name": "Walker",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Hume",
+            "pts": 6
+          },
+          "captain": {
+            "name": "S.Bueno",
+            "pts": 0,
+            "multiplier": 0
+          },
+          "benchBummingPts": 3,
+          "benchPlayers": [
+            {
+              "name": "Beto",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Haaland",
+              "pts": 2,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 10,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 10
+          },
+          "standing": 6
+        },
+        {
+          "gw": 20,
+          "pts": 31,
+          "total": 723,
+          "chip": "",
+          "mini_rank": 42,
+          "last_rank": 45,
+          "site_pts": 31,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 964,
+          "transfers": 2,
+          "fpl_raw_pts": 31,
+          "fpl_net_pts": 31,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 690,
+          "fpl_gw_rank": 10208505,
+          "bestPick": {
+            "name": "Walker",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Schär",
+            "pts": 8
+          },
+          "captain": {
+            "name": "Yoro",
+            "pts": 2,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Strand Larsen",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 2
+          },
+          "standing": 6
+        },
+        {
+          "gw": 21,
+          "pts": 23,
+          "total": 746,
+          "chip": "",
+          "mini_rank": 36,
+          "last_rank": 71,
+          "site_pts": 23,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 965,
+          "transfers": 1,
+          "fpl_raw_pts": 23,
+          "fpl_net_pts": 23,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 713,
+          "fpl_gw_rank": 12324944,
+          "bestPick": {
+            "name": "Hume",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Souček",
+            "pts": 6
+          },
+          "captain": {
+            "name": "Hume",
+            "pts": 0,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 3,
+              "autoSubbed": false
+            },
+            {
+              "name": "Strand Larsen",
+              "pts": 4,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 6,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 6
+          },
+          "standing": 5
+        },
+        {
+          "gw": 22,
+          "pts": 34,
+          "total": 780,
+          "chip": "",
+          "mini_rank": 31,
+          "last_rank": 36,
+          "site_pts": 34,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 965,
+          "transfers": 1,
+          "fpl_raw_pts": 34,
+          "fpl_net_pts": 34,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 747,
+          "fpl_gw_rank": 9580492,
+          "bestPick": {
+            "name": "Hume",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Hall",
+            "pts": 9
+          },
+          "captain": {
+            "name": "Wharton",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 3,
+          "benchPlayers": [
+            {
+              "name": "Strand Larsen",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Haaland",
+              "pts": 2,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 10,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 10
+          },
+          "standing": 4
+        },
+        {
+          "gw": 23,
+          "pts": 20,
+          "total": 800,
+          "chip": "3xc",
+          "mini_rank": 27,
+          "last_rank": 31,
+          "site_pts": 20,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 965,
+          "transfers": 1,
+          "fpl_raw_pts": 20,
+          "fpl_net_pts": 20,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 767,
+          "fpl_gw_rank": 12643968,
+          "bestPick": {
+            "name": "Wharton",
+            "pts": -1
+          },
+          "worstPick": {
+            "name": "Richards",
+            "pts": 7
+          },
+          "captain": {
+            "name": "Wharton",
+            "pts": -1,
+            "multiplier": 3
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 3,
+              "autoSubbed": false
+            },
+            {
+              "name": "Stach",
+              "pts": 8,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 5,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 1,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Stach",
+            "pts": 8
+          },
+          "standing": 4
+        },
+        {
+          "gw": 24,
+          "pts": 41,
+          "total": 841,
+          "chip": "freehit",
+          "mini_rank": 29,
+          "last_rank": 27,
+          "site_pts": 41,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 963,
+          "transfers": null,
+          "fpl_raw_pts": 41,
+          "fpl_net_pts": 41,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 808,
+          "fpl_gw_rank": 11149034,
+          "bestPick": {
+            "name": "Andersen",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Scott",
+            "pts": 13
+          },
+          "captain": {
+            "name": "Souček",
+            "pts": 2,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Raúl",
+              "pts": 6,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 5,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 5,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Raúl",
+            "pts": 6
+          },
+          "standing": 4
+        },
+        {
+          "gw": 25,
+          "pts": 25,
+          "total": 866,
+          "chip": "",
+          "mini_rank": 26,
+          "last_rank": 29,
+          "site_pts": 25,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 962,
+          "transfers": null,
+          "fpl_raw_pts": 25,
+          "fpl_net_pts": 25,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 833,
+          "fpl_gw_rank": 12622554,
+          "bestPick": {
+            "name": "Hall",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Richards",
+            "pts": 8
+          },
+          "captain": {
+            "name": "Wharton",
+            "pts": 3,
+            "multiplier": 2
+          },
+          "benchBummingPts": 2,
+          "benchPlayers": [
+            {
+              "name": "M.Salah",
+              "pts": 2,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Stach",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 11,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 11
+          },
+          "standing": 4
+        },
+        {
+          "gw": 26,
+          "pts": 53,
+          "total": 919,
+          "chip": "",
+          "mini_rank": 34,
+          "last_rank": 26,
+          "site_pts": 53,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 962,
+          "transfers": 2,
+          "fpl_raw_pts": 53,
+          "fpl_net_pts": 53,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 886,
+          "fpl_gw_rank": 8637471,
+          "bestPick": {
+            "name": "Richards",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Strand Larsen",
+            "pts": 13
+          },
+          "captain": {
+            "name": "J.Gomes",
+            "pts": 5,
+            "multiplier": 2
+          },
+          "benchBummingPts": 13,
+          "benchPlayers": [
+            {
+              "name": "Strand Larsen",
+              "pts": 13,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 6,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 5,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "M.Salah",
+            "pts": 6
+          },
+          "standing": 5
+        },
+        {
+          "gw": 27,
+          "pts": 36,
+          "total": 955,
+          "chip": "",
+          "mini_rank": 32,
+          "last_rank": 34,
+          "site_pts": 36,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 27,
+          "bank_pen": false,
+          "team_value": 962,
+          "transfers": 1,
+          "fpl_raw_pts": 36,
+          "fpl_net_pts": 36,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 922,
+          "fpl_gw_rank": 10888719,
+          "bestPick": {
+            "name": "Hume",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Hall",
+            "pts": 7
+          },
+          "captain": {
+            "name": "Hall",
+            "pts": 7,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Strand Larsen",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 3,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 6,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 6
+          },
+          "standing": 5
+        },
+        {
+          "gw": 28,
+          "pts": 33,
+          "total": 988,
+          "chip": "",
+          "mini_rank": 30,
+          "last_rank": 32,
+          "site_pts": 33,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 27,
+          "bank_pen": false,
+          "team_value": 962,
+          "transfers": null,
+          "fpl_raw_pts": 33,
+          "fpl_net_pts": 33,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 955,
+          "fpl_gw_rank": 11256518,
+          "bestPick": {
+            "name": "Dúbravka",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Beto",
+            "pts": 9
+          },
+          "captain": {
+            "name": "Hall",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 3,
+          "benchPlayers": [
+            {
+              "name": "M.Salah",
+              "pts": 2,
+              "autoSubbed": true
+            },
+            {
+              "name": "Strand Larsen",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 2
+          },
+          "standing": 4
+        },
+        {
+          "gw": 29,
+          "pts": 47,
+          "total": 1035,
+          "chip": "",
+          "mini_rank": 34,
+          "last_rank": 30,
+          "site_pts": 47,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 960,
+          "transfers": 2,
+          "fpl_raw_pts": 47,
+          "fpl_net_pts": 47,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 1002,
+          "fpl_gw_rank": 8639753,
+          "bestPick": {
+            "name": "S.Bueno",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Wharton",
+            "pts": 10
+          },
+          "captain": {
+            "name": "Hutchinson",
+            "pts": 0,
+            "multiplier": 0
+          },
+          "benchBummingPts": 5,
+          "benchPlayers": [
+            {
+              "name": "Strand Larsen",
+              "pts": 5,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 6,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 9,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "M.Salah",
+            "pts": 9
+          },
+          "standing": 4
+        },
+        {
+          "gw": 30,
+          "pts": 40,
+          "total": 1075,
+          "chip": "",
+          "mini_rank": 35,
+          "last_rank": 34,
+          "site_pts": 40,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 959,
+          "transfers": null,
+          "fpl_raw_pts": 40,
+          "fpl_net_pts": 40,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 1042,
+          "fpl_gw_rank": 7493806,
+          "bestPick": {
+            "name": "S.Bueno",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Richards",
+            "pts": 10
+          },
+          "captain": {
+            "name": "Hutchinson",
+            "pts": 1,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Strand Larsen",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 2,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 2
+          },
+          "standing": 5
+        },
+        {
+          "gw": 31,
+          "pts": 42,
+          "total": 1117,
+          "chip": "wildcard",
+          "mini_rank": 32,
+          "last_rank": 35,
+          "site_pts": 42,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 27,
+          "bank_pen": false,
+          "team_value": 958,
+          "transfers": null,
+          "fpl_raw_pts": 42,
+          "fpl_net_pts": 42,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 1084,
+          "fpl_gw_rank": 5155868,
+          "bestPick": {
+            "name": "Hume",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Beto",
+            "pts": 16
+          },
+          "captain": {
+            "name": "Hutchinson",
+            "pts": 3,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Delap",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 7,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 7
+          },
+          "standing": 4
+        },
+        {
+          "gw": 32,
+          "pts": 34,
+          "total": 1151,
+          "chip": "",
+          "mini_rank": 35,
+          "last_rank": 32,
+          "site_pts": 34,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 26,
+          "bank_pen": false,
+          "team_value": 958,
+          "transfers": 2,
+          "fpl_raw_pts": 34,
+          "fpl_net_pts": 34,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 1118,
+          "fpl_gw_rank": 10709768,
+          "bestPick": {
+            "name": "Hume",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Hudson-Odoi",
+            "pts": 7
+          },
+          "captain": {
+            "name": "Bogle",
+            "pts": 6,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "Delap",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 8,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 2,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "M.Salah",
+            "pts": 8
+          },
+          "standing": 5
+        },
+        {
+          "gw": 33,
+          "pts": 64,
+          "total": 1215,
+          "chip": "",
+          "mini_rank": 36,
+          "last_rank": 35,
+          "site_pts": 64,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 29,
+          "bank_pen": false,
+          "team_value": 959,
+          "transfers": 1,
+          "fpl_raw_pts": 64,
+          "fpl_net_pts": 64,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 1182,
+          "fpl_gw_rank": 6404964,
+          "bestPick": {
+            "name": "Walker",
+            "pts": 1
+          },
+          "worstPick": {
+            "name": "Tavernier",
+            "pts": 9
+          },
+          "captain": {
+            "name": "Hume",
+            "pts": 7,
+            "multiplier": 2
+          },
+          "benchBummingPts": 4,
+          "benchPlayers": [
+            {
+              "name": "Delap",
+              "pts": 4,
+              "autoSubbed": true
+            },
+            {
+              "name": "Pickford",
+              "pts": 1,
+              "autoSubbed": false
+            },
+            {
+              "name": "M.Salah",
+              "pts": 10,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 13,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Haaland",
+            "pts": 13
+          },
+          "standing": 5
+        },
+        {
+          "gw": 34,
+          "pts": 49,
+          "total": 1264,
+          "chip": "",
+          "mini_rank": 35,
+          "last_rank": 36,
+          "site_pts": 32,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 1,
+          "inactive_pen_pts": 9,
+          "xfer_cost_pens": 8,
+          "bank": 30,
+          "bank_pen": false,
+          "team_value": 959,
+          "transfers": 3,
+          "fpl_raw_pts": 32,
+          "fpl_net_pts": 24,
+          "fpl_xfer_cost": 8,
+          "fpl_total": 1206,
+          "fpl_gw_rank": 7611064,
+          "bestPick": {
+            "name": "Hume",
+            "pts": -2
+          },
+          "worstPick": {
+            "name": "Andersen",
+            "pts": 11
+          },
+          "captain": {
+            "name": "Wharton",
+            "pts": 2,
+            "multiplier": 2
+          },
+          "benchBummingPts": 1,
+          "benchPlayers": [
+            {
+              "name": "M.Salah",
+              "pts": 1,
+              "autoSubbed": true
+            },
+            {
+              "name": "Dúbravka",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Delap",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Dúbravka",
+            "pts": 0
+          },
+          "standing": 5
+        },
+        {
+          "gw": 35,
+          "pts": 32,
+          "total": 1296,
+          "chip": "",
+          "mini_rank": 33,
+          "last_rank": 35,
+          "site_pts": 28,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": 4,
+          "bank": 27,
+          "bank_pen": false,
+          "team_value": 960,
+          "transfers": 2,
+          "fpl_raw_pts": 28,
+          "fpl_net_pts": 24,
+          "fpl_xfer_cost": 4,
+          "fpl_total": 1230,
+          "fpl_gw_rank": 12423663,
+          "bestPick": {
+            "name": "Richards",
+            "pts": 0
+          },
+          "worstPick": {
+            "name": "Andersen",
+            "pts": 3
+          },
+          "captain": {
+            "name": "Dúbravka",
+            "pts": 2,
+            "multiplier": 2
+          },
+          "benchBummingPts": 0,
+          "benchPlayers": [
+            {
+              "name": "Pickford",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Watkins",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Palmer",
+              "pts": 0,
+              "autoSubbed": false
+            },
+            {
+              "name": "Haaland",
+              "pts": 0,
+              "autoSubbed": false
+            }
+          ],
+          "walkingThruTraffic": {
+            "name": "Pickford",
+            "pts": 0
+          },
+          "standing": 5
+        },
+        {
+          "gw": 36,
+          "pts": 38,
+          "total": 1334,
+          "chip": "",
+          "mini_rank": 39,
+          "last_rank": 33,
+          "site_pts": 38,
+          "cvc_pens": 0,
+          "cvc_pen_pts": 0,
+          "inactive_pens": 0,
+          "inactive_pen_pts": 0,
+          "xfer_cost_pens": null,
+          "bank": 28,
+          "bank_pen": false,
+          "team_value": 957,
+          "transfers": 1,
+          "fpl_raw_pts": 38,
+          "fpl_net_pts": 38,
+          "fpl_xfer_cost": 0,
+          "fpl_total": 1268,
+          "fpl_gw_rank": 9564287,
+          "standing": 6
+        }
+      ],
+      "summary": {
+        "total_points": 1334,
+        "current_standing": 6,
+        "last_gw": 36,
+        "best_gw": 16,
+        "worst_gw": 87,
+        "avg_gw": 37.1,
+        "total_cvc_pens": 1,
+        "total_cvc_pen_pts": 15,
+        "total_inactive_pens": 3,
+        "total_inactive_pen_pts": 27,
+        "total_bank_pens": 0,
+        "total_bank_pen_pts": 0,
+        "total_xfer_pts": 12,
+        "total_pen_pts": 54,
+        "chips_used": [
+          {
+            "gw": 2,
+            "chip": "3xc"
+          },
+          {
+            "gw": 3,
+            "chip": "freehit"
+          },
+          {
+            "gw": 4,
+            "chip": "wildcard"
+          },
+          {
+            "gw": 8,
+            "chip": "bboost"
+          },
+          {
+            "gw": 23,
+            "chip": "3xc"
+          },
+          {
+            "gw": 24,
+            "chip": "freehit"
+          },
+          {
+            "gw": 31,
+            "chip": "wildcard"
+          }
+        ]
+      }
+    },
+    {
       "id": 5399604,
       "manager": "Huw Jones",
       "team_name": "The Pear Tree Pub",
-      "fpl_overall_rank": 11882457,
+      "fpl_overall_rank": 11885907,
       "fpl_overall_pts": 1263,
       "color": "#a78bfa",
       "gws": [
@@ -17028,7 +17030,7 @@
           "fpl_net_pts": 13,
           "fpl_xfer_cost": 0,
           "fpl_total": 1263,
-          "fpl_gw_rank": 12683989,
+          "fpl_gw_rank": 12771056,
           "standing": 7
         }
       ],
@@ -17083,8 +17085,8 @@
       "id": 6703903,
       "manager": "Curtis Williams",
       "team_name": "Stranger Mings",
-      "fpl_overall_rank": 11434657,
-      "fpl_overall_pts": 1367,
+      "fpl_overall_rank": 11429886,
+      "fpl_overall_pts": 1369,
       "color": "#60a5fa",
       "gws": [
         {
@@ -19329,12 +19331,12 @@
         },
         {
           "gw": 36,
-          "pts": 19,
-          "total": 1409,
+          "pts": 21,
+          "total": 1411,
           "chip": "",
-          "mini_rank": 58,
+          "mini_rank": 59,
           "last_rank": 59,
-          "site_pts": 19,
+          "site_pts": 21,
           "cvc_pens": 0,
           "cvc_pen_pts": 0,
           "inactive_pens": 0,
@@ -19344,21 +19346,21 @@
           "bank_pen": false,
           "team_value": 932,
           "transfers": 1,
-          "fpl_raw_pts": 19,
-          "fpl_net_pts": 19,
+          "fpl_raw_pts": 21,
+          "fpl_net_pts": 21,
           "fpl_xfer_cost": 0,
-          "fpl_total": 1367,
-          "fpl_gw_rank": 12283458,
+          "fpl_total": 1369,
+          "fpl_gw_rank": 12219870,
           "standing": 8
         }
       ],
       "summary": {
-        "total_points": 1409,
+        "total_points": 1411,
         "current_standing": 8,
         "last_gw": 36,
         "best_gw": 19,
         "worst_gw": 54,
-        "avg_gw": 39.1,
+        "avg_gw": 39.2,
         "total_cvc_pens": 0,
         "total_cvc_pen_pts": 0,
         "total_inactive_pens": 2,
@@ -19403,7 +19405,7 @@
       "id": 6595399,
       "manager": "Andrew Morris",
       "team_name": "Expected Toulouse",
-      "fpl_overall_rank": 11732107,
+      "fpl_overall_rank": 11736546,
       "fpl_overall_pts": 1305,
       "color": "#f59e0b",
       "gws": [
@@ -21649,7 +21651,7 @@
           "pts": 15,
           "total": 1434,
           "chip": "",
-          "mini_rank": 64,
+          "mini_rank": 63,
           "last_rank": 65,
           "site_pts": 15,
           "cvc_pens": 0,
@@ -21665,7 +21667,7 @@
           "fpl_net_pts": 15,
           "fpl_xfer_cost": 0,
           "fpl_total": 1305,
-          "fpl_gw_rank": 12619991,
+          "fpl_gw_rank": 12716386,
           "standing": 9
         }
       ],
@@ -21724,7 +21726,7 @@
       "id": 5388975,
       "manager": "Geraint Hooper",
       "team_name": "Sausage Roll FC",
-      "fpl_overall_rank": 11606036,
+      "fpl_overall_rank": 11611351,
       "fpl_overall_pts": 1334,
       "color": "#4ade80",
       "gws": [
@@ -23989,7 +23991,7 @@
           "fpl_net_pts": 23,
           "fpl_xfer_cost": 0,
           "fpl_total": 1334,
-          "fpl_gw_rank": 11822337,
+          "fpl_gw_rank": 11990225,
           "standing": 10
         }
       ],
