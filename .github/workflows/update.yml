@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -31,18 +33,29 @@ jobs:
       - name: Run fetch_data.py
         run: python fetch_data.py
 
-      - name: Commit and push data.json if changed
+      - name: Commit and push if changed
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git stash
-          git fetch origin main
-          git rebase origin/main
-          git stash pop
+
+          # Stage any changes from fetch_data.py
           git add data.json picks_cache.json
+
+          # Exit early if nothing changed
           if git diff --staged --quiet; then
-            echo "data.json unchanged — nothing to commit"
-          else
-            git commit -m "chore: auto-update data.json [skip ci]"
-            git push
+            echo "No changes — nothing to commit"
+            exit 0
           fi
+
+          # Commit locally
+          git commit -m "chore: auto-update data.json [skip ci]"
+
+          # Retry loop: rebase + push, up to 5 times in case of concurrent pushes
+          for i in 1 2 3 4 5; do
+            git pull --rebase origin main && git push && exit 0
+            echo "Push failed, retry $i..."
+            sleep 5
+          done
+
+          echo "Push failed after 5 attempts"
+          exit 1
