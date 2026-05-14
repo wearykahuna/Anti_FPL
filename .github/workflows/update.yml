@@ -14,6 +14,10 @@ jobs:
     permissions:
       contents: write   # needed to push data.json back to the repo
 
+concurrency:
+  group: data-update
+  cancel-in-progress: false
+  
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -35,9 +39,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data.json picks_cache.json
           # Only commit if something actually changed — avoids empty commits
+          git pull --rebase origin main
+          git push
           if git diff --staged --quiet; then
             echo "data.json unchanged — nothing to commit"
           else
             git commit -m "chore: auto-update data.json [skip ci]"
             git push
           fi
+  
