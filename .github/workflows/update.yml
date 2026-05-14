@@ -2,22 +2,20 @@ name: Update Anti-FPL Data
 
 on:
   schedule:
-    # Every day at 08:00 UTC — morning refresh in case Anti-FPL pythonanywhere updated overnight
     - cron: '0 8 * * *'
-    # Every day at 23:30 UTC — evening refresh after GW results and Anti-FPL site recalculates
     - cron: '30 23 * * *'
-  workflow_dispatch: # allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+concurrency:
+  group: data-update
+  cancel-in-progress: false
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # needed to push data.json back to the repo
+      contents: write
 
-concurrency:
-  group: data-update
-  cancel-in-progress: false
-  
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -38,13 +36,10 @@ concurrency:
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data.json picks_cache.json
-          # Only commit if something actually changed — avoids empty commits
           git pull --rebase origin main
-          git push
           if git diff --staged --quiet; then
             echo "data.json unchanged — nothing to commit"
           else
             git commit -m "chore: auto-update data.json [skip ci]"
             git push
           fi
-  
