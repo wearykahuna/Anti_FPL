@@ -35,11 +35,12 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git rebase origin/main
           git add data.json picks_cache.json
           if git diff --staged --quiet; then
             echo "data.json unchanged — nothing to commit"
           else
             git commit -m "chore: auto-update data.json [skip ci]"
-            git pull --rebase origin main
             git push
           fi
