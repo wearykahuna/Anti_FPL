@@ -483,7 +483,6 @@
         <th class="r" id="pens-header">+Pens</th>
         <th class="r">Prev Total</th>
         <th class="r">Total</th>
-        <th class="r">Left</th>
         <th></th>
       </tr>
     </thead>
@@ -598,10 +597,8 @@
         window.playerTeamIds   = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_id]));
       }
 
-      // Fixtures for the current GW — determines which clubs have already played
-      const fixtures = await fetchFixtures(currentGw);
-      // Build a map of club_short → status: 'finished' | 'live' | 'upcoming'
-      const clubStatus = buildClubStatus(fixtures);
+      // Fixtures-dependent "players left" feature removed for now (CORS issue)
+      // Will be reinstated once fixtures are stored in Supabase
 
       const prevStanding = Object.fromEntries(prevScores.map(r => [r.team_id, r.cumulative_standing]));
       const prevTotal    = Object.fromEntries(prevScores.map(r => [r.team_id, r.anti_total]));
@@ -613,47 +610,12 @@
       const chipsByTeam = await fetchChipsByTeam(scores.map(s => s.team_id), currentGw);
 
       render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive,
-             selectionMap, playerScoreMap, clubStatus, chipsByTeam);
+             selectionMap, playerScoreMap, chipsByTeam);
       scheduleRefresh();
 
     } catch (err) {
       showError(err.message);
     }
-  }
-
-  // ── Fixtures + club status ─────────────────────────────────────────────────
-
-  async function fetchFixtures(gw) {
-    // FPL fixtures API — direct call from browser (this one allows CORS)
-    try {
-      const r = await fetch(`https://fantasy.premierleague.com/api/fixtures/?event=${gw}`);
-      if (!r.ok) throw new Error('fixtures fetch failed');
-      return r.json();
-    } catch (err) {
-      console.warn('Fixtures fetch failed', err);
-      return [];
-    }
-  }
-
-  function buildClubStatus(fixtures) {
-    // Need a map of FPL team_id → short_name. Fetch from bootstrap once.
-    if (!window.clubMap) {
-      // Build from playerTeams data we already have: team_id → short_name
-      // Actually we need it from fixtures themselves; FPL uses numeric team_h, team_a
-      // We'll build from a separate bootstrap call if needed
-    }
-    const status = {};
-    fixtures.forEach(f => {
-      const homeId = f.team_h;
-      const awayId = f.team_a;
-      let state;
-      if (f.finished_provisional || f.finished) state = 'finished';
-      else if (f.started)                         state = 'live';
-      else                                        state = 'upcoming';
-      status[homeId] = state;
-      status[awayId] = state;
-    });
-    return status;
   }
 
   // ── Chips history (which chips used so far this season per team) ──────────
@@ -788,7 +750,7 @@
       const penPrefix = isLive ? 'Pending: ' : '';
 
       detailTr.innerHTML = `
-        <td colspan="8">
+        <td colspan="7">
           <div class="detail-inner">
             ${detailItem('FPL Raw', s.fpl_raw_pts ?? '—')}
             ${detailItem(penPrefix + 'Transfer Hits', s.hit_pts || 0, s.hit_pts > 0)}
