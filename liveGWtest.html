@@ -6,443 +6,107 @@
   <title>Anti-FPL · Live Leaderboard</title>
   <style>
     :root {
-      --bg:        #f5f5f5;
-      --surface:   #ffffff;
-      --border:    #e0e0e0;
-      --text:      #111111;
-      --muted:     #888;
-      --accent:    #d62828;
-      --good:      #1a7f4b;
-      --warn:      #b86e00;
-      --live:      #d62828;
-      --font:      'Inter', system-ui, sans-serif;
-      --mono:      'JetBrains Mono', 'Fira Code', monospace;
+      --bg:#f5f5f5; --surface:#fff; --border:#e0e0e0;
+      --text:#111; --muted:#888;
+      --accent:#d62828; --good:#1a7f4b; --warn:#b86e00; --live:#d62828;
+      --font:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono','Fira Code',monospace;
     }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      min-height: 100vh;
-      padding: 24px 16px 48px;
-    }
-
-    /* ── Header ── */
-    header {
-      max-width: 900px;
-      margin: 0 auto 32px;
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-
-    .logo {
-      font-size: 1.6rem;
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      line-height: 1;
-    }
-
-    .logo span { color: var(--accent); }
-
-    .meta {
-      text-align: right;
-      font-size: 0.78rem;
-      color: var(--muted);
-      font-family: var(--mono);
-      line-height: 1.8;
-    }
-
-    /* ── Live badge ── */
-    .live-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(255,59,59,0.12);
-      border: 1px solid rgba(255,59,59,0.3);
-      color: var(--live);
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      padding: 3px 10px;
-      border-radius: 99px;
-      margin-bottom: 4px;
-    }
-
-    .live-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--live);
-      animation: pulse 1.4s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.4; transform: scale(0.7); }
-    }
-
-    /* ── GW summary bar ── */
-    .gw-bar {
-      max-width: 900px;
-      margin: 0 auto 20px;
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .gw-pill {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 8px 16px;
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .gw-pill strong { color: var(--text); font-size: 1rem; display: block; }
-
-    /* ── Refresh bar ── */
-    .refresh-bar {
-      max-width: 900px;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: var(--muted);
-      font-family: var(--mono);
-    }
-
-    .refresh-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 4px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.75rem;
-      font-family: var(--mono);
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .refresh-btn:hover { color: var(--text); border-color: var(--text); }
-
-    /* ── Table ── */
-    .table-wrap {
-      max-width: 900px;
-      margin: 0 auto;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
-    thead th {
-      text-align: left;
-      padding: 10px 14px;
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    thead th.r { text-align: right; }
-
-    tbody tr.team-row {
-      border-bottom: 1px solid var(--border);
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-
-    tbody tr.team-row:hover { background: var(--surface); }
-
-    tbody tr.team-row.expanded { background: var(--surface); }
-
-    td {
-      padding: 12px 14px;
-      vertical-align: middle;
-      white-space: nowrap;
-    }
-
-    td.r { text-align: right; font-family: var(--mono); }
-
-    /* Position */
-    .pos {
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--muted);
-      width: 32px;
-    }
-
-    .pos.top3 { color: var(--good); font-weight: 700; }
-
-    /* Team info */
-    .team-name {
-      font-weight: 600;
-      font-size: 0.88rem;
-    }
-
-    .manager-name {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 2px;
-    }
-
-    /* Chip badge (legacy single chip — kept for fallback) */
-    .chip {
-      display: inline-block;
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      padding: 2px 7px;
-      border-radius: 4px;
-      margin-left: 6px;
-      vertical-align: middle;
-      background: rgba(255,176,59,0.15);
-      color: var(--warn);
-      border: 1px solid rgba(255,176,59,0.3);
-    }
-
-    /* New chips row — all 8 chips with state */
-    .chips-row {
-      display: flex;
-      gap: 3px;
-      margin-top: 4px;
-      flex-wrap: wrap;
-    }
-
-    .chip-pill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 22px;
-      padding: 1px 4px;
-      font-size: 0.55rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      border-radius: 3px;
-      line-height: 1.5;
-      border: 1px solid transparent;
-    }
-
-    .chip-used {
-      background: #ececec;
-      color: #aaa;
-      border-color: #ddd;
-    }
-
-    .chip-avail {
-      background: rgba(59, 130, 246, 0.12);
-      color: #2563eb;
-      border-color: rgba(59, 130, 246, 0.3);
-    }
-
-    .chip-live {
-      background: rgba(255, 176, 59, 0.25);
-      color: var(--warn);
-      border-color: rgba(255, 176, 59, 0.5);
-      animation: chip-pulse 1.4s ease-in-out infinite;
-    }
-
-    @keyframes chip-pulse {
-      0%, 100% { opacity: 1;   transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(0.96); }
-    }
-
-    /* Scores */
-    .gw-pts {
-      font-family: var(--mono);
-      font-weight: 700;
-      font-size: 1rem;
-    }
-
-    .total-pts {
-      font-family: var(--mono);
-      font-size: 0.88rem;
-    }
-
-    /* Pen indicator */
-    .pen-tag {
-      font-size: 0.68rem;
-      color: var(--accent);
-      font-family: var(--mono);
-    }
-
-    .pending-tag {
-      font-size: 0.68rem;
-      color: var(--warn);
-      font-family: var(--mono);
-    }
-
-    /* Live indicator on score */
-    .live-score { color: var(--live); }
-
-    /* Expand chevron */
-    .chevron {
-      font-size: 0.7rem;
-      color: var(--muted);
-      transition: transform 0.2s;
-      display: inline-block;
-    }
-
-    .chevron.open { transform: rotate(180deg); }
-
-    /* ── Expanded detail row ── */
-    tr.detail-row td {
-      padding: 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .detail-inner {
-      padding: 16px 14px 16px 46px;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 12px;
-      background: #f9f9f9;
-    }
-
-    .detail-item {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .detail-label {
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    .detail-value {
-      font-family: var(--mono);
-      font-size: 0.88rem;
-      color: var(--text);
-    }
-
-    .detail-value.pen { color: var(--accent); }
-    .detail-value.ok  { color: var(--good); }
-
-    /* ── Squad section ── */
-    .squad-section {
-      padding: 0 14px 16px 14px;
-      background: #f9f9f9;
-      border-top: 1px solid var(--border);
-    }
-
-    .squad-header {
-      display: flex;
-      justify-content: space-between;
-      padding: 10px 0 6px 0;
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 4px;
-    }
-
-    .squad-legend {
-      font-family: var(--mono);
-      letter-spacing: 0;
-      text-transform: none;
-    }
-
-    .player-row {
-      display: grid;
-      grid-template-columns: 28px 1fr 48px 48px 48px;
-      gap: 8px;
-      align-items: center;
-      padding: 5px 0;
-      font-size: 0.82rem;
-      border-bottom: 1px dashed #ececec;
-    }
-
-    .player-row.bench {
-      background: #f0f0f0;
-      padding-left: 4px;
-      padding-right: 4px;
-      margin: 0 -4px;
-    }
-
-    .player-row.inactive { opacity: 0.5; }
-
-    .player-pos {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .player-name {
-      font-weight: 500;
-    }
-
-    .player-tag {
-      display: inline-block;
-      font-size: 0.62rem;
-      color: var(--warn);
-      font-weight: 700;
-      margin-left: 4px;
-    }
-
-    .player-club {
-      display: inline-block;
-      font-size: 0.6rem;
-      color: var(--muted);
-      letter-spacing: 0.05em;
-      margin-left: 4px;
-    }
-
-    .player-mins, .player-pts, .player-anti {
-      font-family: var(--mono);
-      text-align: right;
-      font-size: 0.8rem;
-    }
-
-    .player-mins { color: var(--muted); }
-    .player-anti { color: var(--accent); font-weight: 600; }
-
-    /* ── Loading / error ── */
-    .state-msg {
-      max-width: 900px;
-      margin: 80px auto;
-      text-align: center;
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      line-height: 2;
-    }
-
-    .state-msg .big { font-size: 2rem; display: block; margin-bottom: 12px; }
-
-    /* ── Footer ── */
-    footer {
-      max-width: 900px;
-      margin: 40px auto 0;
-      font-size: 0.72rem;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      padding-top: 16px;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    @media (max-width: 600px) {
-      .logo { font-size: 1.3rem; }
-      td, th { padding: 10px 8px; }
-      .detail-inner { padding-left: 14px; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:24px 16px 48px}
+
+    header{max-width:900px;margin:0 auto 32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .logo{font-size:1.6rem;font-weight:800;letter-spacing:-0.04em}
+    .logo span{color:var(--accent)}
+    .meta{text-align:right;font-size:0.78rem;color:var(--muted);font-family:var(--mono);line-height:1.8}
+
+    .live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(214,40,40,0.12);
+                border:1px solid rgba(214,40,40,0.3);color:var(--live);font-size:0.7rem;font-weight:700;
+                letter-spacing:0.1em;padding:3px 10px;border-radius:99px;margin-bottom:4px}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:var(--live);animation:pulse 1.4s ease-in-out infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+
+    .gw-bar{max-width:900px;margin:0 auto 20px;display:flex;gap:12px;flex-wrap:wrap}
+    .gw-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+             padding:8px 16px;font-size:0.78rem;color:var(--muted)}
+    .gw-pill strong{color:var(--text);font-size:1rem;display:block}
+
+    .refresh-bar{max-width:900px;margin:0 auto 16px;display:flex;justify-content:space-between;
+                 font-size:0.75rem;color:var(--muted);font-family:var(--mono)}
+
+    .table-wrap{max-width:900px;margin:0 auto;overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:0.85rem}
+    thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
+             color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+    thead th.r{text-align:right}
+    tbody tr.team-row{border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+    tbody tr.team-row:hover,tbody tr.team-row.expanded{background:var(--surface)}
+    td{padding:12px 14px;vertical-align:middle;white-space:nowrap}
+    td.r{text-align:right;font-family:var(--mono)}
+
+    .pos{font-family:var(--mono);font-size:0.75rem;color:var(--muted);width:32px}
+    .pos.top3{color:var(--good);font-weight:700}
+
+    .team-name{font-weight:600;font-size:0.88rem}
+    .manager-name{font-size:0.72rem;color:var(--muted);margin-top:2px}
+
+    .chips-row{display:flex;gap:3px;margin-top:4px;flex-wrap:wrap}
+    .chip-pill{display:inline-flex;align-items:center;justify-content:center;min-width:22px;
+               padding:1px 4px;font-size:0.55rem;font-weight:700;letter-spacing:0.05em;
+               border-radius:3px;line-height:1.5;border:1px solid transparent}
+    .chip-used{background:#ececec;color:#aaa;border-color:#ddd}
+    .chip-avail{background:rgba(59,130,246,0.12);color:#2563eb;border-color:rgba(59,130,246,0.3)}
+    .chip-live{background:rgba(255,176,59,0.25);color:var(--warn);border-color:rgba(255,176,59,0.5);
+               animation:chip-pulse 1.4s ease-in-out infinite}
+    @keyframes chip-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.96)}}
+
+    .gw-pts{font-family:var(--mono);font-weight:700;font-size:1rem}
+    .total-pts{font-family:var(--mono);font-size:0.88rem}
+    .pen-tag{font-size:0.68rem;color:var(--accent);font-family:var(--mono)}
+    .pending-tag{font-size:0.68rem;color:var(--warn);font-family:var(--mono)}
+    .live-score{color:var(--live)}
+
+    .chevron{font-size:0.7rem;color:var(--muted);transition:transform 0.2s;display:inline-block}
+    .chevron.open{transform:rotate(180deg)}
+
+    tr.detail-row td{padding:0;border-bottom:1px solid var(--border)}
+    .detail-inner{padding:16px 14px 16px 46px;display:grid;
+                  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;background:#f9f9f9}
+    .detail-item{display:flex;flex-direction:column;gap:2px}
+    .detail-label{font-size:0.65rem;letter-spacing:0.08em;color:var(--muted);text-transform:uppercase}
+    .detail-value{font-family:var(--mono);font-size:0.88rem}
+    .detail-value.pen{color:var(--accent)}
+    .detail-value.ok{color:var(--good)}
+
+    .squad-section{padding:0 14px 16px 14px;background:#f9f9f9;border-top:1px solid var(--border)}
+    .squad-header{display:flex;justify-content:space-between;padding:10px 0 6px;font-size:0.68rem;
+                  letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);
+                  border-bottom:1px solid var(--border);margin-bottom:4px}
+    .squad-legend{font-family:var(--mono);letter-spacing:0;text-transform:none}
+    .player-row{display:grid;grid-template-columns:36px 1fr 48px 48px 48px;gap:8px;align-items:center;
+                padding:5px 0;font-size:0.82rem;border-bottom:1px dashed #ececec}
+    .player-row.bench{background:#f0f0f0;padding-left:4px;padding-right:4px;margin:0 -4px}
+    .player-row.inactive{opacity:0.5}
+    .player-pos{font-family:var(--mono);font-size:0.7rem;color:var(--muted);text-align:center}
+    .player-name{font-weight:500}
+    .player-tag{display:inline-block;font-size:0.62rem;color:var(--warn);font-weight:700;margin-left:4px}
+    .player-club{display:inline-block;font-size:0.6rem;color:var(--muted);letter-spacing:0.05em;margin-left:4px}
+    .player-mins,.player-pts,.player-anti{font-family:var(--mono);text-align:right;font-size:0.8rem}
+    .player-mins{color:var(--muted)}
+    .player-anti{color:var(--accent);font-weight:600}
+
+    .state-msg{max-width:900px;margin:80px auto;text-align:center;color:var(--muted);
+               font-family:var(--mono);font-size:0.85rem;line-height:2}
+    .state-msg .big{font-size:2rem;display:block;margin-bottom:12px}
+
+    footer{max-width:900px;margin:40px auto 0;font-size:0.72rem;color:var(--muted);
+           border-top:1px solid var(--border);padding-top:16px;display:flex;
+           justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+    @media (max-width:600px){
+      .logo{font-size:1.3rem}
+      td,th{padding:10px 8px}
+      .detail-inner{padding-left:14px}
     }
   </style>
 </head>
@@ -451,9 +115,7 @@
 <header>
   <div>
     <div class="logo"><span>ANTI</span>FPL</div>
-    <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">
-      lowest score wins · 2025/26
-    </div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:4px">lowest score wins · 2025/26</div>
   </div>
   <div class="meta">
     <div id="live-badge-wrap"></div>
@@ -466,14 +128,11 @@
 
 <div class="refresh-bar">
   <span id="team-count">Loading...</span>
-  <span id="next-refresh" style="font-size:0.75rem;color:var(--muted);font-family:var(--mono)">—</span>
+  <span id="next-refresh-bar" style="font-size:0.75rem;color:var(--muted);font-family:var(--mono)">—</span>
 </div>
 
 <div class="table-wrap">
-  <div id="state-msg" class="state-msg">
-    <span class="big">⚽</span>
-    Loading leaderboard...
-  </div>
+  <div id="state-msg" class="state-msg"><span class="big">⚽</span>Loading leaderboard...</div>
   <table id="leaderboard" style="display:none">
     <thead>
       <tr>
@@ -499,106 +158,80 @@
   const SUPABASE_URL = 'https://qudcjhmbextpfdgdxihs.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGNqaG1iZXh0cGZkZ2R4aWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjEzMTQsImV4cCI6MjA5NDE5NzMxNH0.TRapf8KXSpM2XPrzprIhObi5cp0Sxt2wxel9novZRMA';
   const SEASON      = '2025/26';
-  const REFRESH_MS  = 2 * 60 * 1000;   // 2 minutes
+  const REFRESH_MS  = 2 * 60 * 1000;
 
-  const CHIP_LABELS = {
-    bboost:   'BB',
-    '3xc':    'TC',
-    freehit:  'FH',
-    wildcard: 'WC',
-  };
-
-  let refreshTimer   = null;
-  let countdownTimer = null;
-  let nextRefreshAt  = null;
-  let expandedTeam   = null;
-
-  // ── Supabase fetch ─────────────────────────────────────────────────────────
+  let refreshTimer, countdownTimer, nextRefreshAt;
+  let expandedTeam = null;
 
   async function sbFetch(table, params = '') {
-    const r = await fetch(
-      `${SUPABASE_URL}/rest/v1/${table}?${params}`,
-      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-    );
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
     if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
     return r.json();
   }
 
-  // ── Load data ──────────────────────────────────────────────────────────────
-
   async function loadData() {
     try {
-      // Current GW — find the in-progress one, falling back to latest finished
-      const currentGwData = await sbFetch(
-        'gameweeks',
-        `season=eq.${encodeURIComponent(SEASON)}&is_current=eq.true&select=*&limit=1`
-      );
+      // Current GW
+      const gwData = await sbFetch('gameweeks',
+        `season=eq.${encodeURIComponent(SEASON)}&is_current=eq.true&select=*&limit=1`);
       let currentGw, isLive;
-      if (currentGwData.length > 0) {
-        currentGw = currentGwData[0].gw;
-        isLive    = !currentGwData[0].is_finished;
+      if (gwData.length > 0) {
+        currentGw = gwData[0].gw;
+        isLive = !gwData[0].is_finished;
       } else {
-        const latestScored = await sbFetch(
-          'gw_scores',
-          `season=eq.${encodeURIComponent(SEASON)}&select=gw&order=gw.desc&limit=1`
-        );
-        currentGw = latestScored[0]?.gw || 1;
-        isLive    = false;
+        const latest = await sbFetch('gw_scores',
+          `season=eq.${encodeURIComponent(SEASON)}&select=gw&order=gw.desc&limit=1`);
+        currentGw = latest[0]?.gw || 1;
+        isLive = false;
       }
 
-      // All teams
-      const teams = await sbFetch(
-        'teams',
-        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id,manager,team_name`
-      );
+      // Teams (eligible only)
+      const teams = await sbFetch('teams',
+        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id,manager,team_name`);
 
-      // Latest GW scores for all teams
-      const scores = await sbFetch(
-        'gw_scores',
-        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*&order=cumulative_standing.asc`
-      );
+      // GW scores
+      const scores = await sbFetch('gw_scores',
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*`);
 
-      // Previous GW totals for standing change
+      // Previous GW for delta/prevTotal
       const prevScores = currentGw > 1
-        ? await sbFetch(
-            'gw_scores',
-            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw - 1}&select=team_id,cumulative_standing`
-          )
+        ? await sbFetch('gw_scores',
+            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw - 1}&select=team_id,cumulative_standing,anti_total`)
         : [];
 
-      // Team selections for current GW
-      const selections = await sbFetch(
-        'team_gw_selections',
-        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*`
-      );
+      // Selections for this GW
+      const selections = await sbFetch('team_gw_selections',
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*`);
 
-      // Collect all unique player IDs from all squads
-      const allPlayerIds = new Set();
-      selections.forEach(s => (s.squad || []).forEach(p => allPlayerIds.add(p)));
-      const playerIdList = [...allPlayerIds].join(',');
-
-      // Player GW scores for those players this GW
-      const playerScores = allPlayerIds.size
-        ? await sbFetch(
-            'player_gw_scores',
-            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&player_id=in.(${playerIdList})&select=*`
-          )
+      // Player IDs from squads → fetch their GW scores
+      const playerIds = new Set();
+      selections.forEach(s => (s.squad || []).forEach(pid => playerIds.add(pid)));
+      const playerScores = playerIds.size
+        ? await sbFetch('player_gw_scores',
+            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&player_id=in.(${[...playerIds].join(',')})&select=*`)
         : [];
 
-      // Player reference data (names, positions, club teams) from Supabase
-      if (!window.playerNames || !window.playerPositions) {
-        const allPlayers = await sbFetch(
-          'players',
-          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,team_name,team_id`
-        );
-        window.playerNames     = Object.fromEntries(allPlayers.map(p => [p.player_id, p.web_name]));
+      // Player reference data
+      if (!window.playerNames) {
+        const allPlayers = await sbFetch('players',
+          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short`);
+        window.playerNames = Object.fromEntries(allPlayers.map(p => [p.player_id, p.web_name]));
         window.playerPositions = Object.fromEntries(allPlayers.map(p => [p.player_id, p.position]));
-        window.playerTeams     = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_short]));
-        window.playerTeamIds   = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_id]));
+        window.playerTeams = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_short]));
       }
 
-      // Fixtures-dependent "players left" feature removed for now (CORS issue)
-      // Will be reinstated once fixtures are stored in Supabase
+      // Chips history per team
+      const tids = scores.map(s => s.team_id);
+      const chipsRows = tids.length
+        ? await sbFetch('gw_scores',
+            `season=eq.${encodeURIComponent(SEASON)}&team_id=in.(${tids.join(',')})&active_chip=neq.&select=team_id,gw,active_chip`)
+        : [];
+      const chipsByTeam = {};
+      chipsRows.forEach(r => {
+        if (!chipsByTeam[r.team_id]) chipsByTeam[r.team_id] = [];
+        chipsByTeam[r.team_id].push({ gw: r.gw, chip: r.active_chip });
+      });
 
       const prevStanding = Object.fromEntries(prevScores.map(r => [r.team_id, r.cumulative_standing]));
       const prevTotal    = Object.fromEntries(prevScores.map(r => [r.team_id, r.anti_total]));
@@ -606,42 +239,45 @@
       const selectionMap = Object.fromEntries(selections.map(s => [s.team_id, s]));
       const playerScoreMap = Object.fromEntries(playerScores.map(p => [p.player_id, p]));
 
-      // Fetch chips history for each team for the chip row display
-      const chipsByTeam = await fetchChipsByTeam(scores.map(s => s.team_id), currentGw);
-
       render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive,
              selectionMap, playerScoreMap, chipsByTeam);
       scheduleRefresh();
 
     } catch (err) {
+      console.error('loadData error:', err);
       showError(err.message);
     }
   }
 
-  // ── Chips history (which chips used so far this season per team) ──────────
-
-  async function fetchChipsByTeam(teamIds, currentGw) {
-    // Fetch from gw_scores — active_chip is stored per GW
-    const list = teamIds.join(',');
-    const rows = await sbFetch(
-      'gw_scores',
-      `season=eq.${encodeURIComponent(SEASON)}&team_id=in.(${list})&active_chip=neq.&select=team_id,gw,active_chip`
-    );
-    // Build {team_id: [{gw, chip}]}
-    const map = {};
-    rows.forEach(r => {
-      if (!map[r.team_id]) map[r.team_id] = [];
-      map[r.team_id].push({ gw: r.gw, chip: r.active_chip });
+  function buildChipsRow(usedChips, activeChip, currentGw) {
+    const chipOrder = ['wildcard', 'freehit', 'bboost', '3xc'];
+    const chipShort = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
+    const usedCount = {};
+    const activeThisGw = {};
+    usedChips.forEach(c => {
+      usedCount[c.chip] = (usedCount[c.chip] || 0) + 1;
+      if (c.gw === currentGw) activeThisGw[c.chip] = true;
     });
-    return map;
+    const items = [];
+    chipOrder.forEach(name => {
+      const used = usedCount[name] || 0;
+      const isActive = activeChip === name && activeThisGw[name];
+      for (let i = 1; i <= 2; i++) {
+        let cls;
+        if (i <= used && isActive && i === used) cls = 'chip-live';
+        else if (i <= used) cls = 'chip-used';
+        else cls = 'chip-avail';
+        items.push(`<span class="chip-pill ${cls}" title="${chipShort[name]}">${chipShort[name]}</span>`);
+      }
+    });
+    return `<div class="chips-row">${items.join('')}</div>`;
   }
 
-  // ── Render ─────────────────────────────────────────────────────────────────
+  function render(scores, teamInfo, prevStanding, prevTotal, gw, isLive,
+                  selectionMap, playerScoreMap, chipsByTeam) {
 
-  function render(scores, teamInfo, prevStanding, prevTotal, gw, isLive, selectionMap, playerScoreMap) {
     // Live badge
-    const badgeWrap = document.getElementById('live-badge-wrap');
-    badgeWrap.innerHTML = isLive
+    document.getElementById('live-badge-wrap').innerHTML = isLive
       ? `<div class="live-badge"><span class="live-dot"></span>LIVE · GW${gw}</div>`
       : `<div style="font-size:0.72rem;color:var(--muted)">GW${gw} · Final</div>`;
 
@@ -651,58 +287,83 @@
       `Updated ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
 
     // GW summary pills
-    const gwBar = document.getElementById('gw-bar');
-    const gwPts = scores.map(s => s.anti_gw_pts).filter(Boolean);
-    const best  = Math.min(...gwPts);
-    const worst = Math.max(...gwPts);
-    const avg   = gwPts.length ? Math.round(gwPts.reduce((a, b) => a + b, 0) / gwPts.length) : 0;
-    gwBar.innerHTML = `
+    const displayPts = scores.map(s => isLive ? (s.fpl_raw_pts ?? 0) : (s.anti_gw_pts ?? 0));
+    const best  = displayPts.length ? Math.min(...displayPts) : 0;
+    const worst = displayPts.length ? Math.max(...displayPts) : 0;
+    const avg   = displayPts.length ? Math.round(displayPts.reduce((a, b) => a + b, 0) / displayPts.length) : 0;
+    document.getElementById('gw-bar').innerHTML = `
       <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
       <div class="gw-pill"><strong>${scores.length}</strong>Teams</div>
       <div class="gw-pill"><strong>${best}</strong>Best GW score</div>
       <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
       <div class="gw-pill"><strong>${avg}</strong>GW average</div>
     `;
-
     document.getElementById('team-count').textContent =
-      `${scores.length} eligible team${scores.length !== 1 ? 's' : ''}`;
+      `${scores.length} eligible teams · click any row to expand squad`;
 
-    // Table
+    // Sort by displayed total ascending (lowest = best)
+    const sorted = [...scores].sort((a, b) => {
+      const aTot = isLive ? ((prevTotal[a.team_id] ?? 0) + (a.fpl_raw_pts ?? 0)) : (a.anti_total ?? 99999);
+      const bTot = isLive ? ((prevTotal[b.team_id] ?? 0) + (b.fpl_raw_pts ?? 0)) : (b.anti_total ?? 99999);
+      return aTot - bTot;
+    });
+
+    document.getElementById('pens-header').textContent = isLive ? 'Pending' : '+Pens';
+
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
 
-    // Live mode → pens are pending, not yet added to score
-    document.getElementById('pens-header').textContent = isLive ? 'Pending' : '+Pens';
-
-    scores.forEach((s, idx) => {
-      const info     = teamInfo[s.team_id] || {};
-      const pos      = s.cumulative_standing || idx + 1;
-      const prevPos  = prevStanding[s.team_id];
-      const move     = prevPos ? prevPos - pos : 0;
-      const chip     = s.active_chip ? CHIP_LABELS[s.active_chip] || s.active_chip.toUpperCase() : '';
-      const hasPens  = s.total_pens_gw > 0;
+    sorted.forEach((s, idx) => {
+      const info       = teamInfo[s.team_id] || {};
+      const pos        = idx + 1;
+      const prevPos    = prevStanding[s.team_id];
+      const move       = prevPos ? prevPos - pos : 0;
+      const activeChip = s.active_chip || '';
+      const hasPens    = s.total_pens_gw > 0;
       const isExpanded = expandedTeam === s.team_id;
-      const prevTot  = prevTotal[s.team_id];
+      const prevTot    = prevTotal[s.team_id];
 
-      // In live mode show GW score without pens (penalties only finalised at GW end)
-      const displayGwPts = isLive
-        ? (s.fpl_raw_pts ?? s.anti_gw_pts ?? '—')
-        : (s.anti_gw_pts ?? '—');
-      const displayTotal = isLive
-        ? (prevTot != null && s.fpl_raw_pts != null ? prevTot + s.fpl_raw_pts : s.anti_total ?? '—')
+      const displayGw = isLive ? (s.fpl_raw_pts ?? '—') : (s.anti_gw_pts ?? '—');
+      const displayTot = isLive
+        ? ((prevTot ?? 0) + (s.fpl_raw_pts ?? 0))
         : (s.anti_total ?? '—');
 
-      // Position change indicator (now handled above in the new sorted block)
-      const _unused_old_block = null;
+      const moveStr = move > 0
+        ? `<span style="color:var(--good);font-size:0.65rem"> ▲${move}</span>`
+        : move < 0
+        ? `<span style="color:var(--accent);font-size:0.65rem"> ▼${Math.abs(move)}</span>`
+        : '';
 
-      // Team row already created above — skip to detail row
-      // Detail row (hidden unless expanded)
-      const detailTr = document.createElement('tr');
-      detailTr.className = 'detail-row';
-      detailTr.dataset.detailFor = s.team_id;
-      detailTr.style.display = isExpanded ? '' : 'none';
+      const chipsHtml = buildChipsRow(chipsByTeam[s.team_id] || [], activeChip, gw);
 
-      // Squad section
+      // ── Team row ──
+      const tr = document.createElement('tr');
+      tr.className = `team-row${isExpanded ? ' expanded' : ''}`;
+      tr.dataset.teamId = s.team_id;
+      tr.innerHTML = `
+        <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
+        <td>
+          <div class="team-name">
+            <a href="https://fantasy.premierleague.com/entry/${s.team_id}/event/${gw}"
+               target="_blank" rel="noopener"
+               style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted)"
+               onclick="event.stopPropagation()">${info.team_name || s.team_id}</a>
+          </div>
+          <div class="manager-name">${info.manager || ''}</div>
+          ${chipsHtml}
+        </td>
+        <td class="r"><div class="gw-pts ${isLive ? 'live-score' : ''}">${displayGw}</div></td>
+        <td class="r">${hasPens
+          ? `<span class="${isLive ? 'pending-tag' : 'pen-tag'}">${isLive ? '⏳' : '+'}${s.total_pens_gw}</span>`
+          : '<span style="color:var(--muted)">—</span>'}</td>
+        <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">${prevTot ?? '—'}</td>
+        <td class="r total-pts">${displayTot}</td>
+        <td style="width:24px;text-align:center"><span class="chevron ${isExpanded ? 'open' : ''}">▾</span></td>
+      `;
+      tr.addEventListener('click', () => toggleExpand(s.team_id));
+      tbody.appendChild(tr);
+
+      // ── Detail row ──
       const selection = selectionMap[s.team_id];
       let squadHtml = '';
       if (selection?.squad?.length) {
@@ -720,12 +381,11 @@
           const pts       = p.base_pts != null ? p.base_pts : '—';
           const antiPts   = p.anti_pts != null ? p.anti_pts : '—';
           const mins      = p.minutes != null ? p.minutes : '—';
-          const isInactive = p.minutes === 0;
+          const inactive  = p.minutes === 0;
           return `
-            <div class="player-row ${isStarter ? '' : 'bench'} ${isInactive ? 'inactive' : ''}">
+            <div class="player-row ${isStarter ? '' : 'bench'} ${inactive ? 'inactive' : ''}">
               <span class="player-pos">${posShort || (isStarter ? i+1 : 'B')}</span>
-              <span class="player-name">
-                ${name}
+              <span class="player-name">${name}
                 ${club ? `<span class="player-club">${club}</span>` : ''}
                 ${tag ? `<span class="player-tag">${tag}</span>` : ''}
               </span>
@@ -746,9 +406,10 @@
         `;
       }
 
-      // Pen labels — say "pending" during live GW
       const penPrefix = isLive ? 'Pending: ' : '';
-
+      const detailTr = document.createElement('tr');
+      detailTr.className = 'detail-row';
+      detailTr.style.display = isExpanded ? '' : 'none';
       detailTr.innerHTML = `
         <td colspan="7">
           <div class="detail-inner">
@@ -760,9 +421,8 @@
             ${detailItem(penPrefix + 'Chip Pen', s.chip_pen_pts || 0, s.chip_pen_pts > 0)}
             ${detailItem('Bank', s.bank != null ? `£${(s.bank / 10).toFixed(1)}m` : '—', false, s.bank_pen)}
             ${detailItem('Inactive Players', s.inactive_count ?? '—')}
-            ${detailItem('Prev Total', prevTotal[s.team_id] ?? '—')}
-            ${detailItem(isLive ? 'Current Total (Live)' : 'Anti Total', displayTotal)}
-            ${detailItem('GW Rank', s.gw_rank ? `#${s.gw_rank}` : '—')}
+            ${detailItem('Prev Total', prevTot ?? '—')}
+            ${detailItem(isLive ? 'Current Total (Live)' : 'Anti Total', displayTot)}
             ${s.unused_chips?.length ? detailItem('Unused Chips', s.unused_chips.join(', '), true) : ''}
           </div>
           ${squadHtml}
@@ -776,58 +436,38 @@
   }
 
   function detailItem(label, value, isPen = false, isWarn = false) {
-    const cls = isPen ? 'pen' : isWarn ? 'pen' : value === 0 ? 'ok' : '';
-    return `
-      <div class="detail-item">
-        <span class="detail-label">${label}</span>
-        <span class="detail-value ${cls}">${value}</span>
-      </div>
-    `;
+    const cls = (isPen || isWarn) ? 'pen' : value === 0 ? 'ok' : '';
+    return `<div class="detail-item"><span class="detail-label">${label}</span><span class="detail-value ${cls}">${value}</span></div>`;
   }
 
-  function toggleExpand(score, info, isLive) {
-    const tid = score.team_id;
-    if (expandedTeam === tid) {
-      expandedTeam = null;
-    } else {
-      expandedTeam = tid;
-    }
-    // Re-render to update expanded state
+  function toggleExpand(teamId) {
+    expandedTeam = (expandedTeam === teamId) ? null : teamId;
     loadData();
   }
-
-  // ── Auto-refresh ───────────────────────────────────────────────────────────
 
   function scheduleRefresh() {
     clearTimeout(refreshTimer);
     clearInterval(countdownTimer);
     nextRefreshAt = Date.now() + REFRESH_MS;
-
     refreshTimer = setTimeout(loadData, REFRESH_MS);
-
     countdownTimer = setInterval(() => {
       const secs = Math.max(0, Math.round((nextRefreshAt - Date.now()) / 1000));
-      const mm   = String(Math.floor(secs / 60)).padStart(2, '0');
-      const ss   = String(secs % 60).padStart(2, '0');
+      const mm = String(Math.floor(secs / 60)).padStart(2, '0');
+      const ss = String(secs % 60).padStart(2, '0');
       document.getElementById('next-refresh').textContent = `Next refresh ${mm}:${ss}`;
       if (secs === 0) clearInterval(countdownTimer);
     }, 1000);
   }
 
-  // ── Error state ────────────────────────────────────────────────────────────
-
   function showError(msg) {
     document.getElementById('state-msg').innerHTML = `
-      <span class="big">⚠️</span>
-      Failed to load data<br>
-      <span style="font-size:0.75rem">${msg}</span><br><br>
-      <button class="refresh-btn" onclick="loadData()" style="margin:0 auto">Try again</button>
+      <span class="big">⚠️</span>Failed to load data<br>
+      <span style="font-size:0.75rem">${msg}</span>
     `;
-    document.getElementById('state-msg').style.display  = '';
+    document.getElementById('state-msg').style.display = '';
     document.getElementById('leaderboard').style.display = 'none';
   }
 
-  // ── Init ───────────────────────────────────────────────────────────────────
   loadData();
 </script>
 </body>
