@@ -1,0 +1,58 @@
+name: Update Anti-FPL Data
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+    - cron: '30 23 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: data-update
+  cancel-in-progress: false
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run fetch_data.py
+        run: python fetch_data.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          cp data.json /tmp/data.json
+          cp picks_cache.json /tmp/picks_cache.json
+
+          git fetch origin main
+          git reset --hard origin/main
+          git clean -fd
+
+          cp /tmp/data.json data.json
+          cp /tmp/picks_cache.json picks_cache.json
+
+          git add data.json picks_cache.json
+          if git diff --staged --quiet; then
+            echo "No changes"
+            exit 0
+          fi
+
+          git commit -m "chore: auto-update data.json [skip ci]"
+          git push
