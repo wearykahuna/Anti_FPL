@@ -156,7 +156,7 @@ def build_team_row(team_id: int, scored: list[dict], season: str) -> dict:
     }
 
 
-def build_gw_score_rows(team_id: int, scored: list[dict], season: str) -> list[dict]:
+def build_gw_score_rows(team_id: int, scored: list[dict], season: str, live_gw: int | None = None) -> list[dict]:
     rows = []
     for g in scored:
         rows.append({
@@ -186,7 +186,7 @@ def build_gw_score_rows(team_id: int, scored: list[dict], season: str) -> list[d
             "vice_element":        g.get("vice_element"),
             "vice_pts":            g.get("vice_pts"),
             "cumulative_standing": g.get("standing"),
-            "is_live":             g.get("live", False) or False,
+            "is_live":             g["gw"] == live_gw,
         })
     return rows
 
@@ -364,7 +364,7 @@ def main() -> None:
         team_rows.append(build_team_row(tid, scored, SEASON))
 
         # GW score rows
-        score_rows = build_gw_score_rows(tid, scored, SEASON)
+        score_rows = build_gw_score_rows(tid, scored, SEASON, live_gw)
         all_score_rows.extend(score_rows)
 
         # Selection rows — built from same picks_cache, no extra API calls
