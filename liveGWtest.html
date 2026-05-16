@@ -231,6 +231,12 @@
       font-family: var(--mono);
     }
 
+    .pending-tag {
+      font-size: 0.68rem;
+      color: var(--warn);
+      font-family: var(--mono);
+    }
+
     /* Live indicator on score */
     .live-score { color: var(--live); }
 
@@ -343,6 +349,14 @@
       margin-left: 4px;
     }
 
+    .player-club {
+      display: inline-block;
+      font-size: 0.6rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      margin-left: 4px;
+    }
+
     .player-mins, .player-pts, .player-anti {
       font-family: var(--mono);
       text-align: right;
@@ -420,7 +434,8 @@
         <th>#</th>
         <th>Team</th>
         <th class="r">GW</th>
-        <th class="r">+Pens</th>
+        <th class="r" id="pens-header">+Pens</th>
+        <th class="r">Prev Total</th>
         <th class="r">Total</th>
         <th class="r">FPL Rank</th>
         <th></th>
@@ -525,17 +540,24 @@
           )
         : [];
 
-      // Player names — fetched once from FPL bootstrap (cached in window for refreshes)
-      if (!window.playerNames) {
-        window.playerNames = await fetchPlayerNames();
+      // Player reference data (names, positions) from Supabase
+      if (!window.playerNames || !window.playerPositions) {
+        const allPlayers = await sbFetch(
+          'players',
+          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short`
+        );
+        window.playerNames     = Object.fromEntries(allPlayers.map(p => [p.player_id, p.web_name]));
+        window.playerPositions = Object.fromEntries(allPlayers.map(p => [p.player_id, p.position]));
+        window.playerTeams     = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_short]));
       }
 
       const prevStanding = Object.fromEntries(prevScores.map(r => [r.team_id, r.cumulative_standing]));
+      const prevTotal    = Object.fromEntries(prevScores.map(r => [r.team_id, r.anti_total]));
       const teamInfo     = Object.fromEntries(teams.map(t => [t.team_id, t]));
       const selectionMap = Object.fromEntries(selections.map(s => [s.team_id, s]));
       const playerScoreMap = Object.fromEntries(playerScores.map(p => [p.player_id, p]));
 
-      render(scores, teamInfo, prevStanding, currentGw, isLive, selectionMap, playerScoreMap);
+      render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive, selectionMap, playerScoreMap);
       scheduleRefresh();
 
     } catch (err) {
@@ -543,25 +565,11 @@
     }
   }
 
-  // Fetch player names from FPL bootstrap (proxied via Supabase since FPL has CORS issues)
-  // For now we use a fallback — player IDs only if names unavailable
-  async function fetchPlayerNames() {
-    try {
-      const r = await fetch('https://fantasy.premierleague.com/api/bootstrap-static/');
-      if (!r.ok) throw new Error('bootstrap fetch failed');
-      const data = await r.json();
-      return Object.fromEntries(
-        (data.elements || []).map(e => [e.id, e.web_name])
-      );
-    } catch (err) {
-      console.warn('Player names unavailable (CORS) — showing IDs', err);
-      return {};
-    }
-  }
+  // (player names now fetched from Supabase — no more CORS workaround needed)
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  function render(scores, teamInfo, prevStanding, gw, isLive, selectionMap, playerScoreMap) {
+  function render(scores, teamInfo, prevStanding, prevTotal, gw, isLive, selectionMap, playerScoreMap) {
     // Live badge
     const badgeWrap = document.getElementById('live-badge-wrap');
     badgeWrap.innerHTML = isLive
@@ -594,6 +602,9 @@
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
 
+    // Live mode → pens are pending, not yet added to score
+    document.getElementById('pens-header').textContent = isLive ? 'Pending' : '+Pens';
+
     scores.forEach((s, idx) => {
       const info     = teamInfo[s.team_id] || {};
       const pos      = s.cumulative_standing || idx + 1;
@@ -602,6 +613,15 @@
       const chip     = s.active_chip ? CHIP_LABELS[s.active_chip] || s.active_chip.toUpperCase() : '';
       const hasPens  = s.total_pens_gw > 0;
       const isExpanded = expandedTeam === s.team_id;
+      const prevTot  = prevTotal[s.team_id];
+
+      // In live mode show GW score without pens (penalties only finalised at GW end)
+      const displayGwPts = isLive
+        ? (s.fpl_raw_pts ?? s.anti_gw_pts ?? '—')
+        : (s.anti_gw_pts ?? '—');
+      const displayTotal = isLive
+        ? (prevTot != null && s.fpl_raw_pts != null ? prevTot + s.fpl_raw_pts : s.anti_total ?? '—')
+        : (s.anti_total ?? '—');
 
       // Position change indicator
       const moveStr = move > 0
@@ -627,12 +647,17 @@
           <div class="manager-name">${info.manager || ''}</div>
         </td>
         <td class="r">
-          <div class="gw-pts ${isLive ? 'live-score' : ''}">${s.anti_gw_pts ?? '—'}</div>
+          <div class="gw-pts ${isLive ? 'live-score' : ''}">${displayGwPts}</div>
         </td>
         <td class="r">
-          ${hasPens ? `<span class="pen-tag">+${s.total_pens_gw}</span>` : '<span style="color:var(--muted)">—</span>'}
+          ${hasPens
+            ? `<span class="${isLive ? 'pending-tag' : 'pen-tag'}">${isLive ? '⏳' : '+'}${s.total_pens_gw}</span>`
+            : '<span style="color:var(--muted)">—</span>'}
         </td>
-        <td class="r total-pts">${s.anti_total ?? '—'}</td>
+        <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">
+          ${prevTot ?? '—'}
+        </td>
+        <td class="r total-pts">${displayTotal}</td>
         <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">
           ${s.fpl_gw_rank ? '#' + s.fpl_gw_rank.toLocaleString() : '—'}
         </td>
@@ -661,6 +686,8 @@
           const isVice    = pid === viceId;
           const p         = playerScoreMap[pid] || {};
           const name      = (window.playerNames && window.playerNames[pid]) || `#${pid}`;
+          const posShort  = (window.playerPositions && window.playerPositions[pid]) || '';
+          const club      = (window.playerTeams && window.playerTeams[pid]) || '';
           const tag       = isCap ? '(C)' : isVice ? '(V)' : '';
           const pts       = p.base_pts != null ? p.base_pts : '—';
           const antiPts   = p.anti_pts != null ? p.anti_pts : '—';
@@ -668,8 +695,12 @@
           const isInactive = p.minutes === 0;
           return `
             <div class="player-row ${isStarter ? '' : 'bench'} ${isInactive ? 'inactive' : ''}">
-              <span class="player-pos">${isStarter ? i+1 : 'B'+(i-10)}</span>
-              <span class="player-name">${name} ${tag ? `<span class="player-tag">${tag}</span>` : ''}</span>
+              <span class="player-pos">${posShort || (isStarter ? i+1 : 'B')}</span>
+              <span class="player-name">
+                ${name}
+                ${club ? `<span class="player-club">${club}</span>` : ''}
+                ${tag ? `<span class="player-tag">${tag}</span>` : ''}
+              </span>
               <span class="player-mins">${mins}'</span>
               <span class="player-pts">${pts}</span>
               <span class="player-anti">${antiPts}</span>
@@ -687,18 +718,22 @@
         `;
       }
 
+      // Pen labels — say "pending" during live GW
+      const penPrefix = isLive ? 'Pending: ' : '';
+
       detailTr.innerHTML = `
-        <td colspan="7">
+        <td colspan="8">
           <div class="detail-inner">
             ${detailItem('FPL Raw', s.fpl_raw_pts ?? '—')}
-            ${detailItem('Transfer Hits', s.hit_pts || 0, s.hit_pts > 0)}
-            ${detailItem('Inactive Pen', s.inactive_pen_pts || 0, s.inactive_pen_pts > 0)}
-            ${detailItem('Bank Pen', s.bank_pen_pts || 0, s.bank_pen_pts > 0)}
-            ${detailItem('C/VC Pen', s.cvc_pen_pts || 0, s.cvc_pen_pts > 0)}
-            ${detailItem('Chip Pen', s.chip_pen_pts || 0, s.chip_pen_pts > 0)}
+            ${detailItem(penPrefix + 'Transfer Hits', s.hit_pts || 0, s.hit_pts > 0)}
+            ${detailItem(penPrefix + 'Inactive Pen', s.inactive_pen_pts || 0, s.inactive_pen_pts > 0)}
+            ${detailItem(penPrefix + 'Bank Pen', s.bank_pen_pts || 0, s.bank_pen_pts > 0)}
+            ${detailItem(penPrefix + 'C/VC Pen', s.cvc_pen_pts || 0, s.cvc_pen_pts > 0)}
+            ${detailItem(penPrefix + 'Chip Pen', s.chip_pen_pts || 0, s.chip_pen_pts > 0)}
             ${detailItem('Bank', s.bank != null ? `£${(s.bank / 10).toFixed(1)}m` : '—', false, s.bank_pen)}
             ${detailItem('Inactive Players', s.inactive_count ?? '—')}
-            ${detailItem('Anti Total', s.anti_total ?? '—')}
+            ${detailItem('Prev Total', prevTotal[s.team_id] ?? '—')}
+            ${detailItem(isLive ? 'Current Total (Live)' : 'Anti Total', displayTotal)}
             ${detailItem('GW Rank', s.gw_rank ? `#${s.gw_rank}` : '—')}
             ${s.unused_chips?.length ? detailItem('Unused Chips', s.unused_chips.join(', '), true) : ''}
           </div>

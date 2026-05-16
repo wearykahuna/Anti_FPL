@@ -33,7 +33,6 @@ from anti_fpl_scoring import (
     current_gw,
     score_team_season,
     split_chips_by_half,
-    build_player_type_map,
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -81,7 +80,8 @@ def reset_season(sb: SyncPostgrestClient, season: str) -> None:
     log.warning("Wiping all data for season %s ...", season)
     for tbl in (
         "gw_scores", "cup_fixtures", "mini_league_members",
-        "player_gw_scores", "team_gw_selections", "teams", "gameweeks",
+        "player_gw_scores", "team_gw_selections", "teams",
+        "players", "gameweeks",
     ):
         sb.from_(tbl).delete().eq("season", season).execute()
         log.info("  Cleared %s", tbl)
@@ -105,6 +105,27 @@ def upsert_in_batches(
 
 
 # ── Row builders ──────────────────────────────────────────────────────────────
+
+def build_player_rows(bootstrap: dict, season: str) -> list[dict]:
+    """Build reference rows for every FPL player from bootstrap data."""
+    teams_by_id = {t["id"]: t for t in bootstrap.get("teams", [])}
+    pos_map = {1: "GKP", 2: "DEF", 3: "MID", 4: "FWD"}
+    rows = []
+    for el in bootstrap.get("elements", []):
+        team = teams_by_id.get(el.get("team"), {})
+        rows.append({
+            "season":     season,
+            "player_id":  el["id"],
+            "web_name":   el.get("web_name", str(el["id"])),
+            "first_name": el.get("first_name"),
+            "last_name":  el.get("second_name"),
+            "position":   pos_map.get(el.get("element_type"), "?"),
+            "team_short": team.get("short_name"),
+            "team_name":  team.get("name"),
+            "now_cost":   el.get("now_cost"),
+        })
+    return rows
+
 
 def build_gameweek_rows(bootstrap: dict, season: str) -> list[dict]:
     rows = []
@@ -251,13 +272,16 @@ def main() -> None:
         log.error("Bootstrap fetch failed.")
         sys.exit(1)
 
-    last_gw     = current_gw(bootstrap)
-    finished    = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
-    player_type = build_player_type_map(bootstrap)
+    last_gw  = current_gw(bootstrap)
+    finished = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
     log.info("Last finished GW: %d", last_gw)
 
     # Upsert gameweeks
     upsert_in_batches(sb, "gameweeks", build_gameweek_rows(bootstrap, SEASON), "season,gw")
+
+    # Upsert players (reference table)
+    log.info("Upserting players reference table...")
+    upsert_in_batches(sb, "players", build_player_rows(bootstrap, SEASON), "season,player_id")
 
     # ── Team IDs ──────────────────────────────────────────────────────────────
     if args.team:
@@ -327,7 +351,6 @@ def main() -> None:
             pts_cache        = pts_cache,
             picks_cache      = picks_cache,
             last_gw          = last_gw,
-            player_type      = player_type,
             live_gw          = None if last_gw in finished else last_gw,
         )
 
