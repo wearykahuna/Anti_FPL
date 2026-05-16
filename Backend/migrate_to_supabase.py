@@ -30,9 +30,9 @@ from anti_fpl_scoring import (
     fetch_picks,
     fetch_team_history,
     get_all_team_ids_from_league,
-    current_gw,
     score_team_season,
     split_chips_by_half,
+    build_player_type_map,
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
