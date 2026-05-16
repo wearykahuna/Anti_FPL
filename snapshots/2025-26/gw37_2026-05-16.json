@@ -2,7 +2,7 @@
   "metadata": {
     "season": "2025/26",
     "gw": 37,
-    "generated_at": "2026-05-16T19:32:06.193079+00:00",
+    "generated_at": "2026-05-16T21:12:43.687589+00:00",
     "team_count": 10,
     "score_rows": 370
   },
@@ -14,10 +14,10 @@
       "manager": "Geraint Hooper",
       "team_name": "Sausage Roll FC",
       "fpl_joined_at": "2025-08-10T19:51:29.850734+00:00",
-      "anti_joined_at": "2026-05-16T19:30:17.697807+00:00",
+      "anti_joined_at": "2026-05-16T21:10:50.024656+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 32,
@@ -26,10 +26,10 @@
       "manager": "Curtis Williams",
       "team_name": "Stranger Mings",
       "fpl_joined_at": "2025-08-13T18:47:10.146891+00:00",
-      "anti_joined_at": "2026-05-16T19:30:29.428276+00:00",
+      "anti_joined_at": "2026-05-16T21:11:02.323598+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 33,
@@ -38,10 +38,10 @@
       "manager": "Andrew Morris",
       "team_name": "Expected Toulouse",
       "fpl_joined_at": "2025-08-13T16:05:03.528874+00:00",
-      "anti_joined_at": "2026-05-16T19:30:41.150518+00:00",
+      "anti_joined_at": "2026-05-16T21:11:14.614382+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 34,
@@ -50,10 +50,10 @@
       "manager": "JASON Farrugia",
       "team_name": "Losing Comes Easy",
       "fpl_joined_at": "2025-08-03T10:48:01.439884+00:00",
-      "anti_joined_at": "2026-05-16T19:30:52.875182+00:00",
+      "anti_joined_at": "2026-05-16T21:11:26.899801+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 35,
@@ -62,10 +62,10 @@
       "manager": "Huw Jones",
       "team_name": "The Pear Tree Pub",
       "fpl_joined_at": "2025-08-10T20:25:27.045871+00:00",
-      "anti_joined_at": "2026-05-16T19:31:04.596057+00:00",
+      "anti_joined_at": "2026-05-16T21:11:39.200019+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 36,
@@ -74,10 +74,10 @@
       "manager": "Richard Owen",
       "team_name": "Cunha Afford Him",
       "fpl_joined_at": "2025-08-13T17:36:39.285633+00:00",
-      "anti_joined_at": "2026-05-16T19:31:16.30561+00:00",
+      "anti_joined_at": "2026-05-16T21:11:51.499142+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 37,
@@ -86,10 +86,10 @@
       "manager": "Ellison Griffiths",
       "team_name": "Funny loser!",
       "fpl_joined_at": "2025-08-14T20:15:17.071278+00:00",
-      "anti_joined_at": "2026-05-16T19:31:28.046846+00:00",
+      "anti_joined_at": "2026-05-16T21:12:03.792183+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 38,
@@ -98,10 +98,10 @@
       "manager": "Joe Stout",
       "team_name": "Utter Tripe",
       "fpl_joined_at": "2025-07-23T19:29:24.472419+00:00",
-      "anti_joined_at": "2026-05-16T19:31:39.792684+00:00",
+      "anti_joined_at": "2026-05-16T21:12:16.086765+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 39,
@@ -110,10 +110,10 @@
       "manager": "James Elgar",
       "team_name": "Saka on Wood",
       "fpl_joined_at": "2025-07-31T10:23:11.823341+00:00",
-      "anti_joined_at": "2026-05-16T19:31:51.513667+00:00",
+      "anti_joined_at": "2026-05-16T21:12:28.38753+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     },
     {
       "id": 40,
@@ -122,574 +122,13 @@
       "manager": "ross farrugia",
       "team_name": "Man Utd’s dream XI",
       "fpl_joined_at": "2025-07-22T06:31:52.500825+00:00",
-      "anti_joined_at": "2026-05-16T19:32:03.23352+00:00",
+      "anti_joined_at": "2026-05-16T21:12:40.668021+00:00",
       "eligible": true,
       "created_at": "2026-05-16T12:54:07.667404+00:00",
-      "updated_at": "2026-05-16T19:32:04.083336+00:00"
+      "updated_at": "2026-05-16T21:12:41.610087+00:00"
     }
   ],
   "gw_scores": [
-    {
-      "id": 1101,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 1,
-      "fpl_raw_pts": 46,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 6908104,
-      "fpl_total": 46,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 25,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 46,
-      "anti_total": 46,
-      "captain_element": 188,
-      "captain_mult": 1,
-      "captain_pts": 0,
-      "vice_element": 544,
-      "vice_pts": 3,
-      "gw_rank": 5,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1102,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 2,
-      "fpl_raw_pts": 29,
-      "fpl_xfer_cost": 4,
-      "fpl_gw_rank": 10352283,
-      "fpl_total": 71,
-      "active_chip": "",
-      "hit_pts": 4,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 10,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 4,
-      "anti_gw_pts": 33,
-      "anti_total": 79,
-      "captain_element": 605,
-      "captain_mult": 2,
-      "captain_pts": 0,
-      "vice_element": 343,
-      "vice_pts": 0,
-      "gw_rank": 5,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1103,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 3,
-      "fpl_raw_pts": 47,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 5910309,
-      "fpl_total": 118,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 5,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 47,
-      "anti_total": 126,
-      "captain_element": 317,
-      "captain_mult": 2,
-      "captain_pts": 6,
-      "vice_element": 343,
-      "vice_pts": 6,
-      "gw_rank": 10,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1104,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 4,
-      "fpl_raw_pts": 46,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 10496948,
-      "fpl_total": 164,
-      "active_chip": "wildcard",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 28,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 46,
-      "anti_total": 172,
-      "captain_element": 192,
-      "captain_mult": 2,
-      "captain_pts": 8,
-      "vice_element": 205,
-      "vice_pts": 3,
-      "gw_rank": 8,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1105,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 5,
-      "fpl_raw_pts": 47,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 4067237,
-      "fpl_total": 211,
-      "active_chip": "bboost",
-      "hit_pts": 0,
-      "inactive_count": 2,
-      "inactive_pen_pts": 18,
-      "bank": 28,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 18,
-      "anti_gw_pts": 65,
-      "anti_total": 237,
-      "captain_element": 681,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 605,
-      "vice_pts": 2,
-      "gw_rank": 10,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1106,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 6,
-      "fpl_raw_pts": 49,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 5105340,
-      "fpl_total": 260,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 28,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 49,
-      "anti_total": 286,
-      "captain_element": 681,
-      "captain_mult": 2,
-      "captain_pts": 16,
-      "vice_element": 605,
-      "vice_pts": 3,
-      "gw_rank": 10,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1107,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 7,
-      "fpl_raw_pts": 33,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 11511967,
-      "fpl_total": 293,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 20,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 33,
-      "anti_total": 319,
-      "captain_element": 605,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 603,
-      "vice_pts": 3,
-      "gw_rank": 6,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1108,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 8,
-      "fpl_raw_pts": 28,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 11763625,
-      "fpl_total": 321,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 29,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 28,
-      "anti_total": 347,
-      "captain_element": 318,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 314,
-      "vice_pts": 3,
-      "gw_rank": 2,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1109,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 9,
-      "fpl_raw_pts": 31,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 11275031,
-      "fpl_total": 352,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 29,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 31,
-      "anti_total": 378,
-      "captain_element": 318,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 314,
-      "vice_pts": 2,
-      "gw_rank": 3,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1110,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 10,
-      "fpl_raw_pts": 22,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 12250060,
-      "fpl_total": 374,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 22,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 22,
-      "anti_total": 400,
-      "captain_element": 192,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 205,
-      "vice_pts": 1,
-      "gw_rank": 5,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1111,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 11,
-      "fpl_raw_pts": 23,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 11917133,
-      "fpl_total": 397,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 22,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 23,
-      "anti_total": 423,
-      "captain_element": 634,
-      "captain_mult": 1,
-      "captain_pts": 0,
-      "vice_element": 643,
-      "vice_pts": 1,
-      "gw_rank": 3,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1112,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 12,
-      "fpl_raw_pts": 34,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 7970988,
-      "fpl_total": 431,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 18,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 34,
-      "anti_total": 457,
-      "captain_element": 192,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 205,
-      "vice_pts": 2,
-      "gw_rank": 6,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1113,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 13,
-      "fpl_raw_pts": 37,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 5131318,
-      "fpl_total": 468,
-      "active_chip": "3xc",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 17,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 37,
-      "anti_total": 494,
-      "captain_element": 343,
-      "captain_mult": 3,
-      "captain_pts": 9,
-      "vice_element": 605,
-      "vice_pts": 0,
-      "gw_rank": 9,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1114,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 14,
-      "fpl_raw_pts": 40,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 10551733,
-      "fpl_total": 508,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 17,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 40,
-      "anti_total": 534,
-      "captain_element": 343,
-      "captain_mult": 2,
-      "captain_pts": 4,
-      "vice_element": 314,
-      "vice_pts": 0,
-      "gw_rank": 7,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1115,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 15,
-      "fpl_raw_pts": 29,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 11903840,
-      "fpl_total": 537,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 16,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 29,
-      "anti_total": 563,
-      "captain_element": 343,
-      "captain_mult": 2,
-      "captain_pts": 0,
-      "vice_element": 314,
-      "vice_pts": 2,
-      "gw_rank": 10,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1116,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 16,
-      "fpl_raw_pts": 56,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 7696744,
-      "fpl_total": 593,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 13,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 56,
-      "anti_total": 619,
-      "captain_element": 637,
-      "captain_mult": 2,
-      "captain_pts": 8,
-      "vice_element": 605,
-      "vice_pts": 0,
-      "gw_rank": 10,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1117,
-      "season": "2025/26",
-      "team_id": 5388975,
-      "gw": 17,
-      "fpl_raw_pts": 39,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 11590104,
-      "fpl_total": 632,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 5,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 39,
-      "anti_total": 658,
-      "captain_element": 609,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 291,
-      "vice_pts": 3,
-      "gw_rank": 8,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
     {
       "id": 1118,
       "season": "2025/26",
@@ -721,7 +160,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1119,
@@ -754,7 +193,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1120,
@@ -787,7 +226,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1121,
@@ -820,7 +259,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1122,
@@ -853,7 +292,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1123,
@@ -886,7 +325,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1124,
@@ -919,7 +358,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1125,
@@ -952,7 +391,568 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1101,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 1,
+      "fpl_raw_pts": 46,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 6908104,
+      "fpl_total": 46,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 25,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 46,
+      "anti_total": 46,
+      "captain_element": 188,
+      "captain_mult": 1,
+      "captain_pts": 0,
+      "vice_element": 544,
+      "vice_pts": 3,
+      "gw_rank": 5,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1102,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 2,
+      "fpl_raw_pts": 29,
+      "fpl_xfer_cost": 4,
+      "fpl_gw_rank": 10352283,
+      "fpl_total": 71,
+      "active_chip": "",
+      "hit_pts": 4,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 10,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 4,
+      "anti_gw_pts": 33,
+      "anti_total": 79,
+      "captain_element": 605,
+      "captain_mult": 2,
+      "captain_pts": 0,
+      "vice_element": 343,
+      "vice_pts": 0,
+      "gw_rank": 5,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1103,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 3,
+      "fpl_raw_pts": 47,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 5910309,
+      "fpl_total": 118,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 5,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 47,
+      "anti_total": 126,
+      "captain_element": 317,
+      "captain_mult": 2,
+      "captain_pts": 6,
+      "vice_element": 343,
+      "vice_pts": 6,
+      "gw_rank": 10,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1104,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 4,
+      "fpl_raw_pts": 46,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 10496948,
+      "fpl_total": 164,
+      "active_chip": "wildcard",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 28,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 46,
+      "anti_total": 172,
+      "captain_element": 192,
+      "captain_mult": 2,
+      "captain_pts": 8,
+      "vice_element": 205,
+      "vice_pts": 3,
+      "gw_rank": 8,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1105,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 5,
+      "fpl_raw_pts": 47,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 4067237,
+      "fpl_total": 211,
+      "active_chip": "bboost",
+      "hit_pts": 0,
+      "inactive_count": 2,
+      "inactive_pen_pts": 18,
+      "bank": 28,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 18,
+      "anti_gw_pts": 65,
+      "anti_total": 237,
+      "captain_element": 681,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 605,
+      "vice_pts": 2,
+      "gw_rank": 10,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1106,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 6,
+      "fpl_raw_pts": 49,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 5105340,
+      "fpl_total": 260,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 28,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 49,
+      "anti_total": 286,
+      "captain_element": 681,
+      "captain_mult": 2,
+      "captain_pts": 16,
+      "vice_element": 605,
+      "vice_pts": 3,
+      "gw_rank": 10,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1107,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 7,
+      "fpl_raw_pts": 33,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 11511967,
+      "fpl_total": 293,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 20,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 33,
+      "anti_total": 319,
+      "captain_element": 605,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 603,
+      "vice_pts": 3,
+      "gw_rank": 6,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1108,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 8,
+      "fpl_raw_pts": 28,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 11763625,
+      "fpl_total": 321,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 29,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 28,
+      "anti_total": 347,
+      "captain_element": 318,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 314,
+      "vice_pts": 3,
+      "gw_rank": 2,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1109,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 9,
+      "fpl_raw_pts": 31,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 11275031,
+      "fpl_total": 352,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 29,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 31,
+      "anti_total": 378,
+      "captain_element": 318,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 314,
+      "vice_pts": 2,
+      "gw_rank": 3,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1110,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 10,
+      "fpl_raw_pts": 22,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 12250060,
+      "fpl_total": 374,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 22,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 22,
+      "anti_total": 400,
+      "captain_element": 192,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 205,
+      "vice_pts": 1,
+      "gw_rank": 5,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1111,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 11,
+      "fpl_raw_pts": 23,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 11917133,
+      "fpl_total": 397,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 22,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 23,
+      "anti_total": 423,
+      "captain_element": 634,
+      "captain_mult": 1,
+      "captain_pts": 0,
+      "vice_element": 643,
+      "vice_pts": 1,
+      "gw_rank": 3,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1112,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 12,
+      "fpl_raw_pts": 34,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 7970988,
+      "fpl_total": 431,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 18,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 34,
+      "anti_total": 457,
+      "captain_element": 192,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 205,
+      "vice_pts": 2,
+      "gw_rank": 6,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1113,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 13,
+      "fpl_raw_pts": 37,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 5131318,
+      "fpl_total": 468,
+      "active_chip": "3xc",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 17,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 37,
+      "anti_total": 494,
+      "captain_element": 343,
+      "captain_mult": 3,
+      "captain_pts": 9,
+      "vice_element": 605,
+      "vice_pts": 0,
+      "gw_rank": 9,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1114,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 14,
+      "fpl_raw_pts": 40,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 10551733,
+      "fpl_total": 508,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 17,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 40,
+      "anti_total": 534,
+      "captain_element": 343,
+      "captain_mult": 2,
+      "captain_pts": 4,
+      "vice_element": 314,
+      "vice_pts": 0,
+      "gw_rank": 7,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1115,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 15,
+      "fpl_raw_pts": 29,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 11903840,
+      "fpl_total": 537,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 16,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 29,
+      "anti_total": 563,
+      "captain_element": 343,
+      "captain_mult": 2,
+      "captain_pts": 0,
+      "vice_element": 314,
+      "vice_pts": 2,
+      "gw_rank": 10,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1116,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 16,
+      "fpl_raw_pts": 56,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 7696744,
+      "fpl_total": 593,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 13,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 56,
+      "anti_total": 619,
+      "captain_element": 637,
+      "captain_mult": 2,
+      "captain_pts": 8,
+      "vice_element": 605,
+      "vice_pts": 0,
+      "gw_rank": 10,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1117,
+      "season": "2025/26",
+      "team_id": 5388975,
+      "gw": 17,
+      "fpl_raw_pts": 39,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 11590104,
+      "fpl_total": 632,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 5,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 39,
+      "anti_total": 658,
+      "captain_element": 609,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 291,
+      "vice_pts": 3,
+      "gw_rank": 8,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1126,
@@ -985,7 +985,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1127,
@@ -1018,7 +1018,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1128,
@@ -1051,7 +1051,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1129,
@@ -1084,7 +1084,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1130,
@@ -1117,7 +1117,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1131,
@@ -1150,7 +1150,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1132,
@@ -1183,7 +1183,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1133,
@@ -1216,7 +1216,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1134,
@@ -1249,7 +1249,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1135,
@@ -1282,7 +1282,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1136,
@@ -1315,7 +1315,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1137,
@@ -1328,27 +1328,27 @@
       "fpl_total": 1354,
       "active_chip": "",
       "hit_pts": 0,
-      "inactive_count": 11,
-      "inactive_pen_pts": 99,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 25,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 114,
-      "anti_gw_pts": 114,
-      "anti_total": 1602,
+      "total_pens_gw": 0,
+      "anti_gw_pts": 0,
+      "anti_total": 1488,
       "captain_element": 90,
       "captain_mult": 2,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 815,
-      "vice_pts": null,
+      "vice_pts": 0,
       "gw_rank": 1,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1138,
@@ -1381,7 +1381,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1139,
@@ -1414,7 +1414,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1140,
@@ -1447,7 +1447,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1141,
@@ -1480,7 +1480,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1142,
@@ -1513,7 +1513,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1143,
@@ -1546,7 +1546,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1144,
@@ -1579,7 +1579,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1145,
@@ -1612,7 +1612,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1146,
@@ -1645,7 +1645,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1147,
@@ -1678,7 +1678,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1148,
@@ -1711,7 +1711,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1149,
@@ -1744,7 +1744,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1150,
@@ -1777,7 +1777,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1151,
@@ -1810,7 +1810,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1152,
@@ -1843,7 +1843,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1153,
@@ -1876,7 +1876,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1154,
@@ -1909,7 +1909,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1155,
@@ -1942,7 +1942,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1156,
@@ -1975,7 +1975,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1157,
@@ -2008,7 +2008,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1158,
@@ -2041,7 +2041,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1159,
@@ -2074,7 +2074,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1160,
@@ -2107,7 +2107,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1161,
@@ -2140,7 +2140,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1162,
@@ -2173,7 +2173,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1163,
@@ -2206,7 +2206,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1164,
@@ -2239,7 +2239,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1165,
@@ -2272,7 +2272,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1166,
@@ -2305,7 +2305,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1167,
@@ -2338,7 +2338,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1168,
@@ -2371,7 +2371,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1169,
@@ -2404,7 +2404,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1170,
@@ -2437,7 +2437,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1171,
@@ -2470,7 +2470,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1172,
@@ -2503,7 +2503,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1173,
@@ -2536,7 +2536,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1174,
@@ -2549,27 +2549,27 @@
       "fpl_total": 1384,
       "active_chip": "bboost",
       "hit_pts": 0,
-      "inactive_count": 15,
-      "inactive_pen_pts": 135,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 20,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 150,
-      "anti_gw_pts": 150,
-      "anti_total": 1576,
+      "total_pens_gw": 0,
+      "anti_gw_pts": 0,
+      "anti_total": 1426,
       "captain_element": 643,
       "captain_mult": 2,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 633,
-      "vice_pts": null,
-      "gw_rank": 8,
+      "vice_pts": 0,
+      "gw_rank": 2,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1175,
@@ -2602,7 +2602,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1176,
@@ -2635,7 +2635,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1177,
@@ -2668,7 +2668,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1178,
@@ -2701,7 +2701,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1179,
@@ -2734,7 +2734,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1180,
@@ -2767,7 +2767,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1181,
@@ -2800,7 +2800,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1182,
@@ -2833,7 +2833,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1183,
@@ -2866,7 +2866,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1184,
@@ -2899,7 +2899,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1185,
@@ -2932,7 +2932,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1186,
@@ -2965,7 +2965,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1187,
@@ -2998,7 +2998,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1188,
@@ -3031,7 +3031,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1189,
@@ -3064,7 +3064,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1190,
@@ -3097,7 +3097,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1191,
@@ -3130,7 +3130,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1192,
@@ -3163,7 +3163,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1193,
@@ -3196,7 +3196,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1194,
@@ -3229,7 +3229,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1195,
@@ -3262,7 +3262,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1196,
@@ -3295,7 +3295,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1197,
@@ -3328,7 +3328,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1198,
@@ -3361,7 +3361,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1199,
@@ -3394,7 +3394,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1200,
@@ -3427,7 +3427,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1201,
@@ -3460,7 +3460,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1202,
@@ -3493,7 +3493,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1203,
@@ -3526,7 +3526,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1204,
@@ -3559,7 +3559,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1205,
@@ -3592,7 +3592,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1206,
@@ -3625,7 +3625,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1207,
@@ -3658,7 +3658,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1208,
@@ -3691,7 +3691,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1209,
@@ -3724,7 +3724,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1210,
@@ -3757,7 +3757,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1211,
@@ -3770,27 +3770,27 @@
       "fpl_total": 1312,
       "active_chip": "",
       "hit_pts": 0,
-      "inactive_count": 11,
-      "inactive_pen_pts": 99,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 9,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 114,
-      "anti_gw_pts": 114,
-      "anti_total": 1555,
+      "total_pens_gw": 0,
+      "anti_gw_pts": 0,
+      "anti_total": 1441,
       "captain_element": 120,
       "captain_mult": 2,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 727,
-      "vice_pts": null,
-      "gw_rank": 2,
+      "vice_pts": 0,
+      "gw_rank": 3,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1212,
@@ -3823,7 +3823,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1213,
@@ -3856,7 +3856,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1214,
@@ -3889,7 +3889,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1215,
@@ -3922,7 +3922,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1216,
@@ -3955,7 +3955,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1217,
@@ -3988,7 +3988,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1218,
@@ -4021,7 +4021,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1219,
@@ -4054,7 +4054,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1220,
@@ -4087,7 +4087,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1221,
@@ -4120,7 +4120,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1222,
@@ -4153,7 +4153,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1223,
@@ -4186,7 +4186,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1224,
@@ -4219,7 +4219,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1225,
@@ -4252,7 +4252,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1226,
@@ -4285,7 +4285,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1227,
@@ -4318,7 +4318,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1228,
@@ -4351,7 +4351,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1229,
@@ -4384,7 +4384,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1230,
@@ -4417,7 +4417,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1231,
@@ -4450,7 +4450,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1232,
@@ -4483,7 +4483,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1233,
@@ -4516,7 +4516,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1234,
@@ -4549,7 +4549,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1235,
@@ -4582,7 +4582,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1236,
@@ -4615,7 +4615,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1237,
@@ -4648,7 +4648,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1238,
@@ -4681,7 +4681,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1239,
@@ -4714,7 +4714,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1240,
@@ -4747,7 +4747,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1241,
@@ -4780,7 +4780,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1242,
@@ -4813,7 +4813,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1243,
@@ -4846,7 +4846,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1244,
@@ -4879,7 +4879,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1245,
@@ -4912,7 +4912,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1246,
@@ -4945,7 +4945,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1247,
@@ -4978,7 +4978,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1248,
@@ -4991,27 +4991,27 @@
       "fpl_total": 1245,
       "active_chip": "bboost",
       "hit_pts": 4,
-      "inactive_count": 15,
-      "inactive_pen_pts": 135,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 14,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 154,
-      "anti_gw_pts": 157,
-      "anti_total": 1515,
+      "total_pens_gw": 4,
+      "anti_gw_pts": 7,
+      "anti_total": 1365,
       "captain_element": 187,
       "captain_mult": 2,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 191,
-      "vice_pts": null,
-      "gw_rank": 10,
+      "vice_pts": 0,
+      "gw_rank": 9,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1249,
@@ -5044,7 +5044,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1250,
@@ -5077,7 +5077,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1251,
@@ -5110,7 +5110,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1252,
@@ -5143,7 +5143,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1253,
@@ -5176,7 +5176,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1254,
@@ -5209,7 +5209,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1255,
@@ -5242,7 +5242,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1256,
@@ -5275,7 +5275,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1257,
@@ -5308,7 +5308,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1258,
@@ -5341,7 +5341,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1259,
@@ -5374,7 +5374,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1260,
@@ -5407,7 +5407,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1261,
@@ -5440,7 +5440,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1262,
@@ -5473,7 +5473,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1263,
@@ -5506,7 +5506,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1264,
@@ -5539,7 +5539,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1265,
@@ -5572,7 +5572,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1266,
@@ -5605,7 +5605,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1267,
@@ -5638,7 +5638,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1268,
@@ -5671,7 +5671,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1269,
@@ -5704,7 +5704,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1270,
@@ -5737,7 +5737,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1271,
@@ -5770,7 +5770,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1272,
@@ -5803,7 +5803,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1273,
@@ -5836,7 +5836,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1274,
@@ -5869,7 +5869,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1275,
@@ -5902,7 +5902,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1276,
@@ -5935,7 +5935,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1277,
@@ -5968,7 +5968,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1278,
@@ -6001,7 +6001,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1279,
@@ -6034,7 +6034,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1280,
@@ -6067,7 +6067,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1281,
@@ -6100,7 +6100,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1282,
@@ -6133,7 +6133,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1283,
@@ -6166,7 +6166,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1284,
@@ -6199,7 +6199,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1285,
@@ -6212,27 +6212,27 @@
       "fpl_total": 1267,
       "active_chip": "",
       "hit_pts": 4,
-      "inactive_count": 11,
-      "inactive_pen_pts": 99,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 29,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 118,
-      "anti_gw_pts": 122,
-      "anti_total": 1473,
+      "total_pens_gw": 4,
+      "anti_gw_pts": 8,
+      "anti_total": 1359,
       "captain_element": 695,
       "captain_mult": 2,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 386,
-      "vice_pts": null,
-      "gw_rank": 7,
+      "vice_pts": 4,
+      "gw_rank": 10,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1286,
@@ -6265,7 +6265,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1287,
@@ -6298,7 +6298,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1288,
@@ -6331,7 +6331,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1289,
@@ -6364,7 +6364,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1290,
@@ -6397,7 +6397,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1291,
@@ -6430,7 +6430,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1292,
@@ -6463,7 +6463,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1293,
@@ -6496,7 +6496,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1294,
@@ -6529,7 +6529,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1295,
@@ -6562,7 +6562,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1296,
@@ -6595,7 +6595,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1297,
@@ -6628,7 +6628,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1298,
@@ -6661,7 +6661,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1299,
@@ -6694,7 +6694,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1300,
@@ -6727,7 +6727,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1301,
@@ -6760,7 +6760,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1302,
@@ -6793,7 +6793,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1303,
@@ -6826,7 +6826,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1304,
@@ -6859,7 +6859,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1305,
@@ -6892,7 +6892,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1306,
@@ -6925,7 +6925,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1307,
@@ -6958,7 +6958,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1308,
@@ -6991,7 +6991,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1309,
@@ -7024,7 +7024,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1310,
@@ -7057,7 +7057,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1311,
@@ -7090,7 +7090,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1312,
@@ -7123,7 +7123,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1313,
@@ -7156,7 +7156,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1314,
@@ -7189,7 +7189,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1315,
@@ -7222,7 +7222,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1316,
@@ -7255,7 +7255,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1317,
@@ -7288,7 +7288,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1318,
@@ -7321,7 +7321,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1319,
@@ -7354,7 +7354,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1320,
@@ -7387,7 +7387,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1321,
@@ -7420,7 +7420,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1322,
@@ -7433,27 +7433,27 @@
       "fpl_total": 1278,
       "active_chip": "",
       "hit_pts": 4,
-      "inactive_count": 11,
-      "inactive_pen_pts": 99,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 23,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 118,
-      "anti_gw_pts": 119,
-      "anti_total": 1466,
+      "total_pens_gw": 4,
+      "anti_gw_pts": 5,
+      "anti_total": 1352,
       "captain_element": 261,
       "captain_mult": 2,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 38,
-      "vice_pts": null,
-      "gw_rank": 6,
+      "vice_pts": 1,
+      "gw_rank": 8,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1323,
@@ -7486,7 +7486,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1324,
@@ -7519,7 +7519,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1325,
@@ -7552,7 +7552,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1326,
@@ -7585,7 +7585,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1327,
@@ -7618,7 +7618,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1328,
@@ -7651,7 +7651,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1329,
@@ -7684,7 +7684,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1330,
@@ -7717,7 +7717,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1331,
@@ -7750,7 +7750,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1332,
@@ -7783,7 +7783,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1333,
@@ -7816,7 +7816,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1334,
@@ -7849,7 +7849,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1335,
@@ -7882,7 +7882,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1336,
@@ -7915,7 +7915,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1337,
@@ -7948,7 +7948,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1338,
@@ -7981,7 +7981,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1339,
@@ -8014,7 +8014,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1340,
@@ -8047,7 +8047,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1341,
@@ -8080,7 +8080,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1342,
@@ -8113,7 +8113,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1343,
@@ -8146,7 +8146,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1344,
@@ -8179,7 +8179,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1345,
@@ -8212,7 +8212,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1346,
@@ -8245,7 +8245,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1347,
@@ -8278,7 +8278,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1348,
@@ -8311,7 +8311,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1349,
@@ -8344,7 +8344,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1350,
@@ -8377,7 +8377,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1351,
@@ -8410,7 +8410,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1352,
@@ -8443,7 +8443,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1353,
@@ -8476,7 +8476,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1354,
@@ -8509,7 +8509,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1355,
@@ -8542,7 +8542,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1356,
@@ -8575,7 +8575,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1357,
@@ -8608,7 +8608,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1358,
@@ -8641,7 +8641,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1359,
@@ -8654,27 +8654,27 @@
       "fpl_total": 1240,
       "active_chip": "bboost",
       "hit_pts": 0,
-      "inactive_count": 15,
-      "inactive_pen_pts": 135,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 25,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 150,
-      "anti_gw_pts": 150,
-      "anti_total": 1476,
+      "total_pens_gw": 0,
+      "anti_gw_pts": 0,
+      "anti_total": 1326,
       "captain_element": 187,
       "captain_mult": 2,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 708,
-      "vice_pts": null,
-      "gw_rank": 9,
+      "vice_pts": 0,
+      "gw_rank": 4,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1360,
@@ -8707,7 +8707,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1361,
@@ -8740,7 +8740,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1362,
@@ -8773,7 +8773,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1363,
@@ -8806,7 +8806,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1364,
@@ -8839,7 +8839,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1365,
@@ -8872,7 +8872,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1366,
@@ -8905,7 +8905,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1367,
@@ -8938,7 +8938,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1368,
@@ -8971,7 +8971,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1369,
@@ -9004,7 +9004,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1370,
@@ -9037,7 +9037,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1371,
@@ -9070,7 +9070,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1372,
@@ -9103,7 +9103,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1373,
@@ -9136,7 +9136,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1374,
@@ -9169,7 +9169,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1375,
@@ -9202,7 +9202,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1376,
@@ -9235,7 +9235,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1377,
@@ -9268,7 +9268,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1378,
@@ -9301,7 +9301,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1379,
@@ -9334,7 +9334,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1380,
@@ -9367,7 +9367,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1381,
@@ -9400,7 +9400,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1382,
@@ -9433,7 +9433,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1383,
@@ -9466,7 +9466,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1384,
@@ -9499,7 +9499,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1385,
@@ -9532,7 +9532,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1386,
@@ -9565,7 +9565,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1387,
@@ -9598,7 +9598,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1388,
@@ -9631,7 +9631,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1389,
@@ -9664,7 +9664,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1390,
@@ -9697,7 +9697,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1391,
@@ -9730,7 +9730,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1392,
@@ -9763,7 +9763,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1393,
@@ -9796,7 +9796,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1394,
@@ -9829,7 +9829,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1395,
@@ -9862,7 +9862,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1396,
@@ -9875,27 +9875,27 @@
       "fpl_total": 1208,
       "active_chip": "3xc",
       "hit_pts": 0,
-      "inactive_count": 11,
-      "inactive_pen_pts": 99,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 27,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 114,
-      "anti_gw_pts": 118,
-      "anti_total": 1357,
+      "total_pens_gw": 0,
+      "anti_gw_pts": 4,
+      "anti_total": 1243,
       "captain_element": 187,
       "captain_mult": 3,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 726,
-      "vice_pts": null,
-      "gw_rank": 5,
+      "vice_pts": 0,
+      "gw_rank": 7,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1397,
@@ -9928,7 +9928,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1398,
@@ -9961,7 +9961,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1399,
@@ -9994,7 +9994,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1400,
@@ -10027,7 +10027,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1401,
@@ -10060,7 +10060,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1402,
@@ -10093,7 +10093,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1403,
@@ -10126,7 +10126,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1404,
@@ -10159,7 +10159,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1405,
@@ -10192,7 +10192,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1406,
@@ -10225,7 +10225,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1407,
@@ -10258,7 +10258,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1408,
@@ -10291,7 +10291,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1409,
@@ -10324,7 +10324,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1410,
@@ -10357,7 +10357,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1411,
@@ -10390,7 +10390,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1412,
@@ -10423,7 +10423,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1413,
@@ -10456,7 +10456,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1414,
@@ -10489,7 +10489,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1415,
@@ -10522,7 +10522,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1416,
@@ -10555,7 +10555,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1417,
@@ -10588,7 +10588,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1418,
@@ -10621,7 +10621,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1419,
@@ -10654,7 +10654,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1420,
@@ -10687,7 +10687,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1421,
@@ -10720,7 +10720,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1422,
@@ -10753,7 +10753,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1423,
@@ -10786,7 +10786,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1424,
@@ -10819,7 +10819,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1425,
@@ -10852,7 +10852,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1426,
@@ -10885,271 +10885,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1427,
-      "season": "2025/26",
-      "team_id": 3155889,
-      "gw": 31,
-      "fpl_raw_pts": 32,
-      "fpl_xfer_cost": 4,
-      "fpl_gw_rank": 7864072,
-      "fpl_total": 961,
-      "active_chip": "",
-      "hit_pts": 4,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 27,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 4,
-      "anti_gw_pts": 36,
-      "anti_total": 1011,
-      "captain_element": 187,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 815,
-      "vice_pts": 1,
-      "gw_rank": 1,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1428,
-      "season": "2025/26",
-      "team_id": 3155889,
-      "gw": 32,
-      "fpl_raw_pts": 50,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 5262650,
-      "fpl_total": 1011,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 27,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 50,
-      "anti_total": 1061,
-      "captain_element": 424,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 491,
-      "vice_pts": 2,
-      "gw_rank": 10,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1429,
-      "season": "2025/26",
-      "team_id": 3155889,
-      "gw": 33,
-      "fpl_raw_pts": 50,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 10170943,
-      "fpl_total": 1061,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 22,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 50,
-      "anti_total": 1111,
-      "captain_element": 695,
-      "captain_mult": 2,
-      "captain_pts": 0,
-      "vice_element": 815,
-      "vice_pts": 9,
-      "gw_rank": 4,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1430,
-      "season": "2025/26",
-      "team_id": 3155889,
-      "gw": 34,
-      "fpl_raw_pts": 44,
-      "fpl_xfer_cost": 4,
-      "fpl_gw_rank": 3901916,
-      "fpl_total": 1101,
-      "active_chip": "",
-      "hit_pts": 4,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 25,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 4,
-      "anti_gw_pts": 48,
-      "anti_total": 1159,
-      "captain_element": 695,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 106,
-      "vice_pts": 2,
-      "gw_rank": 6,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1431,
-      "season": "2025/26",
-      "team_id": 3155889,
-      "gw": 35,
-      "fpl_raw_pts": 25,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 12628900,
-      "fpl_total": 1126,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 1,
-      "inactive_pen_pts": 9,
-      "bank": 25,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 9,
-      "anti_gw_pts": 34,
-      "anti_total": 1193,
-      "captain_element": 424,
-      "captain_mult": 2,
-      "captain_pts": 2,
-      "vice_element": 695,
-      "vice_pts": 0,
-      "gw_rank": 6,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1432,
-      "season": "2025/26",
-      "team_id": 3155889,
-      "gw": 36,
-      "fpl_raw_pts": 34,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 12134220,
-      "fpl_total": 1160,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 30,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 34,
-      "anti_total": 1227,
-      "captain_element": 695,
-      "captain_mult": 1,
-      "captain_pts": 0,
-      "vice_element": 106,
-      "vice_pts": 1,
-      "gw_rank": 3,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1433,
-      "season": "2025/26",
-      "team_id": 3155889,
-      "gw": 37,
-      "fpl_raw_pts": 0,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 11839204,
-      "fpl_total": 1160,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 11,
-      "inactive_pen_pts": 99,
-      "bank": 27,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 114,
-      "anti_gw_pts": 114,
-      "anti_total": 1341,
-      "captain_element": 258,
-      "captain_mult": 2,
-      "captain_pts": null,
-      "vice_element": 815,
-      "vice_pts": null,
-      "gw_rank": 3,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
-    },
-    {
-      "id": 1434,
-      "season": "2025/26",
-      "team_id": 911549,
-      "gw": 1,
-      "fpl_raw_pts": 24,
-      "fpl_xfer_cost": 0,
-      "fpl_gw_rank": 9419050,
-      "fpl_total": 24,
-      "active_chip": "",
-      "hit_pts": 0,
-      "inactive_count": 0,
-      "inactive_pen_pts": 0,
-      "bank": 30,
-      "bank_pen": false,
-      "bank_pen_pts": 0,
-      "cvc_pen_pts": 0,
-      "chip_pen_pts": 0,
-      "unused_chips": [],
-      "total_pens_gw": 0,
-      "anti_gw_pts": 24,
-      "anti_total": 24,
-      "captain_element": 72,
-      "captain_mult": 2,
-      "captain_pts": 4,
-      "vice_element": 74,
-      "vice_pts": 0,
-      "gw_rank": 2,
-      "cumulative_standing": null,
-      "is_live": false,
-      "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1435,
@@ -11182,7 +10918,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1436,
@@ -11215,7 +10951,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1437,
@@ -11248,7 +10984,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1438,
@@ -11281,7 +11017,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1439,
@@ -11314,7 +11050,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1440,
@@ -11347,7 +11083,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1441,
@@ -11380,7 +11116,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1442,
@@ -11413,7 +11149,271 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1427,
+      "season": "2025/26",
+      "team_id": 3155889,
+      "gw": 31,
+      "fpl_raw_pts": 32,
+      "fpl_xfer_cost": 4,
+      "fpl_gw_rank": 7864072,
+      "fpl_total": 961,
+      "active_chip": "",
+      "hit_pts": 4,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 27,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 4,
+      "anti_gw_pts": 36,
+      "anti_total": 1011,
+      "captain_element": 187,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 815,
+      "vice_pts": 1,
+      "gw_rank": 1,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1428,
+      "season": "2025/26",
+      "team_id": 3155889,
+      "gw": 32,
+      "fpl_raw_pts": 50,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 5262650,
+      "fpl_total": 1011,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 27,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 50,
+      "anti_total": 1061,
+      "captain_element": 424,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 491,
+      "vice_pts": 2,
+      "gw_rank": 10,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1429,
+      "season": "2025/26",
+      "team_id": 3155889,
+      "gw": 33,
+      "fpl_raw_pts": 50,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 10170943,
+      "fpl_total": 1061,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 22,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 50,
+      "anti_total": 1111,
+      "captain_element": 695,
+      "captain_mult": 2,
+      "captain_pts": 0,
+      "vice_element": 815,
+      "vice_pts": 9,
+      "gw_rank": 4,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1430,
+      "season": "2025/26",
+      "team_id": 3155889,
+      "gw": 34,
+      "fpl_raw_pts": 44,
+      "fpl_xfer_cost": 4,
+      "fpl_gw_rank": 3901916,
+      "fpl_total": 1101,
+      "active_chip": "",
+      "hit_pts": 4,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 25,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 4,
+      "anti_gw_pts": 48,
+      "anti_total": 1159,
+      "captain_element": 695,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 106,
+      "vice_pts": 2,
+      "gw_rank": 6,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1431,
+      "season": "2025/26",
+      "team_id": 3155889,
+      "gw": 35,
+      "fpl_raw_pts": 25,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 12628900,
+      "fpl_total": 1126,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 1,
+      "inactive_pen_pts": 9,
+      "bank": 25,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 9,
+      "anti_gw_pts": 34,
+      "anti_total": 1193,
+      "captain_element": 424,
+      "captain_mult": 2,
+      "captain_pts": 2,
+      "vice_element": 695,
+      "vice_pts": 0,
+      "gw_rank": 6,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1432,
+      "season": "2025/26",
+      "team_id": 3155889,
+      "gw": 36,
+      "fpl_raw_pts": 34,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 12134220,
+      "fpl_total": 1160,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 30,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 34,
+      "anti_total": 1227,
+      "captain_element": 695,
+      "captain_mult": 1,
+      "captain_pts": 0,
+      "vice_element": 106,
+      "vice_pts": 1,
+      "gw_rank": 3,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1433,
+      "season": "2025/26",
+      "team_id": 3155889,
+      "gw": 37,
+      "fpl_raw_pts": 0,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 11839204,
+      "fpl_total": 1160,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 27,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 0,
+      "anti_total": 1227,
+      "captain_element": 258,
+      "captain_mult": 2,
+      "captain_pts": 0,
+      "vice_element": 815,
+      "vice_pts": 0,
+      "gw_rank": 5,
+      "cumulative_standing": null,
+      "is_live": true,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
+    },
+    {
+      "id": 1434,
+      "season": "2025/26",
+      "team_id": 911549,
+      "gw": 1,
+      "fpl_raw_pts": 24,
+      "fpl_xfer_cost": 0,
+      "fpl_gw_rank": 9419050,
+      "fpl_total": 24,
+      "active_chip": "",
+      "hit_pts": 0,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
+      "bank": 30,
+      "bank_pen": false,
+      "bank_pen_pts": 0,
+      "cvc_pen_pts": 0,
+      "chip_pen_pts": 0,
+      "unused_chips": [],
+      "total_pens_gw": 0,
+      "anti_gw_pts": 24,
+      "anti_total": 24,
+      "captain_element": 72,
+      "captain_mult": 2,
+      "captain_pts": 4,
+      "vice_element": 74,
+      "vice_pts": 0,
+      "gw_rank": 2,
+      "cumulative_standing": null,
+      "is_live": false,
+      "created_at": "2026-05-16T12:54:07.880039+00:00",
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1443,
@@ -11446,7 +11446,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1444,
@@ -11479,7 +11479,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1445,
@@ -11512,7 +11512,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1446,
@@ -11545,7 +11545,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1447,
@@ -11578,7 +11578,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1448,
@@ -11611,7 +11611,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1449,
@@ -11644,7 +11644,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1450,
@@ -11677,7 +11677,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1451,
@@ -11710,7 +11710,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1452,
@@ -11743,7 +11743,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1453,
@@ -11776,7 +11776,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1454,
@@ -11809,7 +11809,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1455,
@@ -11842,7 +11842,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1456,
@@ -11875,7 +11875,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1457,
@@ -11908,7 +11908,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1458,
@@ -11941,7 +11941,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1459,
@@ -11974,7 +11974,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1460,
@@ -12007,7 +12007,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1461,
@@ -12040,7 +12040,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1462,
@@ -12073,7 +12073,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1463,
@@ -12106,7 +12106,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1464,
@@ -12139,7 +12139,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1465,
@@ -12172,7 +12172,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1466,
@@ -12205,7 +12205,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1467,
@@ -12238,7 +12238,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1468,
@@ -12271,7 +12271,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1469,
@@ -12304,7 +12304,7 @@
       "cumulative_standing": null,
       "is_live": false,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     },
     {
       "id": 1470,
@@ -12317,27 +12317,27 @@
       "fpl_total": 1085,
       "active_chip": "3xc",
       "hit_pts": 0,
-      "inactive_count": 11,
-      "inactive_pen_pts": 99,
+      "inactive_count": 0,
+      "inactive_pen_pts": 0,
       "bank": 21,
       "bank_pen": false,
       "bank_pen_pts": 0,
-      "cvc_pen_pts": 15,
+      "cvc_pen_pts": 0,
       "chip_pen_pts": 0,
       "unused_chips": [],
-      "total_pens_gw": 114,
-      "anti_gw_pts": 116,
-      "anti_total": 1287,
+      "total_pens_gw": 0,
+      "anti_gw_pts": 2,
+      "anti_total": 1173,
       "captain_element": 187,
       "captain_mult": 3,
-      "captain_pts": null,
+      "captain_pts": 0,
       "vice_element": 603,
-      "vice_pts": null,
-      "gw_rank": 4,
+      "vice_pts": 0,
+      "gw_rank": 6,
       "cumulative_standing": null,
-      "is_live": false,
+      "is_live": true,
       "created_at": "2026-05-16T12:54:07.880039+00:00",
-      "updated_at": "2026-05-16T19:32:04.619963+00:00"
+      "updated_at": "2026-05-16T21:12:42.282595+00:00"
     }
   ]
 }
