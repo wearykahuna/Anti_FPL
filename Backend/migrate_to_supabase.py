@@ -272,9 +272,14 @@ def main() -> None:
         log.error("Bootstrap fetch failed.")
         sys.exit(1)
 
-    last_gw  = current_gw(bootstrap)
-    finished = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
-    log.info("Last finished GW: %d", last_gw)
+    finished      = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
+    current       = next((e["id"] for e in bootstrap.get("events", []) if e.get("is_current")), None)
+    last_finished = max(finished) if finished else 0
+    last_gw       = current if current else last_finished
+    live_gw       = current if current and current not in finished else None
+    player_type   = build_player_type_map(bootstrap)
+    log.info("Last finished GW: %d, Current GW: %s, Live GW: %s",
+             last_finished, current, live_gw)
 
     # Upsert gameweeks
     upsert_in_batches(sb, "gameweeks", build_gameweek_rows(bootstrap, SEASON), "season,gw")
@@ -352,7 +357,7 @@ def main() -> None:
             picks_cache      = picks_cache,
             last_gw          = last_gw,
             player_type      = player_type,
-            live_gw          = None if last_gw in finished else last_gw,
+            live_gw          = live_gw,
         )
 
         # Team info row
