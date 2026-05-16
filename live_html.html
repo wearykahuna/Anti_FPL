@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-FPL · Live Leaderboard</title>
+  <style>
+    :root {
+      --bg:        #f5f5f5;
+      --surface:   #ffffff;
+      --border:    #e0e0e0;
+      --text:      #111111;
+      --muted:     #888;
+      --accent:    #d62828;
+      --good:      #1a7f4b;
+      --warn:      #b86e00;
+      --live:      #d62828;
+      --font:      'Inter', system-ui, sans-serif;
+      --mono:      'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+
+    /* ── Header ── */
+    header {
+      max-width: 900px;
+      margin: 0 auto 32px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: 1;
+    }
+
+    .logo span { color: var(--accent); }
+
+    .meta {
+      text-align: right;
+      font-size: 0.78rem;
+      color: var(--muted);
+      font-family: var(--mono);
+      line-height: 1.8;
+    }
+
+    /* ── Live badge ── */
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,59,59,0.12);
+      border: 1px solid rgba(255,59,59,0.3);
+      color: var(--live);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      padding: 3px 10px;
+      border-radius: 99px;
+      margin-bottom: 4px;
+    }
+
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--live);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ── GW summary bar ── */
+    .gw-bar {
+      max-width: 900px;
+      margin: 0 auto 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .gw-pill {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .gw-pill strong { color: var(--text); font-size: 1rem; display: block; }
+
+    /* ── Refresh bar ── */
+    .refresh-bar {
+      max-width: 900px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-family: var(--mono);
+    }
+
+    .refresh-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 4px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .refresh-btn:hover { color: var(--text); border-color: var(--text); }
+
+    /* ── Table ── */
+    .table-wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    thead th.r { text-align: right; }
+
+    tbody tr.team-row {
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    tbody tr.team-row:hover { background: var(--surface); }
+
+    tbody tr.team-row.expanded { background: var(--surface); }
+
+    td {
+      padding: 12px 14px;
+      vertical-align: middle;
+      white-space: nowrap;
+    }
+
+    td.r { text-align: right; font-family: var(--mono); }
+
+    /* Position */
+    .pos {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--muted);
+      width: 32px;
+    }
+
+    .pos.top3 { color: var(--good); font-weight: 700; }
+
+    /* Team info */
+    .team-name {
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    .manager-name {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Chip badge */
+    .chip {
+      display: inline-block;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      background: rgba(255,176,59,0.15);
+      color: var(--warn);
+      border: 1px solid rgba(255,176,59,0.3);
+    }
+
+    /* Scores */
+    .gw-pts {
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .total-pts {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+    }
+
+    /* Pen indicator */
+    .pen-tag {
+      font-size: 0.68rem;
+      color: var(--accent);
+      font-family: var(--mono);
+    }
+
+    /* Live indicator on score */
+    .live-score { color: var(--live); }
+
+    /* Expand chevron */
+    .chevron {
+      font-size: 0.7rem;
+      color: var(--muted);
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+
+    .chevron.open { transform: rotate(180deg); }
+
+    /* ── Expanded detail row ── */
+    tr.detail-row td {
+      padding: 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-inner {
+      padding: 16px 14px 16px 46px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      background: #f9f9f9;
+    }
+
+    .detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .detail-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .detail-value {
+      font-family: var(--mono);
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .detail-value.pen { color: var(--accent); }
+    .detail-value.ok  { color: var(--good); }
+
+    /* ── Loading / error ── */
+    .state-msg {
+      max-width: 900px;
+      margin: 80px auto;
+      text-align: center;
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 2;
+    }
+
+    .state-msg .big { font-size: 2rem; display: block; margin-bottom: 12px; }
+
+    /* ── Footer ── */
+    footer {
+      max-width: 900px;
+      margin: 40px auto 0;
+      font-size: 0.72rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .logo { font-size: 1.3rem; }
+      td, th { padding: 10px 8px; }
+      .detail-inner { padding-left: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo"><span>ANTI</span>FPL</div>
+    <div style="font-size:0.72rem;color:var(--muted);margin-top:4px;">
+      lowest score wins · 2025/26
+    </div>
+  </div>
+  <div class="meta">
+    <div id="live-badge-wrap"></div>
+    <div id="last-updated">—</div>
+    <div id="next-refresh">—</div>
+  </div>
+</header>
+
+<div class="gw-bar" id="gw-bar"></div>
+
+<div class="refresh-bar">
+  <span id="team-count">Loading...</span>
+  <span id="next-refresh" style="font-size:0.75rem;color:var(--muted);font-family:var(--mono)">—</span>
+</div>
+
+<div class="table-wrap">
+  <div id="state-msg" class="state-msg">
+    <span class="big">⚽</span>
+    Loading leaderboard...
+  </div>
+  <table id="leaderboard" style="display:none">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Team</th>
+        <th class="r">GW</th>
+        <th class="r">+Pens</th>
+        <th class="r">Total</th>
+        <th class="r">FPL Rank</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<footer>
+  <span>Anti-FPL · 2025/26 Season</span>
+  <span>Lowest score wins · Penalties add points</span>
+</footer>
+
+<script>
+  const SUPABASE_URL = 'https://qudcjhmbextpfdgdxihs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGNqaG1iZXh0cGZkZ2R4aWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjEzMTQsImV4cCI6MjA5NDE5NzMxNH0.TRapf8KXSpM2XPrzprIhObi5cp0Sxt2wxel9novZRMA';
+  const SEASON      = '2025/26';
+  const REFRESH_MS  = 2 * 60 * 1000;   // 2 minutes
+
+  const CHIP_LABELS = {
+    bboost:   'BB',
+    '3xc':    'TC',
+    freehit:  'FH',
+    wildcard: 'WC',
+  };
+
+  let refreshTimer   = null;
+  let countdownTimer = null;
+  let nextRefreshAt  = null;
+  let expandedTeam   = null;
+
+  // ── Supabase fetch ─────────────────────────────────────────────────────────
+
+  async function sbFetch(table, params = '') {
+    const r = await fetch(
+      `${SUPABASE_URL}/rest/v1/${table}?${params}`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
+    return r.json();
+  }
+
+  // ── Load data ──────────────────────────────────────────────────────────────
+
+  async function loadData() {
+    try {
+      // Current GW
+      const gws = await sbFetch(
+        'gameweeks',
+        `season=eq.${encodeURIComponent(SEASON)}&order=gw.desc&limit=1`
+      );
+      const currentGw = gws[0]?.gw || 1;
+      const isLive    = gws[0]?.is_current && !gws[0]?.is_finished;
+
+      // All teams
+      const teams = await sbFetch(
+        'teams',
+        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id,manager,team_name`
+      );
+
+      // Latest GW scores for all teams
+      const scores = await sbFetch(
+        'gw_scores',
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*&order=cumulative_standing.asc`
+      );
+
+      // Previous GW totals for standing change
+      const prevScores = currentGw > 1
+        ? await sbFetch(
+            'gw_scores',
+            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw - 1}&select=team_id,cumulative_standing`
+          )
+        : [];
+
+      const prevStanding = Object.fromEntries(prevScores.map(r => [r.team_id, r.cumulative_standing]));
+      const teamInfo     = Object.fromEntries(teams.map(t => [t.team_id, t]));
+
+      render(scores, teamInfo, prevStanding, currentGw, isLive);
+      scheduleRefresh();
+
+    } catch (err) {
+      showError(err.message);
+    }
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+
+  function render(scores, teamInfo, prevStanding, gw, isLive) {
+    // Live badge
+    const badgeWrap = document.getElementById('live-badge-wrap');
+    badgeWrap.innerHTML = isLive
+      ? `<div class="live-badge"><span class="live-dot"></span>LIVE · GW${gw}</div>`
+      : `<div style="font-size:0.72rem;color:var(--muted)">GW${gw} · Final</div>`;
+
+    // Last updated
+    const now = new Date();
+    document.getElementById('last-updated').textContent =
+      `Updated ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+
+    // GW summary pills
+    const gwBar = document.getElementById('gw-bar');
+    const gwPts = scores.map(s => s.anti_gw_pts).filter(Boolean);
+    const best  = Math.min(...gwPts);
+    const worst = Math.max(...gwPts);
+    const avg   = gwPts.length ? Math.round(gwPts.reduce((a, b) => a + b, 0) / gwPts.length) : 0;
+    gwBar.innerHTML = `
+      <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
+      <div class="gw-pill"><strong>${scores.length}</strong>Teams</div>
+      <div class="gw-pill"><strong>${best}</strong>Best GW score</div>
+      <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
+      <div class="gw-pill"><strong>${avg}</strong>GW average</div>
+    `;
+
+    document.getElementById('team-count').textContent =
+      `${scores.length} eligible team${scores.length !== 1 ? 's' : ''}`;
+
+    // Table
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+
+    scores.forEach((s, idx) => {
+      const info     = teamInfo[s.team_id] || {};
+      const pos      = s.cumulative_standing || idx + 1;
+      const prevPos  = prevStanding[s.team_id];
+      const move     = prevPos ? prevPos - pos : 0;
+      const chip     = s.active_chip ? CHIP_LABELS[s.active_chip] || s.active_chip.toUpperCase() : '';
+      const hasPens  = s.total_pens_gw > 0;
+      const isExpanded = expandedTeam === s.team_id;
+
+      // Position change indicator
+      const moveStr = move > 0
+        ? `<span style="color:var(--good);font-size:0.65rem"> ▲${move}</span>`
+        : move < 0
+        ? `<span style="color:var(--accent);font-size:0.65rem"> ▼${Math.abs(move)}</span>`
+        : '';
+
+      // Team row
+      const tr = document.createElement('tr');
+      tr.className = `team-row${isExpanded ? ' expanded' : ''}`;
+      tr.dataset.teamId = s.team_id;
+      tr.innerHTML = `
+        <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
+        <td>
+          <div class="team-name">
+            ${info.team_name || s.team_id}
+            ${chip ? `<span class="chip">${chip}</span>` : ''}
+          </div>
+          <div class="manager-name">${info.manager || ''}</div>
+        </td>
+        <td class="r">
+          <div class="gw-pts ${isLive ? 'live-score' : ''}">${s.anti_gw_pts ?? '—'}</div>
+        </td>
+        <td class="r">
+          ${hasPens ? `<span class="pen-tag">+${s.total_pens_gw}</span>` : '<span style="color:var(--muted)">—</span>'}
+        </td>
+        <td class="r total-pts">${s.anti_total ?? '—'}</td>
+        <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">
+          ${s.fpl_gw_rank ? '#' + s.fpl_gw_rank.toLocaleString() : '—'}
+        </td>
+        <td style="width:24px;text-align:center">
+          <span class="chevron ${isExpanded ? 'open' : ''}">▾</span>
+        </td>
+      `;
+      tr.addEventListener('click', () => toggleExpand(s, info, isLive));
+      tbody.appendChild(tr);
+
+      // Detail row (hidden unless expanded)
+      const detailTr = document.createElement('tr');
+      detailTr.className = 'detail-row';
+      detailTr.dataset.detailFor = s.team_id;
+      detailTr.style.display = isExpanded ? '' : 'none';
+      detailTr.innerHTML = `
+        <td colspan="7">
+          <div class="detail-inner">
+            ${detailItem('FPL Raw', s.fpl_raw_pts ?? '—')}
+            ${detailItem('Transfer Hits', s.hit_pts || 0, s.hit_pts > 0)}
+            ${detailItem('Inactive Pen', s.inactive_pen_pts || 0, s.inactive_pen_pts > 0)}
+            ${detailItem('Bank Pen', s.bank_pen_pts || 0, s.bank_pen_pts > 0)}
+            ${detailItem('C/VC Pen', s.cvc_pen_pts || 0, s.cvc_pen_pts > 0)}
+            ${detailItem('Chip Pen', s.chip_pen_pts || 0, s.chip_pen_pts > 0)}
+            ${detailItem('Bank', s.bank != null ? `£${(s.bank / 10).toFixed(1)}m` : '—', false, s.bank_pen)}
+            ${detailItem('Inactive Players', s.inactive_count ?? '—')}
+            ${detailItem('Anti Total', s.anti_total ?? '—')}
+            ${detailItem('GW Rank', s.gw_rank ? `#${s.gw_rank}` : '—')}
+            ${s.unused_chips?.length ? detailItem('Unused Chips', s.unused_chips.join(', '), true) : ''}
+          </div>
+        </td>
+      `;
+      tbody.appendChild(detailTr);
+    });
+
+    document.getElementById('state-msg').style.display  = 'none';
+    document.getElementById('leaderboard').style.display = '';
+  }
+
+  function detailItem(label, value, isPen = false, isWarn = false) {
+    const cls = isPen ? 'pen' : isWarn ? 'pen' : value === 0 ? 'ok' : '';
+    return `
+      <div class="detail-item">
+        <span class="detail-label">${label}</span>
+        <span class="detail-value ${cls}">${value}</span>
+      </div>
+    `;
+  }
+
+  function toggleExpand(score, info, isLive) {
+    const tid = score.team_id;
+    if (expandedTeam === tid) {
+      expandedTeam = null;
+    } else {
+      expandedTeam = tid;
+    }
+    // Re-render to update expanded state
+    loadData();
+  }
+
+  // ── Auto-refresh ───────────────────────────────────────────────────────────
+
+  function scheduleRefresh() {
+    clearTimeout(refreshTimer);
+    clearInterval(countdownTimer);
+    nextRefreshAt = Date.now() + REFRESH_MS;
+
+    refreshTimer = setTimeout(loadData, REFRESH_MS);
+
+    countdownTimer = setInterval(() => {
+      const secs = Math.max(0, Math.round((nextRefreshAt - Date.now()) / 1000));
+      const mm   = String(Math.floor(secs / 60)).padStart(2, '0');
+      const ss   = String(secs % 60).padStart(2, '0');
+      document.getElementById('next-refresh').textContent = `Next refresh ${mm}:${ss}`;
+      if (secs === 0) clearInterval(countdownTimer);
+    }, 1000);
+  }
+
+  // ── Error state ────────────────────────────────────────────────────────────
+
+  function showError(msg) {
+    document.getElementById('state-msg').innerHTML = `
+      <span class="big">⚠️</span>
+      Failed to load data<br>
+      <span style="font-size:0.75rem">${msg}</span><br><br>
+      <button class="refresh-btn" onclick="loadData()" style="margin:0 auto">Try again</button>
+    `;
+    document.getElementById('state-msg').style.display  = '';
+    document.getElementById('leaderboard').style.display = 'none';
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  loadData();
+</script>
+</body>
+</html>
