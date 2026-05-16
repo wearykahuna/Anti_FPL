@@ -80,7 +80,7 @@ def reset_season(sb: SyncPostgrestClient, season: str) -> None:
     for tbl in (
         "gw_scores", "cup_fixtures", "mini_league_members",
         "player_gw_scores", "team_gw_selections", "teams",
-        "players", "gameweeks",
+        "players", "gameweeks", "fixtures", "mini_leagues",
     ):
         sb.from_(tbl).delete().eq("season", season).execute()
         log.info("  Cleared %s", tbl)
@@ -126,6 +126,33 @@ def build_player_rows(bootstrap: dict, season: str) -> list[dict]:
         })
     return rows
 
+def fetch_all_fixtures() -> list[dict]:
+    import requests
+    try:
+        r = requests.get("https://fantasy.premierleague.com/api/fixtures/", timeout=20)
+        r.raise_for_status()
+        return r.json()
+    except Exception as exc:
+        log.warning("Fixtures fetch failed: %s", exc)
+        return []
+
+def build_fixture_rows(fixtures: list[dict], season: str) -> list[dict]:
+    rows = []
+    for f in fixtures:
+        rows.append({
+            "season":               season,
+            "fixture_id":           f["id"],
+            "gw":                   f.get("event") or 0,
+            "team_h":               f["team_h"],
+            "team_a":               f["team_a"],
+            "kickoff_time":         f.get("kickoff_time"),
+            "started":              f.get("started") or False,
+            "finished":             f.get("finished") or False,
+            "finished_provisional": f.get("finished_provisional") or False,
+            "team_h_score":         f.get("team_h_score"),
+            "team_a_score":         f.get("team_a_score"),
+        })
+    return [r for r in rows if r["gw"] > 0]
 
 def build_gameweek_rows(bootstrap: dict, season: str) -> list[dict]:
     rows = []
@@ -288,6 +315,11 @@ def main() -> None:
     log.info("Upserting players reference table...")
     upsert_in_batches(sb, "players", build_player_rows(bootstrap, SEASON), "season,player_id")
 
+    log.info("Fetching and upserting fixtures...")
+    upsert_in_batches(sb, "fixtures",
+                    build_fixture_rows(fetch_all_fixtures(), SEASON),
+                    "season,fixture_id")
+    
     # ── Team IDs ──────────────────────────────────────────────────────────────
     if args.team:
         team_ids = [args.team]
