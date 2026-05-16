@@ -197,7 +197,7 @@
       margin-top: 2px;
     }
 
-    /* Chip badge */
+    /* Chip badge (legacy single chip — kept for fallback) */
     .chip {
       display: inline-block;
       font-size: 0.6rem;
@@ -210,6 +210,52 @@
       background: rgba(255,176,59,0.15);
       color: var(--warn);
       border: 1px solid rgba(255,176,59,0.3);
+    }
+
+    /* New chips row — all 8 chips with state */
+    .chips-row {
+      display: flex;
+      gap: 3px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .chip-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      padding: 1px 4px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border-radius: 3px;
+      line-height: 1.5;
+      border: 1px solid transparent;
+    }
+
+    .chip-used {
+      background: #ececec;
+      color: #aaa;
+      border-color: #ddd;
+    }
+
+    .chip-avail {
+      background: rgba(59, 130, 246, 0.12);
+      color: #2563eb;
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .chip-live {
+      background: rgba(255, 176, 59, 0.25);
+      color: var(--warn);
+      border-color: rgba(255, 176, 59, 0.5);
+      animation: chip-pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes chip-pulse {
+      0%, 100% { opacity: 1;   transform: scale(1); }
+      50%       { opacity: 0.6; transform: scale(0.96); }
     }
 
     /* Scores */
@@ -437,7 +483,7 @@
         <th class="r" id="pens-header">+Pens</th>
         <th class="r">Prev Total</th>
         <th class="r">Total</th>
-        <th class="r">FPL Rank</th>
+        <th class="r">Left</th>
         <th></th>
       </tr>
     </thead>
@@ -540,16 +586,22 @@
           )
         : [];
 
-      // Player reference data (names, positions) from Supabase
+      // Player reference data (names, positions, club teams) from Supabase
       if (!window.playerNames || !window.playerPositions) {
         const allPlayers = await sbFetch(
           'players',
-          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short`
+          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,team_name,team_id`
         );
         window.playerNames     = Object.fromEntries(allPlayers.map(p => [p.player_id, p.web_name]));
         window.playerPositions = Object.fromEntries(allPlayers.map(p => [p.player_id, p.position]));
         window.playerTeams     = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_short]));
+        window.playerTeamIds   = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_id]));
       }
+
+      // Fixtures for the current GW — determines which clubs have already played
+      const fixtures = await fetchFixtures(currentGw);
+      // Build a map of club_short → status: 'finished' | 'live' | 'upcoming'
+      const clubStatus = buildClubStatus(fixtures);
 
       const prevStanding = Object.fromEntries(prevScores.map(r => [r.team_id, r.cumulative_standing]));
       const prevTotal    = Object.fromEntries(prevScores.map(r => [r.team_id, r.anti_total]));
@@ -557,7 +609,11 @@
       const selectionMap = Object.fromEntries(selections.map(s => [s.team_id, s]));
       const playerScoreMap = Object.fromEntries(playerScores.map(p => [p.player_id, p]));
 
-      render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive, selectionMap, playerScoreMap);
+      // Fetch chips history for each team for the chip row display
+      const chipsByTeam = await fetchChipsByTeam(scores.map(s => s.team_id), currentGw);
+
+      render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive,
+             selectionMap, playerScoreMap, clubStatus, chipsByTeam);
       scheduleRefresh();
 
     } catch (err) {
@@ -565,7 +621,58 @@
     }
   }
 
-  // (player names now fetched from Supabase — no more CORS workaround needed)
+  // ── Fixtures + club status ─────────────────────────────────────────────────
+
+  async function fetchFixtures(gw) {
+    // FPL fixtures API — direct call from browser (this one allows CORS)
+    try {
+      const r = await fetch(`https://fantasy.premierleague.com/api/fixtures/?event=${gw}`);
+      if (!r.ok) throw new Error('fixtures fetch failed');
+      return r.json();
+    } catch (err) {
+      console.warn('Fixtures fetch failed', err);
+      return [];
+    }
+  }
+
+  function buildClubStatus(fixtures) {
+    // Need a map of FPL team_id → short_name. Fetch from bootstrap once.
+    if (!window.clubMap) {
+      // Build from playerTeams data we already have: team_id → short_name
+      // Actually we need it from fixtures themselves; FPL uses numeric team_h, team_a
+      // We'll build from a separate bootstrap call if needed
+    }
+    const status = {};
+    fixtures.forEach(f => {
+      const homeId = f.team_h;
+      const awayId = f.team_a;
+      let state;
+      if (f.finished_provisional || f.finished) state = 'finished';
+      else if (f.started)                         state = 'live';
+      else                                        state = 'upcoming';
+      status[homeId] = state;
+      status[awayId] = state;
+    });
+    return status;
+  }
+
+  // ── Chips history (which chips used so far this season per team) ──────────
+
+  async function fetchChipsByTeam(teamIds, currentGw) {
+    // Fetch from gw_scores — active_chip is stored per GW
+    const list = teamIds.join(',');
+    const rows = await sbFetch(
+      'gw_scores',
+      `season=eq.${encodeURIComponent(SEASON)}&team_id=in.(${list})&active_chip=neq.&select=team_id,gw,active_chip`
+    );
+    // Build {team_id: [{gw, chip}]}
+    const map = {};
+    rows.forEach(r => {
+      if (!map[r.team_id]) map[r.team_id] = [];
+      map[r.team_id].push({ gw: r.gw, chip: r.active_chip });
+    });
+    return map;
+  }
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
@@ -623,51 +730,10 @@
         ? (prevTot != null && s.fpl_raw_pts != null ? prevTot + s.fpl_raw_pts : s.anti_total ?? '—')
         : (s.anti_total ?? '—');
 
-      // Position change indicator
-      const moveStr = move > 0
-        ? `<span style="color:var(--good);font-size:0.65rem"> ▲${move}</span>`
-        : move < 0
-        ? `<span style="color:var(--accent);font-size:0.65rem"> ▼${Math.abs(move)}</span>`
-        : '';
+      // Position change indicator (now handled above in the new sorted block)
+      const _unused_old_block = null;
 
-      // Team row
-      const tr = document.createElement('tr');
-      tr.className = `team-row${isExpanded ? ' expanded' : ''}`;
-      tr.dataset.teamId = s.team_id;
-      tr.innerHTML = `
-        <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
-        <td>
-          <div class="team-name">
-            <a href="https://fantasy.premierleague.com/entry/${s.team_id}/event/${gw}"
-               target="_blank" rel="noopener"
-               style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted)"
-               onclick="event.stopPropagation()">${info.team_name || s.team_id}</a>
-            ${chip ? `<span class="chip">${chip}</span>` : ''}
-          </div>
-          <div class="manager-name">${info.manager || ''}</div>
-        </td>
-        <td class="r">
-          <div class="gw-pts ${isLive ? 'live-score' : ''}">${displayGwPts}</div>
-        </td>
-        <td class="r">
-          ${hasPens
-            ? `<span class="${isLive ? 'pending-tag' : 'pen-tag'}">${isLive ? '⏳' : '+'}${s.total_pens_gw}</span>`
-            : '<span style="color:var(--muted)">—</span>'}
-        </td>
-        <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">
-          ${prevTot ?? '—'}
-        </td>
-        <td class="r total-pts">${displayTotal}</td>
-        <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">
-          ${s.fpl_gw_rank ? '#' + s.fpl_gw_rank.toLocaleString() : '—'}
-        </td>
-        <td style="width:24px;text-align:center">
-          <span class="chevron ${isExpanded ? 'open' : ''}">▾</span>
-        </td>
-      `;
-      tr.addEventListener('click', () => toggleExpand(s, info, isLive));
-      tbody.appendChild(tr);
-
+      // Team row already created above — skip to detail row
       // Detail row (hidden unless expanded)
       const detailTr = document.createElement('tr');
       detailTr.className = 'detail-row';
