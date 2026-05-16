@@ -1,0 +1,4 @@
+#env file containing Supabase credentials (not to be committed to Git)
+.env
+#notes
+notes.txt

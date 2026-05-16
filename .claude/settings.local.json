@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+      "Bash(python phase1a_runner.py)"
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\0134897s\\\\Github\\\\Anti_FPL\" -Recurse -Force)",
       "Bash(Select-Object -Property FullName, PSIsContainer)",
       "Bash(Sort-Object FullName)",
