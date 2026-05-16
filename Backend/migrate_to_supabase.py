@@ -30,9 +30,9 @@ from anti_fpl_scoring import (
     fetch_picks,
     fetch_team_history,
     get_all_team_ids_from_league,
+    current_gw,
     score_team_season,
     split_chips_by_half,
-    build_player_type_map,
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -120,6 +120,7 @@ def build_player_rows(bootstrap: dict, season: str) -> list[dict]:
             "first_name": el.get("first_name"),
             "last_name":  el.get("second_name"),
             "position":   pos_map.get(el.get("element_type"), "?"),
+            "team_id":    el.get("team"),
             "team_short": team.get("short_name"),
             "team_name":  team.get("name"),
             "now_cost":   el.get("now_cost"),
@@ -156,7 +157,7 @@ def build_team_row(team_id: int, scored: list[dict], season: str) -> dict:
     }
 
 
-def build_gw_score_rows(team_id: int, scored: list[dict], season: str, live_gw: int | None = None) -> list[dict]:
+def build_gw_score_rows(team_id: int, scored: list[dict], season: str) -> list[dict]:
     rows = []
     for g in scored:
         rows.append({
@@ -186,7 +187,7 @@ def build_gw_score_rows(team_id: int, scored: list[dict], season: str, live_gw: 
             "vice_element":        g.get("vice_element"),
             "vice_pts":            g.get("vice_pts"),
             "cumulative_standing": g.get("standing"),
-            "is_live":             g["gw"] == live_gw,
+            "is_live":             g.get("live", False) or False,
         })
     return rows
 
@@ -272,14 +273,9 @@ def main() -> None:
         log.error("Bootstrap fetch failed.")
         sys.exit(1)
 
-    finished      = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
-    current       = next((e["id"] for e in bootstrap.get("events", []) if e.get("is_current")), None)
-    last_finished = max(finished) if finished else 0
-    last_gw       = current if current else last_finished
-    live_gw       = current if current and current not in finished else None
-    player_type   = build_player_type_map(bootstrap)
-    log.info("Last finished GW: %d, Current GW: %s, Live GW: %s",
-             last_finished, current, live_gw)
+    last_gw  = current_gw(bootstrap)
+    finished = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
+    log.info("Last finished GW: %d", last_gw)
 
     # Upsert gameweeks
     upsert_in_batches(sb, "gameweeks", build_gameweek_rows(bootstrap, SEASON), "season,gw")
@@ -356,15 +352,14 @@ def main() -> None:
             pts_cache        = pts_cache,
             picks_cache      = picks_cache,
             last_gw          = last_gw,
-            player_type      = player_type,
-            live_gw          = live_gw,
+            live_gw          = None if last_gw in finished else last_gw,
         )
 
         # Team info row
         team_rows.append(build_team_row(tid, scored, SEASON))
 
         # GW score rows
-        score_rows = build_gw_score_rows(tid, scored, SEASON, live_gw)
+        score_rows = build_gw_score_rows(tid, scored, SEASON)
         all_score_rows.extend(score_rows)
 
         # Selection rows — built from same picks_cache, no extra API calls
