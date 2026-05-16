@@ -280,6 +280,78 @@
     .detail-value.pen { color: var(--accent); }
     .detail-value.ok  { color: var(--good); }
 
+    /* ── Squad section ── */
+    .squad-section {
+      padding: 0 14px 16px 14px;
+      background: #f9f9f9;
+      border-top: 1px solid var(--border);
+    }
+
+    .squad-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0 6px 0;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+
+    .squad-legend {
+      font-family: var(--mono);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    .player-row {
+      display: grid;
+      grid-template-columns: 28px 1fr 48px 48px 48px;
+      gap: 8px;
+      align-items: center;
+      padding: 5px 0;
+      font-size: 0.82rem;
+      border-bottom: 1px dashed #ececec;
+    }
+
+    .player-row.bench {
+      background: #f0f0f0;
+      padding-left: 4px;
+      padding-right: 4px;
+      margin: 0 -4px;
+    }
+
+    .player-row.inactive { opacity: 0.5; }
+
+    .player-pos {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .player-name {
+      font-weight: 500;
+    }
+
+    .player-tag {
+      display: inline-block;
+      font-size: 0.62rem;
+      color: var(--warn);
+      font-weight: 700;
+      margin-left: 4px;
+    }
+
+    .player-mins, .player-pts, .player-anti {
+      font-family: var(--mono);
+      text-align: right;
+      font-size: 0.8rem;
+    }
+
+    .player-mins { color: var(--muted); }
+    .player-anti { color: var(--accent); font-weight: 600; }
+
     /* ── Loading / error ── */
     .state-msg {
       max-width: 900px;
@@ -396,13 +468,23 @@
 
   async function loadData() {
     try {
-      // Current GW
-      const gws = await sbFetch(
+      // Current GW — find the in-progress one, falling back to latest finished
+      const currentGwData = await sbFetch(
         'gameweeks',
-        `season=eq.${encodeURIComponent(SEASON)}&order=gw.desc&limit=1`
+        `season=eq.${encodeURIComponent(SEASON)}&is_current=eq.true&select=*&limit=1`
       );
-      const currentGw = gws[0]?.gw || 1;
-      const isLive    = gws[0]?.is_current && !gws[0]?.is_finished;
+      let currentGw, isLive;
+      if (currentGwData.length > 0) {
+        currentGw = currentGwData[0].gw;
+        isLive    = !currentGwData[0].is_finished;
+      } else {
+        const latestScored = await sbFetch(
+          'gw_scores',
+          `season=eq.${encodeURIComponent(SEASON)}&select=gw&order=gw.desc&limit=1`
+        );
+        currentGw = latestScored[0]?.gw || 1;
+        isLive    = false;
+      }
 
       // All teams
       const teams = await sbFetch(
@@ -424,10 +506,36 @@
           )
         : [];
 
+      // Team selections for current GW
+      const selections = await sbFetch(
+        'team_gw_selections',
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*`
+      );
+
+      // Collect all unique player IDs from all squads
+      const allPlayerIds = new Set();
+      selections.forEach(s => (s.squad || []).forEach(p => allPlayerIds.add(p)));
+      const playerIdList = [...allPlayerIds].join(',');
+
+      // Player GW scores for those players this GW
+      const playerScores = allPlayerIds.size
+        ? await sbFetch(
+            'player_gw_scores',
+            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&player_id=in.(${playerIdList})&select=*`
+          )
+        : [];
+
+      // Player names — fetched once from FPL bootstrap (cached in window for refreshes)
+      if (!window.playerNames) {
+        window.playerNames = await fetchPlayerNames();
+      }
+
       const prevStanding = Object.fromEntries(prevScores.map(r => [r.team_id, r.cumulative_standing]));
       const teamInfo     = Object.fromEntries(teams.map(t => [t.team_id, t]));
+      const selectionMap = Object.fromEntries(selections.map(s => [s.team_id, s]));
+      const playerScoreMap = Object.fromEntries(playerScores.map(p => [p.player_id, p]));
 
-      render(scores, teamInfo, prevStanding, currentGw, isLive);
+      render(scores, teamInfo, prevStanding, currentGw, isLive, selectionMap, playerScoreMap);
       scheduleRefresh();
 
     } catch (err) {
@@ -435,9 +543,25 @@
     }
   }
 
+  // Fetch player names from FPL bootstrap (proxied via Supabase since FPL has CORS issues)
+  // For now we use a fallback — player IDs only if names unavailable
+  async function fetchPlayerNames() {
+    try {
+      const r = await fetch('https://fantasy.premierleague.com/api/bootstrap-static/');
+      if (!r.ok) throw new Error('bootstrap fetch failed');
+      const data = await r.json();
+      return Object.fromEntries(
+        (data.elements || []).map(e => [e.id, e.web_name])
+      );
+    } catch (err) {
+      console.warn('Player names unavailable (CORS) — showing IDs', err);
+      return {};
+    }
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
 
-  function render(scores, teamInfo, prevStanding, gw, isLive) {
+  function render(scores, teamInfo, prevStanding, gw, isLive, selectionMap, playerScoreMap) {
     // Live badge
     const badgeWrap = document.getElementById('live-badge-wrap');
     badgeWrap.innerHTML = isLive
@@ -494,7 +618,10 @@
         <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
         <td>
           <div class="team-name">
-            ${info.team_name || s.team_id}
+            <a href="https://fantasy.premierleague.com/entry/${s.team_id}/event/${gw}"
+               target="_blank" rel="noopener"
+               style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted)"
+               onclick="event.stopPropagation()">${info.team_name || s.team_id}</a>
             ${chip ? `<span class="chip">${chip}</span>` : ''}
           </div>
           <div class="manager-name">${info.manager || ''}</div>
@@ -521,6 +648,45 @@
       detailTr.className = 'detail-row';
       detailTr.dataset.detailFor = s.team_id;
       detailTr.style.display = isExpanded ? '' : 'none';
+
+      // Squad section
+      const selection = selectionMap[s.team_id];
+      let squadHtml = '';
+      if (selection?.squad?.length) {
+        const captainId = selection.captain_id;
+        const viceId    = selection.vice_captain_id;
+        const playerRows = selection.squad.map((pid, i) => {
+          const isStarter = i < 11;
+          const isCap     = pid === captainId;
+          const isVice    = pid === viceId;
+          const p         = playerScoreMap[pid] || {};
+          const name      = (window.playerNames && window.playerNames[pid]) || `#${pid}`;
+          const tag       = isCap ? '(C)' : isVice ? '(V)' : '';
+          const pts       = p.base_pts != null ? p.base_pts : '—';
+          const antiPts   = p.anti_pts != null ? p.anti_pts : '—';
+          const mins      = p.minutes != null ? p.minutes : '—';
+          const isInactive = p.minutes === 0;
+          return `
+            <div class="player-row ${isStarter ? '' : 'bench'} ${isInactive ? 'inactive' : ''}">
+              <span class="player-pos">${isStarter ? i+1 : 'B'+(i-10)}</span>
+              <span class="player-name">${name} ${tag ? `<span class="player-tag">${tag}</span>` : ''}</span>
+              <span class="player-mins">${mins}'</span>
+              <span class="player-pts">${pts}</span>
+              <span class="player-anti">${antiPts}</span>
+            </div>
+          `;
+        }).join('');
+        squadHtml = `
+          <div class="squad-section">
+            <div class="squad-header">
+              <span>Squad (GW${gw})</span>
+              <span class="squad-legend">mins · pts · anti</span>
+            </div>
+            ${playerRows}
+          </div>
+        `;
+      }
+
       detailTr.innerHTML = `
         <td colspan="7">
           <div class="detail-inner">
@@ -536,6 +702,7 @@
             ${detailItem('GW Rank', s.gw_rank ? `#${s.gw_rank}` : '—')}
             ${s.unused_chips?.length ? detailItem('Unused Chips', s.unused_chips.join(', '), true) : ''}
           </div>
+          ${squadHtml}
         </td>
       `;
       tbody.appendChild(detailTr);
