@@ -1,0 +1,55 @@
+name: Migrate & Snapshot
+
+on:
+  # Run manually from GitHub Actions tab at any time
+  workflow_dispatch:
+
+  # Run automatically on a schedule — twice daily during the season
+  # Adjust or disable between seasons
+  schedule:
+    - cron: '0 8,20 * * *'   # 08:00 and 20:00 UTC daily
+
+jobs:
+  migrate-and-snapshot:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # needed to commit snapshot files back to repo
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml postgrest python-dotenv
+
+      - name: Run migration
+        working-directory: backend
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python migrate_to_supabase.py
+
+      - name: Run snapshot
+        working-directory: backend
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          python snapshot.py
+
+      - name: Commit snapshot to repo
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add snapshots/
+          # Only commit if there's something new
+          git diff --cached --quiet || git commit -m "snapshot: GW update $(date +'%Y-%m-%d %H:%M UTC')"
+          git push
