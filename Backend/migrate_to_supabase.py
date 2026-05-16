@@ -2,7 +2,8 @@
 Migrate Anti-FPL scored data into Supabase.
 ============================================
 Connects to Supabase, runs the scoring engine on the founding 10 teams,
-and inserts everything into the database tables.
+and inserts everything into the database tables in a single pass —
+live data and picks are fetched once and reused across all tables.
 
 Usage:
     python migrate_to_supabase.py                  # founding 10 teams
@@ -16,6 +17,7 @@ import argparse
 import logging
 import os
 import sys
+import time
 from datetime import datetime, timezone
 
 from dotenv import load_dotenv
@@ -24,21 +26,26 @@ from postgrest import SyncPostgrestClient
 from anti_fpl_scoring import (
     fetch_bootstrap,
     fetch_team_info,
+    fetch_live,
+    fetch_picks,
+    fetch_team_history,
     get_all_team_ids_from_league,
-    score_league,
     current_gw,
+    score_team_season,
+    split_chips_by_half,
+    build_player_type_map,
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
-SEASON = "2025/26"
+SEASON     = "2025/26"
+BATCH_SIZE = 500
 
 FOUNDING_TEAMS = [
     5388975, 6703903, 6595399, 3640882, 5399604,
     6654853, 7667159, 1610262, 3155889, 911549,
 ]
 
-# Batch size for inserts (Supabase handles large batches fine)
-BATCH_SIZE = 500
+INACTIVE_PEN = 9   # mirror from scoring engine for player anti_pts
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -59,32 +66,34 @@ def get_supabase() -> SyncPostgrestClient:
         log.error("Missing SUPABASE_URL or SUPABASE_KEY in .env file.")
         sys.exit(1)
     log.info("Connecting to Supabase: %s", url)
-    # postgrest endpoint is at /rest/v1
     return SyncPostgrestClient(
         f"{url}/rest/v1",
         headers={
-            "apikey": key,
+            "apikey":        key,
             "Authorization": f"Bearer {key}",
         },
     )
 
 
-# ── Wipe season data (use with --reset) ───────────────────────────────────────
+# ── Wipe season data ──────────────────────────────────────────────────────────
 
 def reset_season(sb: SyncPostgrestClient, season: str) -> None:
     log.warning("Wiping all data for season %s ...", season)
-    for tbl in ("gw_scores", "cup_fixtures", "mini_league_members", "teams", "gameweeks"):
+    for tbl in (
+        "gw_scores", "cup_fixtures", "mini_league_members",
+        "player_gw_scores", "team_gw_selections", "teams", "gameweeks",
+    ):
         sb.from_(tbl).delete().eq("season", season).execute()
         log.info("  Cleared %s", tbl)
-    # mini_leagues last (FK from members)
     sb.from_("mini_leagues").delete().eq("season", season).execute()
     log.info("  Cleared mini_leagues")
 
 
-# ── Upsert helpers ────────────────────────────────────────────────────────────
+# ── Upsert helper ─────────────────────────────────────────────────────────────
 
-def upsert_in_batches(sb: SyncPostgrestClient, table: str, rows: list[dict], on_conflict: str) -> None:
-    """Insert/update rows in batches to avoid hitting payload limits."""
+def upsert_in_batches(
+    sb: SyncPostgrestClient, table: str, rows: list[dict], on_conflict: str
+) -> None:
     if not rows:
         log.info("  %s: nothing to upsert", table)
         return
@@ -92,10 +101,10 @@ def upsert_in_batches(sb: SyncPostgrestClient, table: str, rows: list[dict], on_
     for i in range(0, total, BATCH_SIZE):
         batch = rows[i : i + BATCH_SIZE]
         sb.from_(table).upsert(batch, on_conflict=on_conflict).execute()
-        log.info("  %s: upserted %d / %d", table, min(i + BATCH_SIZE, total), total)
+        log.info("  %s: %d / %d rows upserted", table, min(i + BATCH_SIZE, total), total)
 
 
-# ── Build database rows ───────────────────────────────────────────────────────
+# ── Row builders ──────────────────────────────────────────────────────────────
 
 def build_gameweek_rows(bootstrap: dict, season: str) -> list[dict]:
     rows = []
@@ -106,36 +115,32 @@ def build_gameweek_rows(bootstrap: dict, season: str) -> list[dict]:
             "deadline":     ev.get("deadline_time"),
             "is_current":   ev.get("is_current", False),
             "is_finished":  ev.get("finished", False),
-            "finalized_at": (datetime.now(timezone.utc).isoformat() if ev.get("finished") else None),
+            "finalized_at": datetime.now(timezone.utc).isoformat() if ev.get("finished") else None,
         })
     return rows
 
 
-def build_team_row(team: dict, season: str) -> dict:
-    # team here is one of the dicts returned by score_league()
-    # Pull FPL "joined" timestamp separately (cheap, one call per team)
-    fpl_info = fetch_team_info(team["team_id"]) or {}
-    fpl_joined = fpl_info.get("joined_time")  # FPL API field
-
-    eligible = any(g["gw"] == 1 and g.get("anti_gw_pts") is not None for g in team["gws"])
-
+def build_team_row(team_id: int, scored: list[dict], season: str) -> dict:
+    info       = fetch_team_info(team_id) or {}
+    fpl_joined = info.get("joined_time")
+    eligible   = any(g["gw"] == 1 and g.get("anti_gw_pts") is not None for g in scored)
     return {
-        "team_id":        team["team_id"],
+        "team_id":        team_id,
         "season":         season,
-        "manager":        team["manager"],
-        "team_name":      team["team_name"],
+        "manager":        f"{info.get('player_first_name','')} {info.get('player_last_name','')}".strip(),
+        "team_name":      info.get("name", f"Team {team_id}"),
         "fpl_joined_at":  fpl_joined,
         "anti_joined_at": datetime.now(timezone.utc).isoformat(),
         "eligible":       eligible,
     }
 
 
-def build_gw_score_rows(team: dict, season: str) -> list[dict]:
+def build_gw_score_rows(team_id: int, scored: list[dict], season: str) -> list[dict]:
     rows = []
-    for g in team.get("gws", []):
+    for g in scored:
         rows.append({
             "season":              season,
-            "team_id":             team["team_id"],
+            "team_id":             team_id,
             "gw":                  g["gw"],
             "fpl_raw_pts":         g.get("fpl_raw_pts"),
             "fpl_xfer_cost":       g.get("fpl_xfer_cost"),
@@ -165,12 +170,55 @@ def build_gw_score_rows(team: dict, season: str) -> list[dict]:
     return rows
 
 
+def build_player_gw_rows(
+    gw: int, season: str, live_data: dict, is_live: bool
+) -> list[dict]:
+    rows = []
+    for el in live_data.get("elements", []):
+        stats    = el.get("stats", {})
+        base_pts = stats.get("total_points", 0) or 0
+        minutes  = stats.get("minutes", 0) or 0
+        anti_pts = base_pts + INACTIVE_PEN if minutes == 0 else base_pts
+        rows.append({
+            "season":    season,
+            "player_id": el["id"],
+            "gw":        gw,
+            "base_pts":  base_pts,
+            "minutes":   minutes,
+            "anti_pts":  anti_pts,
+            "is_live":   is_live,
+        })
+    return rows
+
+
+def build_selection_row(
+    team_id: int, gw: int, season: str,
+    picks_data: dict, is_live: bool,
+) -> dict | None:
+    picks   = picks_data.get("picks", [])
+    captain = next((p["element"] for p in picks if p.get("is_captain")), None)
+    vice    = next((p["element"] for p in picks if p.get("is_vice_captain")), None)
+    squad   = [p["element"] for p in sorted(picks, key=lambda p: p["position"])]
+    if not squad or captain is None or vice is None:
+        return None
+    return {
+        "season":          season,
+        "team_id":         team_id,
+        "gw":              gw,
+        "squad":           squad,
+        "captain_id":      captain,
+        "vice_captain_id": vice,
+        "active_chip":     (picks_data.get("active_chip") or "").lower(),
+        "is_live":         is_live,
+    }
+
+
 def compute_gw_ranks(all_score_rows: list[dict]) -> None:
-    """For each GW, assign gw_rank based on anti_gw_pts (lowest = #1)."""
+    """Assign gw_rank per GW across all teams (lowest anti_gw_pts = rank 1)."""
     by_gw: dict[int, list[dict]] = {}
     for r in all_score_rows:
         by_gw.setdefault(r["gw"], []).append(r)
-    for gw, rows in by_gw.items():
+    for rows in by_gw.values():
         rows.sort(key=lambda r: r["anti_gw_pts"] if r["anti_gw_pts"] is not None else 99999)
         for rank, r in enumerate(rows, 1):
             r["gw_rank"] = rank
@@ -181,11 +229,13 @@ def compute_gw_ranks(all_score_rows: list[dict]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--league", type=int,            help="FPL mini-league ID")
+    parser.add_argument("--team",   type=int,            help="Single team ID only")
     parser.add_argument("--reset",  action="store_true", help="Wipe season data first")
     args = parser.parse_args()
 
+    t0 = time.time()
     log.info("=" * 60)
-    log.info("Anti-FPL → Supabase migration  -  %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
+    log.info("Anti-FPL → Supabase  —  %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
     log.info("Season: %s", SEASON)
     log.info("=" * 60)
 
@@ -194,58 +244,140 @@ def main() -> None:
     if args.reset:
         reset_season(sb, SEASON)
 
-    # ── 1. Bootstrap and gameweeks ────────────────────────────────────────────
-    log.info("Fetching FPL bootstrap...")
+    # ── Bootstrap ─────────────────────────────────────────────────────────────
+    log.info("Fetching bootstrap...")
     bootstrap = fetch_bootstrap()
     if not bootstrap:
         log.error("Bootstrap fetch failed.")
         sys.exit(1)
-    last_gw = current_gw(bootstrap)
-    log.info("Current (last finished) GW: %d", last_gw)
 
-    log.info("Upserting gameweeks...")
-    gw_rows = build_gameweek_rows(bootstrap, SEASON)
-    upsert_in_batches(sb, "gameweeks", gw_rows, on_conflict="season,gw")
+    last_gw     = current_gw(bootstrap)
+    finished    = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
+    player_type = build_player_type_map(bootstrap)
+    log.info("Last finished GW: %d", last_gw)
 
-    # ── 2. Team IDs ───────────────────────────────────────────────────────────
-    if args.league:
-        log.info("Pulling team IDs from mini-league %d...", args.league)
+    # Upsert gameweeks
+    upsert_in_batches(sb, "gameweeks", build_gameweek_rows(bootstrap, SEASON), "season,gw")
+
+    # ── Team IDs ──────────────────────────────────────────────────────────────
+    if args.team:
+        team_ids = [args.team]
+    elif args.league:
         team_ids = get_all_team_ids_from_league(args.league)
-        log.info("Found %d teams.", len(team_ids))
     else:
         team_ids = FOUNDING_TEAMS
-        log.info("Using %d founding teams.", len(team_ids))
+    log.info("Teams to process: %d", len(team_ids))
 
-    # ── 3. Score the season ──────────────────────────────────────────────────
-    log.info("Scoring %d teams for GW1–%d...", len(team_ids), last_gw)
-    teams = score_league(team_ids, last_gw)
+    # ── Fetch live data ONCE for all GWs ─────────────────────────────────────
+    # live_cache  : gw → {player_id: minutes}
+    # pts_cache   : gw → {player_id: total_points}
+    # live_raw    : gw → full live response (reused for player_gw_scores)
+    log.info("Fetching live data for GW1–%d (one pass)...", last_gw)
+    live_cache: dict[int, dict[int, int]] = {}
+    pts_cache:  dict[int, dict[int, int]] = {}
+    live_raw:   dict[int, dict]           = {}
 
-    # ── 4. Build database rows ───────────────────────────────────────────────
-    log.info("Building team rows...")
-    team_rows = [build_team_row(t, SEASON) for t in teams]
+    for gw in range(1, last_gw + 1):
+        raw = fetch_live(gw)
+        if raw:
+            live_raw[gw]   = raw
+            live_cache[gw] = {e["id"]: e["stats"].get("minutes", 0)      for e in raw.get("elements", [])}
+            pts_cache[gw]  = {e["id"]: e["stats"].get("total_points", 0) for e in raw.get("elements", [])}
+            log.info("  GW%d: %d players indexed", gw, len(live_cache[gw]))
+        time.sleep(0.3)
 
-    log.info("Building gw_scores rows...")
+    # ── Player GW scores (all 700+ players, built from live_raw) ─────────────
+    log.info("Building player_gw_scores from cached live data...")
+    for gw, raw in live_raw.items():
+        is_live   = gw not in finished
+        p_rows    = build_player_gw_rows(gw, SEASON, raw, is_live)
+        upsert_in_batches(sb, "player_gw_scores", p_rows, "season,player_id,gw")
+    log.info("player_gw_scores complete.")
+
+    # ── Score and persist each team ───────────────────────────────────────────
     all_score_rows: list[dict] = []
-    for t in teams:
-        all_score_rows.extend(build_gw_score_rows(t, SEASON))
+    team_rows:      list[dict] = []
+    selection_rows: list[dict] = []
 
-    # Compute per-GW rank across the whole league
-    log.info("Computing per-GW ranks across %d score rows...", len(all_score_rows))
+    for i, tid in enumerate(team_ids, 1):
+        log.info("[%d/%d] Processing team %d...", i, len(team_ids), tid)
+
+        history = fetch_team_history(tid)
+        if not history:
+            log.warning("  Skipping team %d — history fetch failed", tid)
+            continue
+
+        chips = history.get("chips", [])
+        first_half, second_half = split_chips_by_half(chips)
+        gw_rows_hist = {g["event"]: g for g in history.get("current", [])}
+
+        # Fetch picks ONCE per team per GW — reuse for both scoring and selections
+        picks_cache: dict[int, dict] = {}
+        for gw in sorted(gw_rows_hist):
+            picks = fetch_picks(tid, gw)
+            if picks:
+                picks_cache[gw] = picks
+            time.sleep(0.3)
+
+        # Score using already-fetched caches
+        scored = score_team_season(
+            team_id          = tid,
+            history          = history,
+            live_cache       = live_cache,
+            pts_cache        = pts_cache,
+            picks_cache      = picks_cache,
+            last_gw          = last_gw,
+            player_type      = player_type,
+            live_gw          = None if last_gw in finished else last_gw,
+        )
+
+        # Team info row
+        team_rows.append(build_team_row(tid, scored, SEASON))
+
+        # GW score rows
+        score_rows = build_gw_score_rows(tid, scored, SEASON)
+        all_score_rows.extend(score_rows)
+
+        # Selection rows — built from same picks_cache, no extra API calls
+        for gw, picks_data in picks_cache.items():
+            is_live = gw not in finished
+            sel     = build_selection_row(tid, gw, SEASON, picks_data, is_live)
+            if sel:
+                selection_rows.append(sel)
+
+        time.sleep(0.4)
+
+    # ── Compute per-GW ranks then persist ─────────────────────────────────────
+    log.info("Computing per-GW ranks...")
     compute_gw_ranks(all_score_rows)
 
-    # ── 5. Upsert into Supabase ──────────────────────────────────────────────
-    log.info("Upserting %d teams...", len(team_rows))
-    upsert_in_batches(sb, "teams", team_rows, on_conflict="team_id,season")
+    # GW1 eligibility filter
+    eligible_ids = {
+        r["team_id"] for r in all_score_rows
+        if r["gw"] == 1 and r.get("anti_gw_pts") is not None
+    }
+    team_rows      = [t for t in team_rows      if t["team_id"] in eligible_ids]
+    all_score_rows = [r for r in all_score_rows if r["team_id"] in eligible_ids]
+    selection_rows = [r for r in selection_rows if r["team_id"] in eligible_ids]
+    log.info("Eligible teams after GW1 filter: %d", len(team_rows))
 
-    log.info("Upserting %d gw_scores rows...", len(all_score_rows))
-    upsert_in_batches(sb, "gw_scores", all_score_rows, on_conflict="season,team_id,gw")
+    log.info("Upserting teams...")
+    upsert_in_batches(sb, "teams", team_rows, "team_id,season")
 
+    log.info("Upserting gw_scores...")
+    upsert_in_batches(sb, "gw_scores", all_score_rows, "season,team_id,gw")
+
+    log.info("Upserting team_gw_selections...")
+    upsert_in_batches(sb, "team_gw_selections", selection_rows, "season,team_id,gw")
+
+    elapsed = time.time() - t0
     log.info("=" * 60)
-    log.info("Migration complete.")
-    log.info("  Season:       %s", SEASON)
-    log.info("  Teams:        %d", len(team_rows))
-    log.info("  GW score rows %d", len(all_score_rows))
-    log.info("  GWs:          1 – %d", last_gw)
+    log.info("Migration complete in %.1f seconds.", elapsed)
+    log.info("  Season:            %s", SEASON)
+    log.info("  Teams:             %d", len(team_rows))
+    log.info("  GW score rows:     %d", len(all_score_rows))
+    log.info("  Selection rows:    %d", len(selection_rows))
+    log.info("  GWs processed:     1 – %d", last_gw)
     log.info("=" * 60)
 
 
