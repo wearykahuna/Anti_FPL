@@ -95,6 +95,11 @@
     .player-mins{color:var(--muted)}
     .player-anti{color:var(--accent);font-weight:600}
 
+    .fix-icon{display:inline-block;width:14px;text-align:center;font-size:0.7rem;margin-right:2px;font-weight:700}
+    .fix-icon.done{color:var(--good)}
+    .fix-icon.live{color:var(--live);animation:pulse 1.4s ease-in-out infinite}
+    .fix-icon.upc{color:var(--muted)}
+
     .state-msg{max-width:900px;margin:80px auto;text-align:center;color:var(--muted);
                font-family:var(--mono);font-size:0.85rem;line-height:2}
     .state-msg .big{font-size:2rem;display:block;margin-bottom:12px}
@@ -215,11 +220,27 @@
       // Player reference data
       if (!window.playerNames) {
         const allPlayers = await sbFetch('players',
-          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short`);
+          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,team_id`);
         window.playerNames = Object.fromEntries(allPlayers.map(p => [p.player_id, p.web_name]));
         window.playerPositions = Object.fromEntries(allPlayers.map(p => [p.player_id, p.position]));
         window.playerTeams = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_short]));
+        window.playerTeamIds = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_id]));
       }
+
+      // Fixtures for current GW → derive club fixture status
+      const fixtures = await sbFetch('fixtures',
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*`);
+      // clubStatus: {fpl_team_id: 'finished' | 'live' | 'upcoming'}
+      const clubStatus = {};
+      fixtures.forEach(f => {
+        let st;
+        if (f.finished || f.finished_provisional) st = 'finished';
+        else if (f.started)                       st = 'live';
+        else                                      st = 'upcoming';
+        clubStatus[f.team_h] = st;
+        clubStatus[f.team_a] = st;
+      });
+      window.clubStatus = clubStatus;
 
       // Chips history per team
       const tids = scores.map(s => s.team_id);
@@ -377,15 +398,24 @@
           const name      = (window.playerNames && window.playerNames[pid]) || `#${pid}`;
           const posShort  = (window.playerPositions && window.playerPositions[pid]) || '';
           const club      = (window.playerTeams && window.playerTeams[pid]) || '';
+          const clubId    = window.playerTeamIds?.[pid];
+          const fixState  = window.clubStatus?.[clubId] || 'unknown';
           const tag       = isCap ? '(C)' : isVice ? '(V)' : '';
           const pts       = p.base_pts != null ? p.base_pts : '—';
           const antiPts   = p.anti_pts != null ? p.anti_pts : '—';
           const mins      = p.minutes != null ? p.minutes : '—';
           const inactive  = p.minutes === 0;
+
+          // Fixture status indicator
+          let fixIcon = '';
+          if (fixState === 'finished')      fixIcon = '<span class="fix-icon done" title="Fixture finished">✓</span>';
+          else if (fixState === 'live')     fixIcon = '<span class="fix-icon live" title="Fixture in play">●</span>';
+          else if (fixState === 'upcoming') fixIcon = '<span class="fix-icon upc"  title="Fixture upcoming">○</span>';
+
           return `
             <div class="player-row ${isStarter ? '' : 'bench'} ${inactive ? 'inactive' : ''}">
               <span class="player-pos">${posShort || (isStarter ? i+1 : 'B')}</span>
-              <span class="player-name">${name}
+              <span class="player-name">${fixIcon} ${name}
                 ${club ? `<span class="player-club">${club}</span>` : ''}
                 ${tag ? `<span class="player-tag">${tag}</span>` : ''}
               </span>
