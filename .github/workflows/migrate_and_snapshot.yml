@@ -4,10 +4,13 @@ on:
   # Run manually from GitHub Actions tab at any time
   workflow_dispatch:
 
-  # Run automatically on a schedule — twice daily during the season
-  # Adjust or disable between seasons
   schedule:
-    - cron: '0 8,20 * * *'   # 08:00 and 20:00 UTC daily
+    # Every 5 minutes Saturday and Sunday 12:00–22:00 UTC (match windows)
+    - cron: '*/5 12-22 * * 6,0'
+    # Every 5 minutes Friday 19:00–22:00 UTC (Friday night fixtures)
+    - cron: '*/5 19-22 * * 5'
+    # Once daily at 08:00 UTC Mon–Thu (keep Supabase current)
+    - cron: '0 8 * * 1-4'
 
 jobs:
   migrate-and-snapshot:
