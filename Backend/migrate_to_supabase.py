@@ -351,6 +351,7 @@ def main() -> None:
             pts_cache        = pts_cache,
             picks_cache      = picks_cache,
             last_gw          = last_gw,
+            player_type      = player_type,
             live_gw          = None if last_gw in finished else last_gw,
         )
 
