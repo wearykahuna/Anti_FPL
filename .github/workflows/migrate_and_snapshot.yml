@@ -30,7 +30,7 @@ jobs:
           pip install requests beautifulsoup4 lxml postgrest python-dotenv
 
       - name: Run migration
-        working-directory: backend
+        working-directory: Backend
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -38,7 +38,7 @@ jobs:
           python migrate_to_supabase.py
 
       - name: Run snapshot
-        working-directory: backend
+        working-directory: Backend
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
