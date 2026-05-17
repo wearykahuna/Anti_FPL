@@ -30,18 +30,18 @@ from anti_fpl_scoring import (
     fetch_picks,
     fetch_team_history,
     get_all_team_ids_from_league,
+    current_gw,
     score_team_season,
-    build_player_type_map,
+    split_chips_by_half,
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
 SEASON     = "2025/26"
 BATCH_SIZE = 500
 
-FOUNDING_TEAMS = [
-    5388975, 6703903, 6595399, 3640882, 5399604,
-    6654853, 7667159, 1610262, 3155889, 911549,
-]
+# Optional: seed the teams table from this FPL mini-league on first run.
+# After initial seed, the teams table becomes the source of truth.
+SEED_LEAGUE_ID = 248502
 
 INACTIVE_PEN = 9   # mirror from scoring engine for player anti_pts
 
@@ -80,7 +80,7 @@ def reset_season(sb: SyncPostgrestClient, season: str) -> None:
     for tbl in (
         "gw_scores", "cup_fixtures", "mini_league_members",
         "player_gw_scores", "team_gw_selections", "teams",
-        "players", "gameweeks", "fixtures", "mini_leagues",
+        "players", "gameweeks",
     ):
         sb.from_(tbl).delete().eq("season", season).execute()
         log.info("  Cleared %s", tbl)
@@ -126,15 +126,21 @@ def build_player_rows(bootstrap: dict, season: str) -> list[dict]:
         })
     return rows
 
+
 def fetch_all_fixtures() -> list[dict]:
+    """Fetch all FPL fixtures for the season."""
     import requests
     try:
-        r = requests.get("https://fantasy.premierleague.com/api/fixtures/", timeout=20)
+        r = requests.get(
+            "https://fantasy.premierleague.com/api/fixtures/",
+            timeout=20,
+        )
         r.raise_for_status()
         return r.json()
     except Exception as exc:
         log.warning("Fixtures fetch failed: %s", exc)
         return []
+
 
 def build_fixture_rows(fixtures: list[dict], season: str) -> list[dict]:
     rows = []
@@ -152,7 +158,9 @@ def build_fixture_rows(fixtures: list[dict], season: str) -> list[dict]:
             "team_h_score":         f.get("team_h_score"),
             "team_a_score":         f.get("team_a_score"),
         })
+    # Drop fixtures with no event (shouldn't happen but defensive)
     return [r for r in rows if r["gw"] > 0]
+
 
 def build_gameweek_rows(bootstrap: dict, season: str) -> list[dict]:
     rows = []
@@ -183,7 +191,7 @@ def build_team_row(team_id: int, scored: list[dict], season: str) -> dict:
     }
 
 
-def build_gw_score_rows(team_id: int, scored: list[dict], season: str, live_gw: int | None = None) -> list[dict]:
+def build_gw_score_rows(team_id: int, scored: list[dict], season: str) -> list[dict]:
     rows = []
     for g in scored:
         rows.append({
@@ -213,7 +221,7 @@ def build_gw_score_rows(team_id: int, scored: list[dict], season: str, live_gw: 
             "vice_element":        g.get("vice_element"),
             "vice_pts":            g.get("vice_pts"),
             "cumulative_standing": g.get("standing"),
-            "is_live":             g["gw"] == live_gw,
+            "is_live":             g.get("live", False) or False,
         })
     return rows
 
@@ -299,14 +307,9 @@ def main() -> None:
         log.error("Bootstrap fetch failed.")
         sys.exit(1)
 
-    finished      = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
-    current       = next((e["id"] for e in bootstrap.get("events", []) if e.get("is_current")), None)
-    last_finished = max(finished) if finished else 0
-    last_gw       = current if current else last_finished
-    live_gw       = current if current and current not in finished else None
-    player_type   = build_player_type_map(bootstrap)
-    log.info("Last finished GW: %d, Current GW: %s, Live GW: %s",
-             last_finished, current, live_gw)
+    last_gw  = current_gw(bootstrap)
+    finished = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
+    log.info("Last finished GW: %d", last_gw)
 
     # Upsert gameweeks
     upsert_in_batches(sb, "gameweeks", build_gameweek_rows(bootstrap, SEASON), "season,gw")
@@ -315,18 +318,39 @@ def main() -> None:
     log.info("Upserting players reference table...")
     upsert_in_batches(sb, "players", build_player_rows(bootstrap, SEASON), "season,player_id")
 
+    # Upsert fixtures (FPL fixture state for the season)
     log.info("Fetching and upserting fixtures...")
-    upsert_in_batches(sb, "fixtures",
-                    build_fixture_rows(fetch_all_fixtures(), SEASON),
-                    "season,fixture_id")
-    
+    fixtures_raw = fetch_all_fixtures()
+    fixture_rows = build_fixture_rows(fixtures_raw, SEASON)
+    upsert_in_batches(sb, "fixtures", fixture_rows, "season,fixture_id")
+
     # ── Team IDs ──────────────────────────────────────────────────────────────
+    # Priority:
+    #   1. --team CLI arg → single team
+    #   2. --league CLI arg → score that league directly (legacy)
+    #   3. Default → score every team in the `teams` table
+    #      (seed from SEED_LEAGUE_ID on first run if table is empty)
+
     if args.team:
         team_ids = [args.team]
+        log.info("Single-team mode: %d", args.team)
     elif args.league:
+        log.info("Pulling team IDs from mini-league %d (legacy mode)...", args.league)
         team_ids = get_all_team_ids_from_league(args.league)
     else:
-        team_ids = FOUNDING_TEAMS
+        # Read from teams table
+        existing = sb.from_("teams").select("team_id").eq("season", SEASON).execute().data or []
+        team_ids = [r["team_id"] for r in existing]
+
+        if not team_ids:
+            # First-run seed: pull from SEED_LEAGUE_ID, pre-filter ineligibles
+            log.info("Teams table empty — seeding from league %d...", SEED_LEAGUE_ID)
+            raw_ids = get_all_team_ids_from_league(SEED_LEAGUE_ID)
+            log.info("Pulled %d team IDs, running eligibility filter...", len(raw_ids))
+            team_ids = filter_eligible_team_ids(raw_ids)
+        else:
+            log.info("Loaded %d existing teams from teams table", len(team_ids))
+
     log.info("Teams to process: %d", len(team_ids))
 
     # ── Fetch live data ONCE for all GWs ─────────────────────────────────────
@@ -368,6 +392,8 @@ def main() -> None:
             log.warning("  Skipping team %d — history fetch failed", tid)
             continue
 
+        chips = history.get("chips", [])
+        first_half, second_half = split_chips_by_half(chips)
         gw_rows_hist = {g["event"]: g for g in history.get("current", [])}
 
         # Fetch picks ONCE per team per GW — reuse for both scoring and selections
@@ -386,8 +412,7 @@ def main() -> None:
             pts_cache        = pts_cache,
             picks_cache      = picks_cache,
             last_gw          = last_gw,
-            player_type      = player_type,
-            live_gw          = live_gw,
+            live_gw          = None if last_gw in finished else last_gw,
         )
 
         # Team info row
