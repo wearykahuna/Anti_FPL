@@ -30,9 +30,8 @@ from anti_fpl_scoring import (
     fetch_picks,
     fetch_team_history,
     get_all_team_ids_from_league,
-    current_gw,
     score_team_season,
-    split_chips_by_half,
+    build_player_type_map,
 )
 
 # ── Config ────────────────────────────────────────────────────────────────────
@@ -191,7 +190,7 @@ def build_team_row(team_id: int, scored: list[dict], season: str) -> dict:
     }
 
 
-def build_gw_score_rows(team_id: int, scored: list[dict], season: str) -> list[dict]:
+def build_gw_score_rows(team_id: int, scored: list[dict], season: str, live_gw: int | None = None) -> list[dict]:
     rows = []
     for g in scored:
         rows.append({
@@ -221,7 +220,7 @@ def build_gw_score_rows(team_id: int, scored: list[dict], season: str) -> list[d
             "vice_element":        g.get("vice_element"),
             "vice_pts":            g.get("vice_pts"),
             "cumulative_standing": g.get("standing"),
-            "is_live":             g.get("live", False) or False,
+            "is_live":             g["gw"] == live_gw,
         })
     return rows
 
@@ -307,9 +306,14 @@ def main() -> None:
         log.error("Bootstrap fetch failed.")
         sys.exit(1)
 
-    last_gw  = current_gw(bootstrap)
-    finished = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
-    log.info("Last finished GW: %d", last_gw)
+    finished      = {e["id"] for e in bootstrap.get("events", []) if e.get("finished")}
+    current       = next((e["id"] for e in bootstrap.get("events", []) if e.get("is_current")), None)
+    last_finished = max(finished) if finished else 0
+    last_gw       = current if current else last_finished
+    live_gw       = current if current and current not in finished else None
+    player_type   = build_player_type_map(bootstrap)
+    log.info("Last finished GW: %d, Current GW: %s, Live GW: %s",
+             last_finished, current, live_gw)
 
     # Upsert gameweeks
     upsert_in_batches(sb, "gameweeks", build_gameweek_rows(bootstrap, SEASON), "season,gw")
@@ -347,7 +351,7 @@ def main() -> None:
             log.info("Teams table empty — seeding from league %d...", SEED_LEAGUE_ID)
             raw_ids = get_all_team_ids_from_league(SEED_LEAGUE_ID)
             log.info("Pulled %d team IDs, running eligibility filter...", len(raw_ids))
-            team_ids = filter_eligible_team_ids(raw_ids)
+            team_ids = raw_ids
         else:
             log.info("Loaded %d existing teams from teams table", len(team_ids))
 
@@ -392,8 +396,6 @@ def main() -> None:
             log.warning("  Skipping team %d — history fetch failed", tid)
             continue
 
-        chips = history.get("chips", [])
-        first_half, second_half = split_chips_by_half(chips)
         gw_rows_hist = {g["event"]: g for g in history.get("current", [])}
 
         # Fetch picks ONCE per team per GW — reuse for both scoring and selections
@@ -412,14 +414,15 @@ def main() -> None:
             pts_cache        = pts_cache,
             picks_cache      = picks_cache,
             last_gw          = last_gw,
-            live_gw          = None if last_gw in finished else last_gw,
+            player_type      = player_type,
+            live_gw          = live_gw,
         )
 
         # Team info row
         team_rows.append(build_team_row(tid, scored, SEASON))
 
         # GW score rows
-        score_rows = build_gw_score_rows(tid, scored, SEASON)
+        score_rows = build_gw_score_rows(tid, scored, SEASON, live_gw)
         all_score_rows.extend(score_rows)
 
         # Selection rows — built from same picks_cache, no extra API calls

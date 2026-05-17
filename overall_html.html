@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anti-FPL · Live Leaderboard</title>
+  <title>Anti-FPL · Overall League</title>
   <style>
     :root {
       --bg:#f5f5f5; --surface:#fff; --border:#e0e0e0;
@@ -15,20 +15,21 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:24px 16px 48px}
 
-    header{max-width:900px;margin:0 auto 32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    header{max-width:900px;margin:0 auto 16px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
     .logo{font-size:1.6rem;font-weight:800;letter-spacing:-0.04em}
     .logo span{color:var(--accent)}
     .meta{text-align:right;font-size:0.78rem;color:var(--muted);font-family:var(--mono);line-height:1.8}
 
-    .live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(214,40,40,0.12);
-                border:1px solid rgba(214,40,40,0.3);color:var(--live);font-size:0.7rem;font-weight:700;
-                letter-spacing:0.1em;padding:3px 10px;border-radius:99px;margin-bottom:4px}
+    /* Tabs */
     .tabs{max-width:900px;margin:0 auto 24px;display:flex;border-bottom:1px solid var(--border);gap:0}
     .tab{padding:10px 18px;font-size:0.82rem;font-weight:600;color:var(--muted);
          border-bottom:2px solid transparent;cursor:pointer;text-decoration:none;transition:all 0.2s}
     .tab:hover{color:var(--text)}
     .tab.active{color:var(--text);border-bottom-color:var(--accent)}
 
+    .live-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(214,40,40,0.12);
+                border:1px solid rgba(214,40,40,0.3);color:var(--live);font-size:0.7rem;font-weight:700;
+                letter-spacing:0.1em;padding:3px 10px;border-radius:99px;margin-bottom:4px}
     .live-dot{width:7px;height:7px;border-radius:50%;background:var(--live);animation:pulse 1.4s ease-in-out infinite}
     @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
 
@@ -136,15 +137,15 @@
 </header>
 
 <div class="tabs">
-  <a class="tab active" href="liveGWtest.html">Fight for the right to open mic</a>
-  <a class="tab" href="Overall_anti_fpl_league.html">Overall Anti FPL</a>
+  <a class="tab" href="liveGWtest.html">Fight for the right to open mic</a>
+  <a class="tab active" href="Overall_anti_fpl_league.html">Overall Anti FPL</a>
 </div>
 
 <div class="gw-bar" id="gw-bar"></div>
 
 <div class="refresh-bar">
   <span id="team-count">Loading...</span>
-  <span id="next-refresh-bar" style="font-size:0.75rem;color:var(--muted);font-family:var(--mono)">—</span>
+  <span style="font-size:0.75rem;color:var(--muted);font-family:var(--mono)">—</span>
 </div>
 
 <div class="table-wrap">
@@ -176,6 +177,9 @@
   const SEASON      = '2025/26';
   const REFRESH_MS  = 2 * 60 * 1000;
 
+  // No mini-league filter — show every team in the teams table
+  const TEAM_FILTER = null;
+
   let refreshTimer, countdownTimer, nextRefreshAt;
   let expandedTeam = null;
 
@@ -188,7 +192,6 @@
 
   async function loadData() {
     try {
-      // Current GW
       const gwData = await sbFetch('gameweeks',
         `season=eq.${encodeURIComponent(SEASON)}&is_current=eq.true&select=*&limit=1`);
       let currentGw, isLive;
@@ -202,34 +205,26 @@
         isLive = false;
       }
 
-      // Get the team IDs for "Fight for the right to open mic" mini-league
-      const ml = await sbFetch('mini_leagues',
-        `season=eq.${encodeURIComponent(SEASON)}&invite_code=eq.OPENMIC2526&select=id&limit=1`);
-      if (!ml.length) { showError('Mini-league not found'); return; }
-      const members = await sbFetch('mini_league_members',
-        `mini_league_id=eq.${ml[0].id}&select=team_id`);
-      const memberIds = members.map(m => m.team_id);
-      if (!memberIds.length) { showError('No members in mini-league'); return; }
+      // ALL eligible teams (no mini-league filter on this page)
+      let teamsFilter = `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id,manager,team_name&limit=1000`;
+      const teams = await sbFetch('teams', teamsFilter);
+      const teamIdList = teams.map(t => t.team_id);
+      if (!teamIdList.length) {
+        showError('No eligible teams found.');
+        return;
+      }
 
-      // Teams (eligible only, filtered to mini-league members)
-      const teams = await sbFetch('teams',
-        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&team_id=in.(${memberIds.join(',')})&select=team_id,manager,team_name`);
-
-      // GW scores
       const scores = await sbFetch('gw_scores',
-        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&team_id=in.(${memberIds.join(',')})&select=*`);
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&team_id=in.(${teamIdList.join(',')})&select=*&limit=1000`);
 
-      // Previous GW for delta/prevTotal
       const prevScores = currentGw > 1
         ? await sbFetch('gw_scores',
-            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw - 1}&team_id=in.(${memberIds.join(',')})&select=team_id,cumulative_standing,anti_total`)
+            `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw - 1}&team_id=in.(${teamIdList.join(',')})&select=team_id,cumulative_standing,anti_total&limit=1000`)
         : [];
 
-      // Selections for this GW
       const selections = await sbFetch('team_gw_selections',
-        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&team_id=in.(${memberIds.join(',')})&select=*`);
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&team_id=in.(${teamIdList.join(',')})&select=*&limit=1000`);
 
-      // Player IDs from squads → fetch their GW scores
       const playerIds = new Set();
       selections.forEach(s => (s.squad || []).forEach(pid => playerIds.add(pid)));
       const playerScores = playerIds.size
@@ -237,20 +232,18 @@
             `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&player_id=in.(${[...playerIds].join(',')})&select=*`)
         : [];
 
-      // Player reference data
       if (!window.playerNames) {
         const allPlayers = await sbFetch('players',
-          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,team_id`);
+          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,team_id&limit=1000`);
         window.playerNames = Object.fromEntries(allPlayers.map(p => [p.player_id, p.web_name]));
         window.playerPositions = Object.fromEntries(allPlayers.map(p => [p.player_id, p.position]));
         window.playerTeams = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_short]));
         window.playerTeamIds = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_id]));
       }
 
-      // Fixtures for current GW → derive club fixture status
+      // Fixtures for the current GW
       const fixtures = await sbFetch('fixtures',
         `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=*`);
-      // clubStatus: {fpl_team_id: 'finished' | 'live' | 'upcoming'}
       const clubStatus = {};
       fixtures.forEach(f => {
         let st;
@@ -262,11 +255,10 @@
       });
       window.clubStatus = clubStatus;
 
-      // Chips history per team
       const tids = scores.map(s => s.team_id);
       const chipsRows = tids.length
         ? await sbFetch('gw_scores',
-            `season=eq.${encodeURIComponent(SEASON)}&team_id=in.(${tids.join(',')})&active_chip=neq.&select=team_id,gw,active_chip`)
+            `season=eq.${encodeURIComponent(SEASON)}&team_id=in.(${tids.join(',')})&active_chip=neq.&select=team_id,gw,active_chip&limit=5000`)
         : [];
       const chipsByTeam = {};
       chipsRows.forEach(r => {
@@ -283,7 +275,6 @@
       render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive,
              selectionMap, playerScoreMap, chipsByTeam);
       scheduleRefresh();
-
     } catch (err) {
       console.error('loadData error:', err);
       showError(err.message);
@@ -316,18 +307,14 @@
 
   function render(scores, teamInfo, prevStanding, prevTotal, gw, isLive,
                   selectionMap, playerScoreMap, chipsByTeam) {
-
-    // Live badge
     document.getElementById('live-badge-wrap').innerHTML = isLive
       ? `<div class="live-badge"><span class="live-dot"></span>LIVE · GW${gw}</div>`
       : `<div style="font-size:0.72rem;color:var(--muted)">GW${gw} · Final</div>`;
 
-    // Last updated
     const now = new Date();
     document.getElementById('last-updated').textContent =
       `Updated ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
 
-    // GW summary pills
     const displayPts = scores.map(s => isLive ? (s.fpl_raw_pts ?? 0) : (s.anti_gw_pts ?? 0));
     const best  = displayPts.length ? Math.min(...displayPts) : 0;
     const worst = displayPts.length ? Math.max(...displayPts) : 0;
@@ -342,7 +329,6 @@
     document.getElementById('team-count').textContent =
       `${scores.length} eligible teams · click any row to expand squad`;
 
-    // Sort by displayed total ascending (lowest = best)
     const sorted = [...scores].sort((a, b) => {
       const aTot = isLive ? ((prevTotal[a.team_id] ?? 0) + (a.fpl_raw_pts ?? 0)) : (a.anti_total ?? 99999);
       const bTot = isLive ? ((prevTotal[b.team_id] ?? 0) + (b.fpl_raw_pts ?? 0)) : (b.anti_total ?? 99999);
@@ -355,19 +341,17 @@
     tbody.innerHTML = '';
 
     sorted.forEach((s, idx) => {
-      const info       = teamInfo[s.team_id] || {};
-      const pos        = idx + 1;
-      const prevPos    = prevStanding[s.team_id];
-      const move       = prevPos ? prevPos - pos : 0;
+      const info = teamInfo[s.team_id] || {};
+      const pos = idx + 1;
+      const prevPos = prevStanding[s.team_id];
+      const move = prevPos ? prevPos - pos : 0;
       const activeChip = s.active_chip || '';
-      const hasPens    = s.total_pens_gw > 0;
+      const hasPens = s.total_pens_gw > 0;
       const isExpanded = expandedTeam === s.team_id;
-      const prevTot    = prevTotal[s.team_id];
+      const prevTot = prevTotal[s.team_id];
 
       const displayGw = isLive ? (s.fpl_raw_pts ?? '—') : (s.anti_gw_pts ?? '—');
-      const displayTot = isLive
-        ? ((prevTot ?? 0) + (s.fpl_raw_pts ?? 0))
-        : (s.anti_total ?? '—');
+      const displayTot = isLive ? ((prevTot ?? 0) + (s.fpl_raw_pts ?? 0)) : (s.anti_total ?? '—');
 
       const moveStr = move > 0
         ? `<span style="color:var(--good);font-size:0.65rem"> ▲${move}</span>`
@@ -377,10 +361,8 @@
 
       const chipsHtml = buildChipsRow(chipsByTeam[s.team_id] || [], activeChip, gw);
 
-      // ── Team row ──
       const tr = document.createElement('tr');
       tr.className = `team-row${isExpanded ? ' expanded' : ''}`;
-      tr.dataset.teamId = s.team_id;
       tr.innerHTML = `
         <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
         <td>
@@ -404,34 +386,30 @@
       tr.addEventListener('click', () => toggleExpand(s.team_id));
       tbody.appendChild(tr);
 
-      // ── Detail row ──
       const selection = selectionMap[s.team_id];
       let squadHtml = '';
       if (selection?.squad?.length) {
         const captainId = selection.captain_id;
-        const viceId    = selection.vice_captain_id;
+        const viceId = selection.vice_captain_id;
         const playerRows = selection.squad.map((pid, i) => {
           const isStarter = i < 11;
-          const isCap     = pid === captainId;
-          const isVice    = pid === viceId;
-          const p         = playerScoreMap[pid] || {};
-          const name      = (window.playerNames && window.playerNames[pid]) || `#${pid}`;
-          const posShort  = (window.playerPositions && window.playerPositions[pid]) || '';
-          const club      = (window.playerTeams && window.playerTeams[pid]) || '';
-          const clubId    = window.playerTeamIds?.[pid];
-          const fixState  = window.clubStatus?.[clubId] || 'unknown';
-          const tag       = isCap ? '(C)' : isVice ? '(V)' : '';
-          const pts       = p.base_pts != null ? p.base_pts : '—';
-          const antiPts   = p.anti_pts != null ? p.anti_pts : '—';
-          const mins      = p.minutes != null ? p.minutes : '—';
-          const inactive  = p.minutes === 0;
-
-          // Fixture status indicator
+          const isCap = pid === captainId;
+          const isVice = pid === viceId;
+          const p = playerScoreMap[pid] || {};
+          const name = (window.playerNames && window.playerNames[pid]) || `#${pid}`;
+          const posShort = (window.playerPositions && window.playerPositions[pid]) || '';
+          const club = (window.playerTeams && window.playerTeams[pid]) || '';
+          const clubId = window.playerTeamIds?.[pid];
+          const fixState = window.clubStatus?.[clubId] || 'unknown';
+          const tag = isCap ? '(C)' : isVice ? '(V)' : '';
+          const pts = p.base_pts != null ? p.base_pts : '—';
+          const antiPts = p.anti_pts != null ? p.anti_pts : '—';
+          const mins = p.minutes != null ? p.minutes : '—';
+          const inactive = p.minutes === 0;
           let fixIcon = '';
           if (fixState === 'finished')      fixIcon = '<span class="fix-icon done" title="Fixture finished">✓</span>';
           else if (fixState === 'live')     fixIcon = '<span class="fix-icon live" title="Fixture in play">●</span>';
           else if (fixState === 'upcoming') fixIcon = '<span class="fix-icon upc"  title="Fixture upcoming">○</span>';
-
           return `
             <div class="player-row ${isStarter ? '' : 'bench'} ${inactive ? 'inactive' : ''}">
               <span class="player-pos">${posShort || (isStarter ? i+1 : 'B')}</span>
@@ -481,7 +459,7 @@
       tbody.appendChild(detailTr);
     });
 
-    document.getElementById('state-msg').style.display  = 'none';
+    document.getElementById('state-msg').style.display = 'none';
     document.getElementById('leaderboard').style.display = '';
   }
 
