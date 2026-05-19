@@ -1,0 +1,133 @@
+name: Anti-FPL
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Which task to run'
+        required: true
+        default: 'scheduler'
+        type: choice
+        options:
+          - scheduler
+          - refresh_reference
+          - refresh_picks
+          - refresh_live
+          - recalc_scores
+          - snapshot
+          - score_new_team
+      team_id:
+        description: 'Team ID (only for score_new_team)'
+        required: false
+        type: string
+
+  schedule:
+    # Each cron line has a comment with which task it maps to.
+    # The "Determine task" step uses the cron string to dispatch.
+
+    # ── refresh_reference: daily 03:00 UTC ─────────────────────────────────
+    - cron: '0 3 * * *'
+
+    # ── refresh_picks: hourly 17:00 Fri → 16:00 Sun (self-gates) ───────────
+    - cron: '0 17 * * 5'
+    - cron: '0 18 * * 5'
+    - cron: '0 19 * * 5'
+    - cron: '0 20 * * 5'
+    - cron: '0 21 * * 5'
+    - cron: '0 22 * * 5'
+    - cron: '0 23 * * 5'
+    - cron: '0 0  * * 6'
+    - cron: '0 1  * * 6'
+    - cron: '0 9  * * 6'
+    - cron: '0 10 * * 6'
+    - cron: '0 11 * * 6'
+    - cron: '0 16 * * 0'
+
+    # ── scheduler: every 15 minutes, 11:30–22:30 UTC daily ─────────────────
+    - cron: '30 11 * * *'
+    - cron: '45 11 * * *'
+    - cron: '0,15,30,45 12 * * *'
+    - cron: '0,15,30,45 13 * * *'
+    - cron: '0,15,30,45 14 * * *'
+    - cron: '0,15,30,45 15 * * *'
+    - cron: '0,15,30,45 16 * * *'
+    - cron: '0,15,30,45 17 * * *'
+    - cron: '0,15,30,45 18 * * *'
+    - cron: '0,15,30,45 19 * * *'
+    - cron: '0,15,30,45 20 * * *'
+    - cron: '0,15,30,45 21 * * *'
+    - cron: '0 22 * * *'
+    - cron: '15 22 * * *'
+    - cron: '30 22 * * *'
+
+    # ── snapshot: weekly Sunday 23:00 UTC ─────────────────────────────────
+    - cron: '0 23 * * 0'
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Determine task
+        id: t
+        run: |
+          # Manual dispatch
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "task=${{ github.event.inputs.task }}" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Schedule trigger — dispatch by cron value
+          CRON='${{ github.event.schedule }}'
+          case "$CRON" in
+            "0 3 * * *")
+              TASK=refresh_reference ;;
+            "0 23 * * 0")
+              TASK=snapshot ;;
+            # Picks crons (Fri/Sat/Sun specific hours)
+            "0 17 * * 5"|"0 18 * * 5"|"0 19 * * 5"|"0 20 * * 5"|"0 21 * * 5"|"0 22 * * 5"|"0 23 * * 5"|\
+            "0 0 * * 6"|"0 1 * * 6"|"0 9 * * 6"|"0 10 * * 6"|"0 11 * * 6"|\
+            "0 16 * * 0")
+              TASK=refresh_picks ;;
+            # Everything else = scheduler
+            *)
+              TASK=scheduler ;;
+          esac
+          echo "task=$TASK" >> $GITHUB_OUTPUT
+          echo "Mapped cron '$CRON' to task '$TASK'"
+
+      - name: Run task
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        working-directory: backend
+        run: |
+          TASK="${{ steps.t.outputs.task }}"
+          echo "Running task: $TASK"
+          if [ "$TASK" = "score_new_team" ]; then
+            python run_task.py "$TASK" --team "${{ github.event.inputs.team_id }}"
+          else
+            python run_task.py "$TASK"
+          fi
+
+      - name: Commit snapshot if any
+        if: steps.t.outputs.task == 'snapshot'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add snapshots/
+          git diff --cached --quiet || git commit -m "snapshot: $(date +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase origin main
+          git push
