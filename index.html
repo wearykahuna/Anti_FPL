@@ -238,7 +238,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
   <!-- loading placeholder -->
   <div id="loading-state">
     <span class="spin-big">&#x23F3;</span>
-    Loading data.json&#x2026;
+    Loading from Supabase&#x2026;
   </div>
 
   <!-- STANDINGS -->
@@ -399,7 +399,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
         </div>
       </div>
       <div id="bench-no-data" style="padding:20px 18px;font-size:12px;color:var(--muted)">
-        Picks data not available. Run <code style="background:var(--surface);padding:1px 5px;border-radius:3px">python fetch_data.py --picks</code> to fetch and cache GW picks data.
+        Bench data requires GW selections — available once picks are recorded each gameweek.
       </div>
     </div>
 
@@ -467,40 +467,138 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 </main>
 
 <script>
+// ─── Supabase config ──────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://qudcjhmbextpfdgdxihs.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGNqaG1iZXh0cGZkZ2R4aWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjEzMTQsImV4cCI6MjA5NDE5NzMxNH0.TRapf8KXSpM2XPrzprIhObi5cp0Sxt2wxel9novZRMA';
+const SEASON = '2025/26';
+
+const TEAM_COLORS = [
+  '#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6',
+  '#06b6d4','#f97316','#ec4899','#84cc16','#6366f1',
+  '#14b8a6','#a78bfa','#fb923c','#34d399','#60a5fa',
+];
+
 // ─── state ────────────────────────────────────────────────────────────────────
-let DATA = null;
 let TEAMS = [];
 let MAX_GW = 1;
 let CUR_GW = 1;
-let COMPLETED_GW = 1;  // last fully finished GW (MAX_GW - 1 when GW in progress)
+let COMPLETED_GW = 1;
 let CHART_OBJ = null;
 let RANK_CHART_OBJ = null;
 let DNA_CHART = null;
 let CHIP_SPLIT_CHART = null;
 const HIDDEN = new Set();
 
-// ─── bootstrap ────────────────────────────────────────────────────────────────
-async function loadData() {
-  const r = await fetch('data.json?' + Date.now());
-  if (!r.ok) throw new Error('data.json returned HTTP ' + r.status);
+// ─── Supabase helpers ─────────────────────────────────────────────────────────
+async function sbFetch(table, params = '') {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${params ? '?' + params : ''}`;
+  const r = await fetch(url, {
+    headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` }
+  });
+  if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
   return r.json();
 }
 
+async function sbFetchAll(table, params = '') {
+  const rows = [];
+  let offset = 0;
+  while (true) {
+    const sep = params ? '&' : '';
+    const batch = await sbFetch(table, `${params}${sep}limit=1000&offset=${offset}`);
+    rows.push(...batch);
+    if (batch.length < 1000) break;
+    offset += 1000;
+  }
+  return rows;
+}
+
+// ─── Data loading from Supabase ───────────────────────────────────────────────
+async function loadFromSupabase() {
+  const enc = s => encodeURIComponent(s);
+  const sf  = `season=eq.${enc(SEASON)}`;
+
+  const [gwData, teamsRaw, playersRaw] = await Promise.all([
+    sbFetch('gameweeks', `${sf}&select=*&order=gw.asc`),
+    sbFetch('teams',     `${sf}&eligible=eq.true&select=*&order=team_id.asc`),
+    sbFetch('players',   `${sf}&select=player_id,web_name`),
+  ]);
+
+  const allScores  = await sbFetchAll('gw_scores', `${sf}&order=gw.asc`);
+  const playerNames = Object.fromEntries(playersRaw.map(p => [p.player_id, p.web_name]));
+
+  const currentGwRow = gwData.find(g => g.is_current);
+  const maxFinished  = Math.max(0, ...gwData.filter(g => g.is_finished).map(g => g.gw));
+  const maxGw        = gwData.length ? Math.max(...gwData.map(g => g.gw)) : 1;
+  const currentGW    = currentGwRow?.gw ?? maxGw;
+  const gwInProgress = currentGwRow ? !currentGwRow.is_finished : false;
+  const completedGW  = gwInProgress ? Math.max(0, currentGW - 1) : (maxFinished || currentGW);
+
+  const scoresByTeam = {};
+  for (const s of allScores) {
+    if (!scoresByTeam[s.team_id]) scoresByTeam[s.team_id] = [];
+    scoresByTeam[s.team_id].push(s);
+  }
+
+  const teams = teamsRaw.map((t, i) => {
+    const gwScores = (scoresByTeam[t.team_id] || []).sort((a, b) => a.gw - b.gw);
+    const latest   = gwScores.at(-1);
+
+    const gws = gwScores.map(s => ({
+      gw:               s.gw,
+      pts:              s.anti_gw_pts,
+      total:            s.anti_total,
+      standing:         s.cumulative_standing,
+      mini_rank:        s.cumulative_standing,
+      chip:             s.active_chip || null,
+      site_pts:         s.fpl_raw_pts,
+      cvc_pens:         (s.cvc_pen_pts || 0) > 0 ? 1 : 0,
+      cvc_pen_pts:      s.cvc_pen_pts   || 0,
+      inactive_pens:    s.inactive_count || 0,
+      inactive_pen_pts: s.inactive_pen_pts || 0,
+      xfer_cost_pens:   s.hit_pts || 0,
+      bank_pen:         !!s.bank_pen,
+      captain: s.captain_element ? {
+        name:       playerNames[s.captain_element] || `#${s.captain_element}`,
+        pts:        s.captain_pts ?? 0,
+        multiplier: s.captain_mult || 2,
+      } : null,
+      benchBummingPts: null,
+      benchPlayers:    null,
+    }));
+
+    const chips_used = gws.filter(g => g.chip).map(g => ({ chip: g.chip, gw: g.gw }));
+
+    return {
+      id:        t.team_id,
+      team_name: t.team_name,
+      manager:   t.manager,
+      color:     TEAM_COLORS[i % TEAM_COLORS.length],
+      gws,
+      summary: {
+        total_points: latest?.anti_total ?? 0,
+        chips_used,
+      },
+    };
+  });
+
+  return { teams, currentGW, completedGW, gwInProgress };
+}
+
+// ─── bootstrap ────────────────────────────────────────────────────────────────
 async function init() {
   try {
-    DATA   = await loadData();
-    TEAMS  = DATA.teams;
-    MAX_GW = DATA.metadata.current_gw;
-    CUR_GW = MAX_GW;
-    const inProgress = !!DATA.metadata.gw_in_progress;
-    COMPLETED_GW = inProgress ? MAX_GW - 1 : MAX_GW;
+    const { teams, currentGW, completedGW, gwInProgress } = await loadFromSupabase();
+    TEAMS        = teams;
+    MAX_GW       = currentGW;
+    CUR_GW       = currentGW;
+    COMPLETED_GW = completedGW;
 
     document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (inProgress ? ' ⚡' : ' ✓');
+    document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
     document.getElementById('header-sub').textContent =
       '2025/26 Season \xB7 The worst team wins \xB7 Through GW' + MAX_GW +
-      ' \xB7 Updated ' + fmtDate(DATA.metadata.last_updated);
-    if (inProgress) {
+      ' \xB7 Updated ' + fmtDate(new Date().toISOString());
+    if (gwInProgress) {
       document.getElementById('gw-progress-banner').style.display = 'block';
       document.getElementById('gw-progress-text').textContent = 'GW' + MAX_GW + ' in progress';
     }
@@ -511,8 +609,7 @@ async function init() {
     document.getElementById('loading-state').style.display = 'none';
     const el = document.getElementById('error-state');
     el.style.display = 'block';
-    el.textContent = 'Failed to load data.json: ' + e.message +
-      '. Run fetch_data.py first, then open this file via a local server or file://.';
+    el.textContent = 'Failed to load from Supabase: ' + e.message;
   }
 }
 
@@ -521,15 +618,15 @@ async function reloadData(btn) {
   const spin = btn.querySelector('.spin');
   spin.style.animation = 'spin 1s linear infinite';
   try {
-    DATA         = await loadData();
-    TEAMS        = DATA.teams;
-    MAX_GW       = DATA.metadata.current_gw;
-    CUR_GW       = MAX_GW;
-    COMPLETED_GW = DATA.metadata.gw_in_progress ? MAX_GW - 1 : MAX_GW;
-    document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + ' ✓';
+    const { teams, currentGW, completedGW, gwInProgress } = await loadFromSupabase();
+    TEAMS        = teams;
+    MAX_GW       = currentGW;
+    CUR_GW       = currentGW;
+    COMPLETED_GW = completedGW;
+    document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
     document.getElementById('header-sub').textContent =
       '2025/26 Season \xB7 The worst team wins \xB7 Through GW' + MAX_GW +
-      ' \xB7 Updated ' + fmtDate(DATA.metadata.last_updated);
+      ' \xB7 Updated ' + fmtDate(new Date().toISOString());
     if (CHART_OBJ) { CHART_OBJ.destroy(); CHART_OBJ = null; }
     renderAll();
   } catch(e) {
@@ -1105,7 +1202,7 @@ function renderCaptainPenLeague() {
   const hasPicks = TEAMS.some(t => t.gws.some(g => g.captain));
   if (!hasPicks) {
     document.getElementById('cap-pen-body').innerHTML =
-      '<tr><td colspan="5" style="padding:12px;color:var(--muted);font-size:12px">Run fetch_data.py --picks to populate captain data.</td></tr>';
+      '<tr><td colspan="5" style="padding:12px;color:var(--muted);font-size:12px">Captain data will appear once picks are recorded for the season.</td></tr>';
     return;
   }
 
