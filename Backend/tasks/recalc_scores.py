@@ -167,12 +167,12 @@ def update_ranks_for_gw(season: str, gw: int) -> None:
               .execute().data or [])
     if not rows:
         return
-    rows.sort(key=lambda r: r.get("anti_gw_pts") if r.get("anti_gw_pts") is not None else 99999)
-    updates = [
-        {"id": r["id"], "season": season, "team_id": r["team_id"], "gw": gw, "gw_rank": rank}
-        for rank, r in enumerate(rows, 1)
-    ]
-    sb.from_("gw_scores").upsert(updates, on_conflict="season,team_id,gw").execute()
+    rows = [r for r in rows if r.get("anti_gw_pts") is not None]
+    if not rows:
+        return
+    rows.sort(key=lambda r: r["anti_gw_pts"])
+    for rank, r in enumerate(rows, 1):
+        sb.from_("gw_scores").update({"gw_rank": rank}).eq("id", r["id"]).execute()
 
 
 def update_cumulative_standings(season: str, gw: int) -> None:
@@ -184,12 +184,12 @@ def update_cumulative_standings(season: str, gw: int) -> None:
               .execute().data or [])
     if not rows:
         return
-    rows.sort(key=lambda r: r.get("anti_total") if r.get("anti_total") is not None else 99999)
-    updates = [
-        {"id": r["id"], "season": season, "team_id": r["team_id"], "gw": gw, "cumulative_standing": pos}
-        for pos, r in enumerate(rows, 1)
-    ]
-    sb.from_("gw_scores").upsert(updates, on_conflict="season,team_id,gw").execute()
+    rows = [r for r in rows if r.get("anti_total") is not None]
+    if not rows:
+        return
+    rows.sort(key=lambda r: r["anti_total"])
+    for pos, r in enumerate(rows, 1):
+        sb.from_("gw_scores").update({"cumulative_standing": pos}).eq("id", r["id"]).execute()
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

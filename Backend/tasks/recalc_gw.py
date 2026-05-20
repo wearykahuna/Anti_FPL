@@ -35,8 +35,22 @@ SEASON       = DEFAULT_SEASON
 _POS_TO_TYPE = {"GKP": 1, "DEF": 2, "MID": 3, "FWD": 4}
 
 
-def run(gw_from: int, gw_to: int) -> int:
-    log.info("Recalc GW %d–%d for season %s", gw_from, gw_to, SEASON)
+def _calc_fpl_raw(squad: list, captain_id: int | None, active_chip: str, pts_map: dict) -> int:
+    """Recompute fpl_raw from player scores (same logic as recalc_scores.py)."""
+    starters = squad[:11]
+    cap_mult  = 3 if active_chip == "3xc" else 2
+    raw = sum(pts_map.get(pid, 0) for pid in starters)
+    if captain_id in starters:
+        raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
+    if active_chip == "bboost":
+        for pid in squad[11:]:
+            raw += pts_map.get(pid, 0)
+    return raw
+
+
+def run(gw_from: int, gw_to: int, recalc_fpl_raw: bool = False) -> int:
+    log.info("Recalc GW %d–%d for season %s (recalc_fpl_raw=%s)",
+             gw_from, gw_to, SEASON, recalc_fpl_raw)
 
     players_ref  = get_players_ref(SEASON)
     player_type  = {p["player_id"]: _POS_TO_TYPE.get(p.get("position"), 3) for p in players_ref}
@@ -93,9 +107,14 @@ def run(gw_from: int, gw_to: int) -> int:
                 ],
             }
 
+            if recalc_fpl_raw:
+                fpl_raw = _calc_fpl_raw(squad, captain_id, active_chip, pts_map)
+            else:
+                fpl_raw = existing.get("fpl_raw_pts", 0) or 0
+
             hist_gw_row = {
                 "event":                gw,
-                "points":               existing.get("fpl_raw_pts", 0) or 0,
+                "points":               fpl_raw,
                 "event_transfers_cost": existing.get("fpl_xfer_cost", 0) or 0,
                 "bank":                 existing.get("bank", 0) or 0,
                 "rank":                 existing.get("fpl_gw_rank"),
@@ -140,7 +159,10 @@ if __name__ == "__main__":
     import argparse
     logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s  %(message)s", datefmt="%H:%M:%S")
     p = argparse.ArgumentParser()
-    p.add_argument("--gw-from", type=int, required=True)
-    p.add_argument("--gw-to",   type=int)
+    p.add_argument("--gw-from",        type=int, required=True)
+    p.add_argument("--gw-to",          type=int)
+    p.add_argument("--recalc-fpl-raw", action="store_true",
+                   help="Recompute fpl_raw from player_gw_scores instead of reading from DB. "
+                        "Use after backfill_player_scores to correct stale FPL raw pts.")
     a = p.parse_args()
-    sys.exit(run(a.gw_from, a.gw_to or a.gw_from))
+    sys.exit(run(a.gw_from, a.gw_to or a.gw_from, recalc_fpl_raw=a.recalc_fpl_raw))

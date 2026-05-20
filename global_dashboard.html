@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Anti FPL Mini League</title>
+<title>Anti FPL Global Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -211,11 +211,11 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 <header>
   <div class="logo">&#x1F3F4;</div>
   <div class="header-text">
-    <h1>Anti FPL &#x2014; Mini League</h1>
-    <p id="header-sub">2025/26 Season &#xB7; Fight for the right to open mic</p>
+    <h1>Anti FPL &#x2014; Global Dashboard</h1>
+    <p id="header-sub">2025/26 Season &#xB7; All tracked teams</p>
   </div>
   <div class="gw-badge" id="gw-badge">GW &#x2014;</div>
-  <a href="global_dashboard.html" class="refresh-btn" style="text-decoration:none">&#x1F30D; Global</a>
+  <a href="index.html" class="refresh-btn" style="text-decoration:none">&#x1F3C6; Mini League</a>
   <button class="refresh-btn" onclick="reloadData(this)">
     <span class="spin">&#x21BB;</span> Refresh
   </button>
@@ -253,7 +253,8 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
             <th>Team</th>
             <th class="num">Total</th>
             <th class="num">GW Pts</th>
-            <th class="num">Global Rank</th>
+            <th class="num">Overall Rank</th>
+            <th class="num">Prev Rank</th>
             <th class="num">3&#x2011;GW Avg</th>
             <th class="num">5&#x2011;GW Avg</th>
             <th>Chips Left</th>
@@ -302,7 +303,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 
     <!-- GW-by-GW rank chart -->
     <div class="panel" style="margin-bottom:20px">
-      <div class="stat-card-header">Mini League Rank by GW &#x2014; Lower is Better</div>
+      <div class="stat-card-header">Overall Rank by GW &#x2014; Lower is Better</div>
       <div class="chart-wrap-sm"><canvas id="rank-chart"></canvas></div>
       <div class="chart-legend" id="rank-legend"></div>
     </div>
@@ -314,7 +315,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
         <div id="time-top-list"></div>
       </div>
       <div class="panel">
-        <div class="stat-card-header">&#x1F3A4; Weeks in 10th Place <span>(open mic danger zone)</span></div>
+        <div class="stat-card-header">&#x1F3A4; Weeks in Last Place</div>
         <div id="time-bottom-list"></div>
       </div>
     </div>
@@ -517,21 +518,13 @@ async function loadFromSupabase() {
   const enc = s => encodeURIComponent(s);
   const sf  = `season=eq.${enc(SEASON)}`;
 
-  const [gwData, mlRaw, playersRaw] = await Promise.all([
-    sbFetch('gameweeks',    `${sf}&select=*&order=gw.asc`),
-    sbFetch('mini_leagues', `${sf}&invite_code=eq.OPENMIC2526&select=id&limit=1`),
-    sbFetch('players',      `${sf}&select=player_id,web_name`),
+  const [gwData, teamsRaw, playersRaw] = await Promise.all([
+    sbFetch('gameweeks', `${sf}&select=*&order=gw.asc`),
+    sbFetch('teams',     `${sf}&eligible=eq.true&select=*&order=team_id.asc`),
+    sbFetch('players',   `${sf}&select=player_id,web_name`),
   ]);
 
-  if (!mlRaw.length) throw new Error('Mini-league OPENMIC2526 not found in Supabase.');
-  const mlMembers = await sbFetch('mini_league_members', `mini_league_id=eq.${mlRaw[0].id}&select=team_id`);
-  const memberIds = mlMembers.map(m => m.team_id);
-  if (!memberIds.length) throw new Error('No members found in mini-league OPENMIC2526.');
-
-  const [teamsRaw, allScores] = await Promise.all([
-    sbFetch('teams',    `${sf}&team_id=in.(${memberIds.join(',')})&select=*&order=team_id.asc`),
-    sbFetchAll('gw_scores', `${sf}&team_id=in.(${memberIds.join(',')})&order=gw.asc`),
-  ]);
+  const allScores = await sbFetchAll('gw_scores', `${sf}&order=gw.asc`);
   const playerNames = Object.fromEntries(playersRaw.map(p => [p.player_id, p.web_name]));
 
   const currentGwRow = gwData.find(g => g.is_current);
@@ -555,9 +548,8 @@ async function loadFromSupabase() {
       gw:               s.gw,
       pts:              s.anti_gw_pts,
       total:            s.anti_total,
-      standing:         s.cumulative_standing,  // global rank (all teams)
-      ml_rank:          null,                    // mini-league rank, computed after load
-      mini_rank:        null,                    // alias; set by computeMLRanks
+      standing:         s.cumulative_standing,
+      mini_rank:        s.cumulative_standing,
       chip:             s.active_chip || null,
       site_pts:         s.fpl_raw_pts,
       cvc_pens:         (s.cvc_pen_pts || 0) > 0 ? 1 : 0,
@@ -593,23 +585,6 @@ async function loadFromSupabase() {
   return { teams, currentGW, completedGW, gwInProgress };
 }
 
-// ─── Mini-league rank computation ────────────────────────────────────────────
-function computeMLRanks(teams) {
-  // For every GW find the set of loaded teams and rank by anti_total (lower = better).
-  // Writes ml_rank + mini_rank (alias) onto each gw entry in-place.
-  const maxGw = Math.max(0, ...teams.flatMap(t => t.gws.map(g => g.gw)));
-  for (let gw = 1; gw <= maxGw; gw++) {
-    const entries = teams
-      .map(t => ({ team: t, e: t.gws.find(g => g.gw === gw) }))
-      .filter(x => x.e != null)
-      .sort((a, b) => (a.e.total ?? 99999) - (b.e.total ?? 99999));
-    entries.forEach((x, i) => {
-      x.e.ml_rank   = i + 1;
-      x.e.mini_rank = i + 1;  // kept for backwards compat with score-card rendering
-    });
-  }
-}
-
 // ─── bootstrap ────────────────────────────────────────────────────────────────
 async function init() {
   try {
@@ -618,12 +593,12 @@ async function init() {
     MAX_GW       = currentGW;
     CUR_GW       = currentGW;
     COMPLETED_GW = completedGW;
-    computeMLRanks(TEAMS);
+
 
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
     document.getElementById('header-sub').textContent =
-      '2025/26 Season \xB7 Fight for the right to open mic \xB7 Through GW' + MAX_GW +
+      '2025/26 Season \xB7 All tracked teams \xB7 Through GW' + MAX_GW +
       ' \xB7 Updated ' + fmtDate(new Date().toISOString());
     if (gwInProgress) {
       document.getElementById('gw-progress-banner').style.display = 'block';
@@ -650,10 +625,10 @@ async function reloadData(btn) {
     MAX_GW       = currentGW;
     CUR_GW       = currentGW;
     COMPLETED_GW = completedGW;
-    computeMLRanks(TEAMS);
+
     document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
     document.getElementById('header-sub').textContent =
-      '2025/26 Season \xB7 Fight for the right to open mic \xB7 Through GW' + MAX_GW +
+      '2025/26 Season \xB7 All tracked teams \xB7 Through GW' + MAX_GW +
       ' \xB7 Updated ' + fmtDate(new Date().toISOString());
     if (CHART_OBJ) { CHART_OBJ.destroy(); CHART_OBJ = null; }
     renderAll();
@@ -739,21 +714,28 @@ function renderStandings() {
     const cur  = gwEntry(team, MAX_GW);
     const prev = gwEntry(team, MAX_GW - 1);
 
-    // Mini-league position (1-10, computed locally)
-    const mlPos     = cur?.ml_rank ?? idx + 1;
-    const prevMlPos = prev?.ml_rank ?? mlPos;
-    const diff      = prevMlPos - mlPos;  // positive = moved up
+    const standing = cur?.standing ?? idx + 1;
+    const prevStanding = prev?.standing ?? standing;
+    const diff = prevStanding - standing;
 
-    const rankCls = mlPos===1?'top1':mlPos===2?'top2':mlPos===3?'top3':'';
+    const rankCls = idx===0?'top1':idx===1?'top2':idx===2?'top3':'';
     const movHtml = diff===0
       ? `<span class="move-badge move-eq">–</span>`
       : diff>0
         ? `<span class="move-badge move-up">▲${diff}</span>`
         : `<span class="move-badge move-dn">▼${Math.abs(diff)}</span>`;
 
-    const total      = team.summary?.total_points ?? '?';
-    const gwPts      = cur?.pts ?? '—';
-    const globalRank = cur?.standing ?? '—';  // cumulative_standing from DB (all teams)
+    const total    = team.summary?.total_points ?? '?';
+    const gwPts    = cur?.pts ?? '—';
+    const gwRank   = cur?.mini_rank ?? '—';
+    const prevRank = prev?.mini_rank ?? '—';
+    const rankDiff = (typeof gwRank==='number' && typeof prevRank==='number')
+      ? prevRank - gwRank : 0;
+    const rankMov = rankDiff===0
+      ? `<span class="move-badge move-eq" style="font-size:9px">–</span>`
+      : rankDiff>0
+        ? `<span class="move-badge move-up" style="font-size:9px">▲${rankDiff}</span>`
+        : `<span class="move-badge move-dn" style="font-size:9px">▼${Math.abs(rankDiff)}</span>`;
     const avg3   = mean(lastNPts(team,3));
     const avg5   = mean(lastNPts(team,5));
     const form   = team.gws.slice(-5).map(g=>g.pts).filter(p=>p!=null);
@@ -779,7 +761,7 @@ function renderStandings() {
 
     return `<tr>
       <td><div class="rank-cell">
-        <span class="rank-num ${rankCls}">${mlPos}</span>${movHtml}
+        <span class="rank-num ${rankCls}">${standing}</span>${movHtml}
       </div></td>
       <td><div class="team-row">
         <span class="dot" style="background:${team.color}"></span>
@@ -793,7 +775,8 @@ function renderStandings() {
       </div></td>
       <td><div class="total-pts">${total}</div></td>
       <td class="num">${gwPts}</td>
-      <td class="num">${globalRank}</td>
+      <td class="num" style="white-space:nowrap">${gwRank} ${rankMov}</td>
+      <td class="num">${prevRank}</td>
       <td class="num">${avg3!=null?avg3.toFixed(1):'—'}</td>
       <td class="num">${avg5!=null?avg5.toFixed(1):'—'}</td>
       <td><div class="chips-cell">${chipPips}</div></td>
@@ -990,7 +973,7 @@ function renderRankChart() {
 
   const datasets = TEAMS.map(team => ({
     label: team.manager,
-    data: Array.from({length:MAX_GW}, (_, i) => gwEntry(team, i+1)?.ml_rank ?? null),
+    data: Array.from({length:MAX_GW}, (_, i) => gwEntry(team, i+1)?.standing ?? null),
     borderColor: team.color,
     backgroundColor: team.color + '22',
     borderWidth: 2,
@@ -1028,11 +1011,11 @@ function renderRankChart() {
         x: {grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}}},
         y: {
           reverse: true,
-          min: 1, max: 10,
+          min: 1,
           grid:{color:'rgba(30,45,68,.6)'},
           ticks:{color:'#475569', font:{size:10}, stepSize:1,
             callback: v => `#${v}`},
-          title:{display:true, text:'Mini-League Position (1 = leading)', color:'#475569', font:{size:11}},
+          title:{display:true, text:'Overall Position (1 = leading)', color:'#475569', font:{size:11}},
         }
       }
     }
@@ -1050,8 +1033,8 @@ function renderTimeStats() {
 
   const teamWeeks = TEAMS.map(team => ({
     team,
-    top:    team.gws.filter(g => g.gw <= COMPLETED_GW && g.ml_rank === 1).length,
-    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW && g.ml_rank === 10).length,
+    top:    team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing === 1).length,
+    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing === TEAMS.length).length,
   }));
 
   const topList    = [...teamWeeks].filter(x => x.top > 0)   .sort((a,b) => b.top    - a.top).slice(0, 3);
