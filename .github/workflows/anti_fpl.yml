@@ -15,10 +15,19 @@ on:
           - refresh_picks
           - refresh_live
           - recalc_scores
+          - recalc_gw
           - snapshot
           - score_new_team
       team_id:
         description: 'Team ID (only for score_new_team)'
+        required: false
+        type: string
+      gw_from:
+        description: 'GW start (only for recalc_gw)'
+        required: false
+        type: string
+      gw_to:
+        description: 'GW end (only for recalc_gw — leave blank for single GW)'
         required: false
         type: string
 
@@ -123,6 +132,10 @@ jobs:
             python run_task.py recalc_scores
           elif [ "$TASK" = "score_new_team" ]; then
             python run_task.py "$TASK" --team "${{ github.event.inputs.team_id }}"
+          elif [ "$TASK" = "recalc_gw" ]; then
+            GW_ARGS="--gw-from ${{ github.event.inputs.gw_from }}"
+            [ -n "${{ github.event.inputs.gw_to }}" ] && GW_ARGS="$GW_ARGS --gw-to ${{ github.event.inputs.gw_to }}"
+            python run_task.py "$TASK" $GW_ARGS
           else
             python run_task.py "$TASK"
           fi

@@ -9,6 +9,8 @@ Usage:
     python run_task.py refresh_picks
     python run_task.py refresh_live
     python run_task.py recalc_scores
+    python run_task.py recalc_gw --gw-from 5
+    python run_task.py recalc_gw --gw-from 5 --gw-to 10
     python run_task.py score_new_team --team 5388975
     python run_task.py snapshot
 
@@ -72,8 +74,17 @@ def _task_scheduler(args):
     from tasks.scheduler import run
     return run()
 
+def _task_recalc_gw(args):
+    from tasks.recalc_gw import run
+    if not args.gw_from:
+        log.error("recalc_gw requires --gw-from <gw>")
+        return 1
+    gw_to = args.gw_to or args.gw_from
+    return run(args.gw_from, gw_to)
+
 
 TASKS = {
+    "recalc_gw":         _task_recalc_gw,
     "recalc_scores":     _task_recalc_scores,
     "refresh_live":      _task_refresh_live,
     "refresh_picks":     _task_refresh_picks,
@@ -89,7 +100,9 @@ TASKS = {
 def main() -> int:
     parser = argparse.ArgumentParser(description="Anti-FPL task dispatcher")
     parser.add_argument("task", choices=sorted(TASKS.keys()), help="Task to run")
-    parser.add_argument("--team", type=int, help="Team ID (for score_new_team)")
+    parser.add_argument("--team",    type=int, help="Team ID (for score_new_team)")
+    parser.add_argument("--gw-from", type=int, dest="gw_from", help="Start GW (for recalc_gw)")
+    parser.add_argument("--gw-to",   type=int, dest="gw_to",   help="End GW (for recalc_gw, defaults to --gw-from)")
     args = parser.parse_args()
 
     log.info("Running task: %s", args.task)
