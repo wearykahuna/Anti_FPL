@@ -9,6 +9,7 @@ on:
         default: 'scheduler'
         type: choice
         options:
+          - full_refresh
           - scheduler
           - refresh_reference
           - refresh_picks
@@ -112,11 +113,15 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-        working-directory: backend
+        working-directory: Backend
         run: |
           TASK="${{ steps.t.outputs.task }}"
           echo "Running task: $TASK"
-          if [ "$TASK" = "score_new_team" ]; then
+          if [ "$TASK" = "full_refresh" ]; then
+            python run_task.py refresh_reference
+            python run_task.py refresh_picks
+            python run_task.py recalc_scores
+          elif [ "$TASK" = "score_new_team" ]; then
             python run_task.py "$TASK" --team "${{ github.event.inputs.team_id }}"
           else
             python run_task.py "$TASK"
