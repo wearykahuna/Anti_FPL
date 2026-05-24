@@ -556,6 +556,7 @@ async function loadFromSupabase() {
       pts:              s.anti_gw_pts,
       total:            s.anti_total,
       standing:         s.cumulative_standing,  // global rank (all teams)
+      is_provisional:   !!s.is_provisional,     // true while GW awaits official FPL confirmation
       ml_rank:          null,                    // mini-league rank, computed after load
       mini_rank:        null,                    // alias; set by computeMLRanks
       chip:             s.active_chip || null,
@@ -752,7 +753,8 @@ function renderStandings() {
         : `<span class="move-badge move-dn">▼${Math.abs(diff)}</span>`;
 
     const total      = team.summary?.total_points ?? '?';
-    const gwPts      = cur?.pts ?? '—';
+    const provMark   = cur?.is_provisional ? '<span title="Provisional — awaiting FPL official confirmation" style="color:var(--muted);font-size:10px;vertical-align:super">~</span>' : '';
+    const gwPts      = cur?.pts != null ? `${cur.pts}${provMark}` : '—';
     const globalRank = cur?.standing ?? '—';  // cumulative_standing from DB (all teams)
     const avg3   = mean(lastNPts(team,3));
     const avg5   = mean(lastNPts(team,5));
@@ -864,7 +866,7 @@ function renderGWScores(gw) {
         ${esc(team.team_name)} ${chipHtml}
       </div>
       <div class="sc-manager">${esc(team.manager)}</div>
-      <div class="sc-pts" style="color:${ptsColor(g.pts)}">${g.pts??'—'}</div>
+      <div class="sc-pts" style="color:${ptsColor(g.pts)}">${g.pts??'—'}${g.is_provisional?'<span title="Provisional — awaiting FPL official confirmation" style="font-size:11px;color:var(--muted);vertical-align:super;margin-left:2px">~</span>':''}</div>
       <div class="sc-total">Total: ${g.total??'—'} pts &middot; Standing: ${g.standing??'—'}</div>
       ${pensHtml}${picksHtml}
     </div>`;

@@ -218,6 +218,29 @@ def is_live_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]
     return any_active, current
 
 
+# ── Provisional window helper ─────────────────────────────────────────────────
+
+def is_provisional_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]:
+    """
+    Returns (is_open, current_gw).
+
+    Open when all GW fixtures are finished/finished_provisional but at least one
+    hasn't been officially confirmed yet — the gap between final whistle and
+    FPL's official GW confirmation (can be several hours).
+    """
+    current = get_current_gw(season)
+    if current is None:
+        return False, None
+
+    fixtures = get_fixtures(season, gw=current)
+    if not fixtures:
+        return False, current
+
+    all_done  = all(f.get("finished") or f.get("finished_provisional") for f in fixtures)
+    any_prov  = any(f.get("finished_provisional") and not f.get("finished") for f in fixtures)
+    return all_done and any_prov, current
+
+
 # ── Cleanup helpers ───────────────────────────────────────────────────────────
 
 def wipe_season(season: str = DEFAULT_SEASON,

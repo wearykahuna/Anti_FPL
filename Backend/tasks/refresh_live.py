@@ -6,10 +6,12 @@ this is a no-op so the cron can fire every 2 mins all weekend cheaply.
 
 When live:
   - 1 API call to /event/{gw}/live/
+  - 1 API call to /fixtures/?event={gw}  (updates fixture states in DB)
   - Filters updates to players whose club has a match in play or recently finished
   - Upserts affected rows into player_gw_scores
+  - Sets is_provisional=True for players in finished_provisional (not yet finished) fixtures
 
-API calls per run: 1 when live, 0 when idle.
+API calls per run: 2 when live, 0 when idle.
 """
 
 import logging
@@ -19,7 +21,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from fpl_api import fetch_live
+from fpl_api import fetch_fixtures as fetch_fixtures_api, fetch_live
 from db       import (
     DEFAULT_SEASON,
     get_fixtures,
@@ -34,6 +36,39 @@ log = logging.getLogger(__name__)
 SEASON = DEFAULT_SEASON
 
 
+# ── Fixture state sync ────────────────────────────────────────────────────────
+
+def sync_fixture_states(season: str, gw: int) -> list[dict]:
+    """
+    Fetch fresh fixture states from FPL API and upsert into the fixtures table.
+    Returns the fresh fixture list (or falls back to DB if the API call fails).
+    """
+    fresh = fetch_fixtures_api(gw=gw)
+    if not fresh:
+        log.warning("Fixture state fetch failed — using DB fixtures.")
+        return get_fixtures(season, gw)
+
+    rows = [
+        {
+            "season":               season,
+            "fixture_id":           f["id"],
+            "gw":                   gw,
+            "team_h":               f["team_h"],
+            "team_a":               f["team_a"],
+            "kickoff_time":         f.get("kickoff_time"),
+            "started":              f.get("started") or False,
+            "finished":             f.get("finished") or False,
+            "finished_provisional": f.get("finished_provisional") or False,
+            "team_h_score":         f.get("team_h_score"),
+            "team_a_score":         f.get("team_a_score"),
+        }
+        for f in fresh
+    ]
+    upsert("fixtures", rows, on_conflict="season,fixture_id")
+    log.info("Synced %d fixture states for GW%d", len(rows), gw)
+    return rows
+
+
 # ── Row builder ───────────────────────────────────────────────────────────────
 
 def build_player_gw_rows(
@@ -41,11 +76,13 @@ def build_player_gw_rows(
     season: str,
     live_data: dict,
     is_live: bool,
-    relevant_player_ids: set[int] | None = None,
+    relevant_player_ids:    set[int] | None = None,
+    provisional_player_ids: set[int] | None = None,
 ) -> list[dict]:
     """
     Build rows for player_gw_scores. If relevant_player_ids is provided,
     only those players are included (saves DB writes during live polling).
+    is_provisional=True is set for players in provisional_player_ids.
     """
     rows = []
     for el in live_data.get("elements", []):
@@ -55,27 +92,31 @@ def build_player_gw_rows(
         base_pts = stats.get("total_points", 0) or 0
         minutes  = stats.get("minutes", 0) or 0
         anti_pts = base_pts + INACTIVE_PEN if minutes == 0 else base_pts
+        is_prov  = provisional_player_ids is not None and el["id"] in provisional_player_ids
         rows.append({
-            "season":    season,
-            "player_id": el["id"],
-            "gw":        gw,
-            "base_pts":  base_pts,
-            "minutes":   minutes,
-            "anti_pts":  anti_pts,
-            "is_live":   is_live,
+            "season":         season,
+            "player_id":      el["id"],
+            "gw":             gw,
+            "base_pts":       base_pts,
+            "minutes":        minutes,
+            "anti_pts":       anti_pts,
+            "is_live":        is_live,
+            "is_provisional": is_prov,
         })
     return rows
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def get_active_player_ids(season: str, gw: int) -> set[int]:
+def get_active_player_ids(season: str, gw: int, fixtures: list[dict] | None = None) -> set[int]:
     """
     Return player IDs whose club has a fixture this GW that is currently
     in play OR has finished. Excludes players whose fixture hasn't started yet
     (their stats are still all zeroes — no need to update).
+    Accepts an optional pre-fetched fixtures list to avoid a redundant DB query.
     """
-    fixtures = get_fixtures(season, gw)
+    if fixtures is None:
+        fixtures = get_fixtures(season, gw)
     active_club_ids: set[int] = set()
     for f in fixtures:
         if f.get("started") or f.get("finished") or f.get("finished_provisional"):
@@ -89,7 +130,20 @@ def get_active_player_ids(season: str, gw: int) -> set[int]:
     return {p["player_id"] for p in players if p.get("team_id") in active_club_ids}
 
 
-# ── Entry point ───────────────────────────────────────────────────────────────
+def _provisional_player_ids(fixtures: list[dict], season: str) -> set[int]:
+    """Player IDs whose fixture is finished_provisional but not yet officially finished."""
+    prov_clubs: set[int] = set()
+    for f in fixtures:
+        if f.get("finished_provisional") and not f.get("finished"):
+            prov_clubs.add(f["team_h"])
+            prov_clubs.add(f["team_a"])
+    if not prov_clubs:
+        return set()
+    players = get_players_ref(season)
+    return {p["player_id"] for p in players if p.get("team_id") in prov_clubs}
+
+
+# ── Entry points ──────────────────────────────────────────────────────────────
 
 def run() -> int:
     log.info("Refresh live — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
@@ -101,31 +155,65 @@ def run() -> int:
 
     log.info("Live window OPEN for GW%d", current_gw)
 
-    # Identify players who actually need an update
-    relevant_ids = get_active_player_ids(SEASON, current_gw)
+    # Sync fresh fixture states so scheduler can detect provisional window next cycle
+    fixtures     = sync_fixture_states(SEASON, current_gw)
+    relevant_ids = get_active_player_ids(SEASON, current_gw, fixtures=fixtures)
     if not relevant_ids:
         log.info("No active fixtures this GW yet — exiting.")
         return 0
     log.info("Active players (clubs with started/finished fixtures): %d", len(relevant_ids))
 
-    # One API call for the live GW
+    prov_ids  = _provisional_player_ids(fixtures, SEASON)
+
     live_data = fetch_live(current_gw)
     if not live_data:
         log.error("Live data fetch failed.")
         return 1
 
     rows = build_player_gw_rows(
-        gw                  = current_gw,
-        season              = SEASON,
-        live_data           = live_data,
-        is_live             = True,
-        relevant_player_ids = relevant_ids,
+        gw                     = current_gw,
+        season                 = SEASON,
+        live_data              = live_data,
+        is_live                = True,
+        relevant_player_ids    = relevant_ids,
+        provisional_player_ids = prov_ids or None,
     )
 
     log.info("Upserting %d player_gw_score rows...", len(rows))
     upsert("player_gw_scores", rows, on_conflict="season,player_id,gw")
 
     log.info("Refresh live complete.")
+    return 0
+
+
+def run_provisional_pass(gw: int) -> int:
+    """
+    Fetch final player scores after all GW fixtures are finished_provisional.
+    Called by the scheduler's provisional window path. No live-gate check.
+    """
+    log.info("Provisional player score pass — GW%d %s", gw, datetime.now().strftime("%Y-%m-%d %H:%M"))
+
+    fixtures     = sync_fixture_states(SEASON, gw)
+    relevant_ids = get_active_player_ids(SEASON, gw, fixtures=fixtures)
+    prov_ids     = _provisional_player_ids(fixtures, SEASON)
+
+    live_data = fetch_live(gw)
+    if not live_data:
+        log.error("Live data fetch failed.")
+        return 1
+
+    rows = build_player_gw_rows(
+        gw                     = gw,
+        season                 = SEASON,
+        live_data              = live_data,
+        is_live                = True,
+        relevant_player_ids    = relevant_ids or None,
+        provisional_player_ids = prov_ids or None,
+    )
+
+    log.info("Upserting %d player_gw_score rows (provisional)...", len(rows))
+    upsert("player_gw_scores", rows, on_conflict="season,player_id,gw")
+    log.info("Provisional player scores updated.")
     return 0
 
 

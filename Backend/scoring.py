@@ -48,6 +48,49 @@ CUP_START_GW     = LAST_GW - CUP_ROUNDS + 1     # 29
 CUP_MAX_ENTRANTS = 2 ** CUP_ROUNDS               # 1024
 
 
+# ── FPL raw score calculator (finished / provisional GWs) ────────────────────
+
+def calc_fpl_raw(
+    squad:       list[int],
+    captain_id:  int | None,
+    vice_id:     int | None,
+    active_chip: str,
+    pts_map:     dict[int, int],
+    mins_map:    dict[int, int],
+    player_type: dict[int, int],
+) -> int:
+    """
+    Compute fpl_raw from player scores with auto-subs and VC promotion.
+
+    Use when all player minutes are final (finished or finished_provisional GW).
+    For bench-boost: all 15 count, no auto-subs.
+    VC promotion: if captain played 0 mins, VC gets cap_mult bonus (incl. TC 3×).
+    """
+    cap_mult = 3 if active_chip == "3xc" else 2
+
+    if active_chip == "bboost":
+        raw = sum(pts_map.get(pid, 0) for pid in squad)
+        if captain_id in squad and mins_map.get(captain_id, 0) > 0:
+            raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
+        elif vice_id in squad and mins_map.get(vice_id, 0) > 0:
+            raw += pts_map.get(vice_id, 0) * (cap_mult - 1)
+        return raw
+
+    starters = [{"element": pid, "position": i + 1}  for i, pid in enumerate(squad[:11])]
+    bench    = [{"element": pid, "position": i + 12} for i, pid in enumerate(squad[11:])]
+    all_ids  = set(squad)
+    xi       = infer_autosubs(starters, bench, player_type, all_ids, mins_map)
+    xi_ids   = [p["element"] for p in xi]
+    raw      = sum(pts_map.get(pid, 0) for pid in xi_ids)
+
+    if captain_id in xi_ids and mins_map.get(captain_id, 0) > 0:
+        raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
+    elif vice_id in xi_ids and mins_map.get(vice_id, 0) > 0:
+        raw += pts_map.get(vice_id, 0) * (cap_mult - 1)
+
+    return raw
+
+
 # ── Bootstrap inspection helpers ──────────────────────────────────────────────
 
 def current_gw(bootstrap: dict) -> int:

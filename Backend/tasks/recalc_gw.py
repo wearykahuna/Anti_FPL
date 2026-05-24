@@ -26,56 +26,13 @@ from db import (
     get_teams,
     upsert,
 )
-from scoring import infer_autosubs, score_one_gw_for_team
+from scoring import calc_fpl_raw, score_one_gw_for_team
 from tasks.recalc_scores import to_gw_scores_row, update_cumulative_standings, update_ranks_for_gw
 
 log = logging.getLogger(__name__)
 
 SEASON       = DEFAULT_SEASON
 _POS_TO_TYPE = {"GKP": 1, "DEF": 2, "MID": 3, "FWD": 4}
-
-
-def _calc_fpl_raw(
-    squad:       list,
-    captain_id:  int | None,
-    vice_id:     int | None,
-    active_chip: str,
-    pts_map:     dict,
-    mins_map:    dict,
-    player_type: dict,
-) -> int:
-    """
-    Recompute fpl_raw from player scores, applying FPL auto-sub and VC-promotion rules.
-
-    Auto-subs: bench players who played replace 0-min starters (formation rules apply).
-    VC promotion: if captain played 0 mins, vice-captain gets 2× (always 2×, even with TC).
-    Bench Boost: all 15 count, no auto-subs.
-    """
-    cap_mult = 3 if active_chip == "3xc" else 2
-
-    if active_chip == "bboost":
-        raw = sum(pts_map.get(pid, 0) for pid in squad)
-        if captain_id in squad and mins_map.get(captain_id, 0) > 0:
-            raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
-        elif vice_id in squad and mins_map.get(vice_id, 0) > 0:
-            raw += pts_map.get(vice_id, 0) * (cap_mult - 1)  # VC inherits cap_mult (incl. TC)
-        return raw
-
-    starters = [{"element": pid, "position": i + 1}      for i, pid in enumerate(squad[:11])]
-    bench    = [{"element": pid, "position": i + 12}     for i, pid in enumerate(squad[11:])]
-    all_ids  = set(squad)
-    xi       = infer_autosubs(starters, bench, player_type, all_ids, mins_map)
-
-    xi_ids = [p["element"] for p in xi]
-    raw    = sum(pts_map.get(pid, 0) for pid in xi_ids)
-
-    # Captain bonus — or VC promotion if captain didn't play
-    if captain_id in xi_ids and mins_map.get(captain_id, 0) > 0:
-        raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
-    elif vice_id in xi_ids and mins_map.get(vice_id, 0) > 0:
-        raw += pts_map.get(vice_id, 0) * (cap_mult - 1)  # VC inherits cap_mult (incl. TC)
-
-    return raw
 
 
 def run(gw_from: int, gw_to: int, recalc_fpl_raw: bool = False) -> int:
@@ -138,8 +95,8 @@ def run(gw_from: int, gw_to: int, recalc_fpl_raw: bool = False) -> int:
             }
 
             if recalc_fpl_raw:
-                fpl_raw = _calc_fpl_raw(squad, captain_id, vice_id, active_chip,
-                                        pts_map, mins_map, player_type)
+                fpl_raw = calc_fpl_raw(squad, captain_id, vice_id, active_chip,
+                                       pts_map, mins_map, player_type)
             else:
                 fpl_raw = existing.get("fpl_raw_pts", 0) or 0
 

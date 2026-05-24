@@ -34,7 +34,7 @@ from db       import (
     is_live_window_open,
     upsert,
 )
-from scoring  import score_one_gw_for_team
+from scoring  import calc_fpl_raw, score_one_gw_for_team
 
 log = logging.getLogger(__name__)
 
@@ -125,7 +125,10 @@ def score_team_for_gw(
 
 # ── Row formatter ─────────────────────────────────────────────────────────────
 
-def to_gw_scores_row(team_id: int, gw: int, season: str, scored: dict, is_live: bool) -> dict:
+def to_gw_scores_row(
+    team_id: int, gw: int, season: str, scored: dict,
+    is_live: bool, is_provisional: bool = False,
+) -> dict:
     return {
         "season":           season,
         "team_id":          team_id,
@@ -153,6 +156,7 @@ def to_gw_scores_row(team_id: int, gw: int, season: str, scored: dict, is_live: 
         "vice_element":     scored.get("vice_element"),
         "vice_pts":         scored.get("vice_pts"),
         "is_live":          is_live,
+        "is_provisional":   is_provisional,
     }
 
 
@@ -194,14 +198,26 @@ def update_cumulative_standings(season: str, gw: int) -> None:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
-def run() -> int:
-    log.info("Recalc scores — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
+def run(provisional: bool = False) -> int:
+    log.info("Recalc scores — %s%s",
+             datetime.now().strftime("%Y-%m-%d %H:%M"),
+             " [provisional]" if provisional else "")
 
     is_open, current_gw = is_live_window_open(SEASON)
+
     if not is_open:
-        log.info("Live window closed — exiting (no-op).")
-        return 0
-    log.info("Live window OPEN for GW%d", current_gw)
+        if not provisional:
+            log.info("Live window closed — exiting (no-op).")
+            return 0
+        # Provisional mode: verify the provisional window is actually open
+        from db import is_provisional_window_open
+        prov_open, current_gw = is_provisional_window_open(SEASON)
+        if not prov_open:
+            log.info("Provisional window closed — exiting.")
+            return 0
+        log.info("Provisional window OPEN for GW%d", current_gw)
+    else:
+        log.info("Live window OPEN for GW%d", current_gw)
 
     # Players ref — provides both player→club mapping and player_type.
     # players table is kept current by refresh_reference; no API call needed.
@@ -219,20 +235,24 @@ def run() -> int:
     teams     = get_teams(SEASON)
     team_meta = {t["team_id"]: t for t in teams}
 
-    # Active fixture filter
-    active_clubs = get_active_club_ids(SEASON, current_gw)
-    if not active_clubs:
-        log.info("No active fixtures yet for GW%d — exiting.", current_gw)
-        return 0
-    active_teams = teams_with_active_players(selections, player_to_club, active_clubs)
-    log.info("Teams to recalc: %d (of %d total)", len(active_teams), len(selections))
+    # Active fixture filter — in provisional mode all fixtures are done so all teams count
+    if provisional:
+        active_teams = {s["team_id"] for s in selections}
+        log.info("Teams to recalc (provisional): %d", len(active_teams))
+    else:
+        active_clubs = get_active_club_ids(SEASON, current_gw)
+        if not active_clubs:
+            log.info("No active fixtures yet for GW%d — exiting.", current_gw)
+            return 0
+        active_teams = teams_with_active_players(selections, player_to_club, active_clubs)
+        log.info("Teams to recalc: %d (of %d total)", len(active_teams), len(selections))
 
     # Player stats from DB (refresh_live keeps these current)
     player_scores = get_player_scores(SEASON, gw=current_gw)
     mins_map      = {p["player_id"]: p.get("minutes", 0)  for p in player_scores}
     pts_map       = {p["player_id"]: p.get("base_pts", 0) for p in player_scores}
 
-    # Players whose fixture is finished (for live auto-sub inference)
+    # Players whose fixture is finished (for auto-sub inference)
     fixtures             = get_fixtures(SEASON, gw=current_gw)
     finished_fixture_ids = {f["fixture_id"] for f in fixtures
                             if f.get("finished") or f.get("finished_provisional")}
@@ -268,15 +288,23 @@ def run() -> int:
         prev_row    = existing_by_team.get(tid, {})
         squad       = sel.get("squad") or []
         starters    = squad[:11]
-        fpl_raw     = sum(pts_map.get(pid, 0) for pid in starters)
         captain_id  = sel.get("captain_id")
+        vice_id     = sel.get("vice_captain_id")
         active_chip = sel.get("active_chip") or ""
         cap_mult    = 3 if active_chip == "3xc" else 2
-        if captain_id in starters:
-            fpl_raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
-        if active_chip == "bboost":
-            for pid in squad[11:]:
-                fpl_raw += pts_map.get(pid, 0)
+
+        if provisional:
+            # All fixtures done — compute fpl_raw with auto-subs and VC promotion
+            fpl_raw = calc_fpl_raw(squad, captain_id, vice_id, active_chip,
+                                   pts_map, mins_map, player_type)
+        else:
+            # Live estimate: sum starters + captain bonus (no auto-subs yet for starters)
+            fpl_raw = sum(pts_map.get(pid, 0) for pid in starters)
+            if captain_id in starters:
+                fpl_raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
+            if active_chip == "bboost":
+                for pid in squad[11:]:
+                    fpl_raw += pts_map.get(pid, 0)
 
         hist_gw_row = {
             "event":                current_gw,
@@ -301,7 +329,10 @@ def run() -> int:
             prev_anti_total  = prev_totals.get(tid, 0),
         )
         if scored:
-            scored_rows.append(to_gw_scores_row(tid, current_gw, SEASON, scored, is_live=True))
+            scored_rows.append(to_gw_scores_row(
+                tid, current_gw, SEASON, scored,
+                is_live=True, is_provisional=provisional,
+            ))
 
     log.info("Upserting %d gw_scores rows...", len(scored_rows))
     upsert("gw_scores", scored_rows, on_conflict="season,team_id,gw")
