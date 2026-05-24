@@ -35,8 +35,9 @@ on:
     # Each cron line has a comment with which task it maps to.
     # The "Determine task" step uses the cron string to dispatch.
 
-    # ── refresh_reference: daily 03:00 UTC ─────────────────────────────────
-    - cron: '0 3 * * *'
+    # ── refresh_reference: daily 03:00 UTC + 14:00 UTC (catch post-deadline GW transitions) ──
+    - cron: '0 3  * * *'
+    - cron: '0 14 * * *'
 
     # ── refresh_picks: hourly 17:00 Fri → 16:00 Sun (self-gates) ───────────
     - cron: '0 17 * * 5'
@@ -51,24 +52,14 @@ on:
     - cron: '0 9  * * 6'
     - cron: '0 10 * * 6'
     - cron: '0 11 * * 6'
+    # ── refresh_picks: Sunday pre-match window (covers 15:00 UTC kickoffs) ──
+    - cron: '0 11 * * 0'
+    - cron: '0 12 * * 0'
+    - cron: '0 13 * * 0'
     - cron: '0 16 * * 0'
 
-    # ── scheduler: every 15 minutes, 11:30–22:30 UTC daily ─────────────────
-    - cron: '30 11 * * *'
-    - cron: '45 11 * * *'
-    - cron: '0,15,30,45 12 * * *'
-    - cron: '0,15,30,45 13 * * *'
-    - cron: '0,15,30,45 14 * * *'
-    - cron: '0,15,30,45 15 * * *'
-    - cron: '0,15,30,45 16 * * *'
-    - cron: '0,15,30,45 17 * * *'
-    - cron: '0,15,30,45 18 * * *'
-    - cron: '0,15,30,45 19 * * *'
-    - cron: '0,15,30,45 20 * * *'
-    - cron: '0,15,30,45 21 * * *'
-    - cron: '0 22 * * *'
-    - cron: '15 22 * * *'
-    - cron: '30 22 * * *'
+    # ── scheduler: every 5 minutes, 11:00–22:55 UTC daily (self-gates when not live) ──
+    - cron: '*/5 11-22 * * *'
 
     # ── snapshot: weekly Sunday 23:00 UTC ─────────────────────────────────
     - cron: '0 23 * * 0'
@@ -102,14 +93,14 @@ jobs:
           # Schedule trigger — dispatch by cron value
           CRON='${{ github.event.schedule }}'
           case "$CRON" in
-            "0 3 * * *")
+            "0 3 * * *"|"0 14 * * *")
               TASK=refresh_reference ;;
             "0 23 * * 0")
               TASK=snapshot ;;
-            # Picks crons (Fri/Sat/Sun specific hours)
+            # Picks crons (Fri 17-23, Sat 00/01/09-11, Sun 11-13/16)
             "0 17 * * 5"|"0 18 * * 5"|"0 19 * * 5"|"0 20 * * 5"|"0 21 * * 5"|"0 22 * * 5"|"0 23 * * 5"|\
             "0 0 * * 6"|"0 1 * * 6"|"0 9 * * 6"|"0 10 * * 6"|"0 11 * * 6"|\
-            "0 16 * * 0")
+            "0 11 * * 0"|"0 12 * * 0"|"0 13 * * 0"|"0 16 * * 0")
               TASK=refresh_picks ;;
             # Everything else = scheduler
             *)

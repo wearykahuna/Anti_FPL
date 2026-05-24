@@ -136,7 +136,7 @@ def _valid_formation(player_ids: list[int], player_type: dict[int, int]) -> bool
     )
 
 
-def infer_live_autosubs(
+def infer_autosubs(
     starters:         list[dict],
     bench:            list[dict],
     player_type:      dict[int, int],
@@ -144,13 +144,16 @@ def infer_live_autosubs(
     mins:             dict[int, int],
 ) -> list[dict]:
     """
-    Infer auto-subs during a live GW. Returns the effective XI after subs.
+    Apply FPL auto-substitution rules. Returns the effective XI after subs.
 
     Eligible to be subbed OUT : starter whose fixture is finished AND played 0.
     Eligible to come ON       : bench player whose fixture is finished AND played > 0.
     Bench priority            : ascending position (12 → 13 → 14 → 15).
     GK rule                   : GK ↔ GK only; outfield ↔ outfield only.
     Formation rule            : resulting XI must satisfy _valid_formation.
+
+    For a finished GW, pass all squad player IDs as finished_players.
+    For a live GW, pass only players whose fixtures are done.
     """
     xi = list(starters)
     for bench_p in sorted(bench, key=lambda p: p["position"]):
@@ -229,7 +232,7 @@ def score_gw(
         if bench_boost:
             effective_xi = active_players              # all 15, no auto-sub
         else:
-            effective_xi = infer_live_autosubs(starters, bench, player_type, played, mins)
+            effective_xi = infer_autosubs(starters, bench, player_type, played, mins)
 
         # Inactive: only count confirmed (fixture done) 0-min players
         inactive         = [p for p in effective_xi
@@ -250,7 +253,13 @@ def score_gw(
 
     else:
         # ── Finished GW ───────────────────────────────────────────────────────
-        inactive         = [p for p in active_players if mins.get(p["element"], 0) == 0]
+        if bench_boost:
+            effective_xi = active_players              # all 15, no auto-sub
+        else:
+            all_squad_ids = {p["element"] for p in picks}
+            effective_xi = infer_autosubs(starters, bench, player_type, all_squad_ids, mins)
+
+        inactive         = [p for p in effective_xi if mins.get(p["element"], 0) == 0]
         inactive_pen_pts = len(inactive) * INACTIVE_PEN
 
         cap_mins  = mins.get(captain["element"], 0) if captain else 0

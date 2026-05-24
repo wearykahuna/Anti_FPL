@@ -131,7 +131,10 @@ def run() -> int:
     upsert("team_gw_selections", selection_rows, on_conflict="season,team_id,gw")
 
     log.info("Updating chips_history for %d teams...", len(chips_updates))
-    upsert("teams", chips_updates, on_conflict="team_id,season")
+    sb = get_client()
+    for row in chips_updates:
+        sb.from_("teams").update({"chips_history": row["chips_history"]}) \
+          .eq("team_id", row["team_id"]).eq("season", row["season"]).execute()
 
     log.info("Refresh picks complete.")
     return 0
