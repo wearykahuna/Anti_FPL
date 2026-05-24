@@ -364,7 +364,14 @@
       const isExpanded = expandedTeam === s.team_id;
       const prevTot    = prevTotal[s.team_id];
 
-      const displayGw = isLive ? (s.fpl_raw_pts ?? '—') : (s.anti_gw_pts ?? '—');
+      // Provisional: game finished but GW not officially confirmed — show anti score with ~ badge
+      const isProvisional = isLive && !!s.is_provisional;
+      const provBadge = '<span title="Provisional — awaiting FPL official confirmation" style="font-size:9px;color:var(--muted);vertical-align:super;margin-left:2px">~</span>';
+      const displayGwRaw = isProvisional ? (s.anti_gw_pts ?? '—')
+                         : isLive        ? (s.fpl_raw_pts ?? '—')
+                         :                 (s.anti_gw_pts ?? '—');
+      const displayGw  = typeof displayGwRaw === 'number' && isProvisional
+                         ? `${displayGwRaw}${provBadge}` : displayGwRaw;
       const displayTot = isLive
         ? ((prevTot ?? 0) + (s.fpl_raw_pts ?? 0))
         : (s.anti_total ?? '—');
@@ -393,7 +400,7 @@
           <div class="manager-name">${info.manager || ''}</div>
           ${chipsHtml}
         </td>
-        <td class="r"><div class="gw-pts ${isLive ? 'live-score' : ''}">${displayGw}</div></td>
+        <td class="r"><div class="gw-pts ${isLive && !isProvisional ? 'live-score' : ''}">${displayGw}</div></td>
         <td class="r">${hasPens
           ? `<span class="${isLive ? 'pending-tag' : 'pen-tag'}">${isLive ? '⏳' : '+'}${s.total_pens_gw}</span>`
           : '<span style="color:var(--muted)">—</span>'}</td>

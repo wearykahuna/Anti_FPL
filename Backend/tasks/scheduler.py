@@ -4,14 +4,18 @@ tasks/scheduler.py — Dynamic live-task scheduler.
 Runs frequently from cron. Decides whether to invoke the live polling tasks
 based on actual fixture state in the DB.
 
-A match is "imminent or live" when:
-  - Any fixture has started=true and finished=false (currently in play), OR
-  - Any fixture has started=false and kickoff_time is within IMMINENT_MINUTES
+Three states:
+  1. Live / imminent  : a fixture is in play or kicks off within IMMINENT_MINUTES.
+                        → refresh_live  then recalc_scores
+  2. Provisional      : all fixtures finished_provisional but GW not officially done.
+                        → run_provisional_pass  then recalc_scores(provisional=True)
+  3. Idle             : nothing happening → exit cheaply.
 
-If true → invokes refresh_live then recalc_scores.
-If false → exits cheaply.
+The scheduler also refreshes fixture states from the FPL API at the start of each
+run so the DB doesn't go stale during an evening live window (the daily
+refresh_reference only runs at 03:00 and 14:00 UTC).
 
-API calls per run: 0 (DB only, unless live tasks fire).
+API calls per run: 1 fixture-state call always; 1-2 live-data calls when live.
 """
 
 import logging
@@ -29,62 +33,120 @@ SEASON           = DEFAULT_SEASON
 IMMINENT_MINUTES = 15   # fire live tasks if a fixture starts within this window
 
 
-def is_live_or_imminent(season: str) -> tuple[bool, int | None, str]:
+def _sync_fixture_states(season: str, current: int) -> list[dict]:
     """
-    Returns (should_fire, current_gw, reason).
+    Fetch fresh fixture states from FPL API and update the DB.
+    Called once per scheduler run so the DB never drifts stale during a live window.
+    Falls back to DB fixtures if the API call fails.
     """
-    current = get_current_gw(season)
-    if current is None:
-        return False, None, "no current GW"
+    from fpl_api import fetch_fixtures as fetch_fixtures_api
+    from db import upsert
+    fresh = fetch_fixtures_api(gw=current)
+    if not fresh:
+        log.warning("Fixture-state fetch failed — using DB fixtures.")
+        return get_fixtures(season, gw=current)
 
-    fixtures = get_fixtures(season, gw=current)
-    if not fixtures:
-        return False, current, "no fixtures for current GW"
+    rows = [
+        {
+            "season":               season,
+            "fixture_id":           f["id"],
+            "gw":                   current,
+            "team_h":               f["team_h"],
+            "team_a":               f["team_a"],
+            "kickoff_time":         f.get("kickoff_time"),
+            "started":              f.get("started") or False,
+            "finished":             f.get("finished") or False,
+            "finished_provisional": f.get("finished_provisional") or False,
+            "team_h_score":         f.get("team_h_score"),
+            "team_a_score":         f.get("team_a_score"),
+        }
+        for f in fresh
+    ]
+    upsert("fixtures", rows, on_conflict="season,fixture_id")
+    return rows
 
-    now      = datetime.now(timezone.utc)
-    horizon  = now + timedelta(minutes=IMMINENT_MINUTES)
+
+def _classify(fixtures: list[dict]) -> tuple[str, str]:
+    """
+    Classify the current state from a fresh fixture list.
+    Returns (state, reason) where state is "live", "provisional", or "idle".
+    """
+    now     = datetime.now(timezone.utc)
+    horizon = now + timedelta(minutes=IMMINENT_MINUTES)
 
     for f in fixtures:
         if f.get("finished") or f.get("finished_provisional"):
-            continue
+            continue  # skip done fixtures
 
-        # In play right now
-        if f.get("started"):
-            return True, current, "match in play"
-
-        # Imminent kickoff
         ko = f.get("kickoff_time")
-        if not ko:
-            continue
-        try:
-            ko_dt = datetime.fromisoformat(ko.replace("Z", "+00:00"))
-        except ValueError:
-            continue
-        if now <= ko_dt <= horizon:
-            return True, current, f"kickoff at {ko_dt.strftime('%H:%M UTC')}"
+        ko_dt = None
+        if ko:
+            try:
+                ko_dt = datetime.fromisoformat(ko.replace("Z", "+00:00"))
+            except ValueError:
+                pass
 
-    return False, current, "no live/imminent matches"
+        # Fixture is in play (DB flag OR kickoff_time has passed — guards against stale DB)
+        if f.get("started") or (ko_dt and ko_dt <= now):
+            return "live", "match in play"
+
+        # Fixture kicks off within the imminent window
+        if ko_dt and now <= ko_dt <= horizon:
+            return "live", f"kickoff at {ko_dt.strftime('%H:%M UTC')}"
+
+    # No live / imminent fixture found — check if all are finished_provisional
+    all_done = all(f.get("finished") or f.get("finished_provisional") for f in fixtures)
+    any_prov = any(f.get("finished_provisional") and not f.get("finished") for f in fixtures)
+    if all_done and any_prov:
+        return "provisional", "all fixtures finished_provisional"
+
+    return "idle", "no live/imminent matches"
 
 
 def run() -> int:
     log.info("Scheduler — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
 
-    fire, current_gw, reason = is_live_or_imminent(SEASON)
-    log.info("Decision: fire=%s (GW=%s, reason=%s)", fire, current_gw, reason)
-
-    if not fire:
+    current = get_current_gw(SEASON)
+    if current is None:
+        log.info("No current GW — exiting.")
         return 0
 
-    # Run the live tasks in sequence
-    from tasks.refresh_live  import run as run_refresh_live
+    # Refresh fixture states from FPL API before classifying
+    fixtures = _sync_fixture_states(SEASON, current)
+    if not fixtures:
+        log.info("No fixtures for current GW — exiting.")
+        return 0
+
+    state, reason = _classify(fixtures)
+    log.info("State: %s (%s)", state, reason)
+
+    if state == "idle":
+        return 0
+
+    if state == "live":
+        from tasks.refresh_live  import run as run_refresh_live
+        from tasks.recalc_scores import run as run_recalc_scores
+
+        log.info("▶ refresh_live")
+        rc1 = run_refresh_live()
+        log.info("◀ refresh_live exit %d", rc1)
+
+        log.info("▶ recalc_scores")
+        rc2 = run_recalc_scores()
+        log.info("◀ recalc_scores exit %d", rc2)
+
+        return max(rc1, rc2)
+
+    # state == "provisional"
+    from tasks.refresh_live  import run_provisional_pass
     from tasks.recalc_scores import run as run_recalc_scores
 
-    log.info("▶ refresh_live")
-    rc1 = run_refresh_live()
-    log.info("◀ refresh_live exit %d", rc1)
+    log.info("▶ provisional pass (GW%d)", current)
+    rc1 = run_provisional_pass(current)
+    log.info("◀ provisional pass exit %d", rc1)
 
-    log.info("▶ recalc_scores")
-    rc2 = run_recalc_scores()
+    log.info("▶ recalc_scores [provisional]")
+    rc2 = run_recalc_scores(provisional=True)
     log.info("◀ recalc_scores exit %d", rc2)
 
     return max(rc1, rc2)
