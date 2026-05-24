@@ -36,7 +36,7 @@ on:
     # The "Determine task" step uses the cron string to dispatch.
 
     # ── refresh_reference: daily 03:00 UTC + 14:00 UTC (catch post-deadline GW transitions) ──
-    - cron: '0 3  * * *'
+    - cron: '0 3 * * *'
     - cron: '0 14 * * *'
 
     # ── refresh_picks: hourly 17:00 Fri → 16:00 Sun (self-gates) ───────────
@@ -58,8 +58,8 @@ on:
     - cron: '0 13 * * 0'
     - cron: '0 16 * * 0'
 
-    # ── scheduler: every 5 minutes, 11:00–22:55 UTC daily (self-gates when not live) ──
-    - cron: '*/5 11-22 * * *'
+    # ── scheduler: top of every hour 11:00–22:00 UTC; job loops internally every 5 mins ──
+    - cron: '0 11-22 * * *'
 
     # ── snapshot: weekly Sunday 23:00 UTC ─────────────────────────────────
     - cron: '0 23 * * 0'
@@ -114,6 +114,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         working-directory: Backend
+        timeout-minutes: 58
         run: |
           TASK="${{ steps.t.outputs.task }}"
           echo "Running task: $TASK"
@@ -127,6 +128,13 @@ jobs:
             GW_ARGS="--gw-from ${{ github.event.inputs.gw_from }}"
             [ -n "${{ github.event.inputs.gw_to }}" ] && GW_ARGS="$GW_ARGS --gw-to ${{ github.event.inputs.gw_to }}"
             python run_task.py "$TASK" $GW_ARGS
+          elif [ "$TASK" = "scheduler" ]; then
+            # Loop every 5 minutes for ~55 minutes; next hour's job takes over
+            END=$(( $(date +%s) + 55*60 ))
+            while [ $(date +%s) -lt $END ]; do
+              python run_task.py scheduler
+              sleep 300
+            done
           else
             python run_task.py "$TASK"
           fi
