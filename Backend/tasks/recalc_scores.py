@@ -162,38 +162,43 @@ def to_gw_scores_row(
 
 # ── Re-rank helpers ───────────────────────────────────────────────────────────
 
-def update_ranks_for_gw(season: str, gw: int) -> None:
+def update_rankings_for_gw(season: str, gw: int) -> None:
+    """
+    Compute gw_rank and cumulative_standing for every scored team in one pass
+    and write them back with a single batched upsert (2 round trips total,
+    instead of 2 per team).
+
+    gw_rank tiebreak chain (all lower = better, mirrors the cup engine):
+      anti_gw_pts → captain_pts → vice_pts → total_pens_gw → team_id.
+    cumulative_standing tiebreak: anti_total → anti_gw_pts → team_id.
+    """
     sb   = get_client()
     rows = (sb.from_("gw_scores")
-              .select("id,team_id,anti_gw_pts")
+              .select("id,team_id,anti_gw_pts,anti_total,captain_pts,vice_pts,total_pens_gw")
               .eq("season", season)
               .eq("gw", gw)
               .execute().data or [])
-    if not rows:
-        return
     rows = [r for r in rows if r.get("anti_gw_pts") is not None]
     if not rows:
         return
-    rows.sort(key=lambda r: r["anti_gw_pts"])
-    for rank, r in enumerate(rows, 1):
-        sb.from_("gw_scores").update({"gw_rank": rank}).eq("id", r["id"]).execute()
 
+    z = lambda v: 0 if v is None else v
 
-def update_cumulative_standings(season: str, gw: int) -> None:
-    sb   = get_client()
-    rows = (sb.from_("gw_scores")
-              .select("id,team_id,anti_total")
-              .eq("season", season)
-              .eq("gw", gw)
-              .execute().data or [])
-    if not rows:
-        return
-    rows = [r for r in rows if r.get("anti_total") is not None]
-    if not rows:
-        return
-    rows.sort(key=lambda r: r["anti_total"])
-    for pos, r in enumerate(rows, 1):
-        sb.from_("gw_scores").update({"cumulative_standing": pos}).eq("id", r["id"]).execute()
+    gw_order = sorted(rows, key=lambda r: (
+        z(r["anti_gw_pts"]), z(r["captain_pts"]), z(r["vice_pts"]),
+        z(r["total_pens_gw"]), r["team_id"],
+    ))
+    total_order = sorted(rows, key=lambda r: (
+        z(r["anti_total"]), z(r["anti_gw_pts"]), r["team_id"],
+    ))
+
+    updates = {r["id"]: {"id": r["id"]} for r in rows}
+    for rank, r in enumerate(gw_order, 1):
+        updates[r["id"]]["gw_rank"] = rank
+    for pos, r in enumerate(total_order, 1):
+        updates[r["id"]]["cumulative_standing"] = pos
+
+    upsert("gw_scores", list(updates.values()), on_conflict="id")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -337,8 +342,7 @@ def run(provisional: bool = False) -> int:
     log.info("Upserting %d gw_scores rows...", len(scored_rows))
     upsert("gw_scores", scored_rows, on_conflict="season,team_id,gw")
 
-    update_ranks_for_gw(SEASON, current_gw)
-    update_cumulative_standings(SEASON, current_gw)
+    update_rankings_for_gw(SEASON, current_gw)
 
     log.info("Recalc scores complete.")
     return 0

@@ -1,15 +1,18 @@
 """
 tasks/scheduler.py — Dynamic live-task scheduler.
 ====================================================
-Runs frequently from cron. Decides whether to invoke the live polling tasks
-based on actual fixture state in the DB.
+Runs frequently from cron (or in a loop via worker.py). Decides whether to
+invoke the live polling tasks based on actual fixture state in the DB.
 
-Three states:
+Four states:
   1. Live / imminent  : a fixture is in play or kicks off within IMMINENT_MINUTES.
                         → refresh_live  then recalc_scores
   2. Provisional      : all fixtures finished_provisional but GW not officially done.
                         → run_provisional_pass  then recalc_scores(provisional=True)
-  3. Idle             : nothing happening → exit cheaply.
+  3. Finalize         : all fixtures officially finished but gw_scores rows are
+                        still flagged live/provisional → finalize_gw (final player
+                        pull, chip penalties, clear flags). Fires once per GW.
+  4. Idle             : nothing happening → exit cheaply.
 
 The scheduler also refreshes fixture states from the FPL API at the start of each
 run so the DB doesn't go stale during an evening live window (the daily
@@ -22,10 +25,11 @@ import logging
 import sys
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from db import DEFAULT_SEASON, get_current_gw, get_fixtures
+from db import DEFAULT_SEASON, get_current_gw, get_fixtures, has_unfinalized_scores
 
 log = logging.getLogger(__name__)
 
@@ -66,6 +70,27 @@ def _sync_fixture_states(season: str, current: int) -> list[dict]:
     return rows
 
 
+def _next_kickoff_minutes(fixtures: list[dict]) -> Optional[float]:
+    """Minutes until the next future kickoff in this GW, or None if there isn't one."""
+    now = datetime.now(timezone.utc)
+    upcoming = []
+    for f in fixtures:
+        if f.get("started") or f.get("finished") or f.get("finished_provisional"):
+            continue
+        ko = f.get("kickoff_time")
+        if not ko:
+            continue
+        try:
+            ko_dt = datetime.fromisoformat(ko.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if ko_dt > now:
+            upcoming.append(ko_dt)
+    if not upcoming:
+        return None
+    return (min(upcoming) - now).total_seconds() / 60
+
+
 def _classify(fixtures: list[dict]) -> tuple[str, str]:
     """
     Classify the current state from a fresh fixture list.
@@ -103,25 +128,38 @@ def _classify(fixtures: list[dict]) -> tuple[str, str]:
     return "idle", "no live/imminent matches"
 
 
-def run() -> int:
+def tick() -> tuple[int, str, Optional[float]]:
+    """
+    One scheduler pass.
+    Returns (exit_code, state, minutes_until_next_kickoff).
+    state is one of "live", "provisional", "finalize", "idle".
+    """
     log.info("Scheduler — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
 
     current = get_current_gw(SEASON)
     if current is None:
         log.info("No current GW — exiting.")
-        return 0
+        return 0, "idle", None
 
     # Refresh fixture states from FPL API before classifying
     fixtures = _sync_fixture_states(SEASON, current)
     if not fixtures:
         log.info("No fixtures for current GW — exiting.")
-        return 0
+        return 0, "idle", None
 
     state, reason = _classify(fixtures)
+    next_ko = _next_kickoff_minutes(fixtures)
+
+    # Idle + everything officially finished + rows still flagged → finalize once
+    if (state == "idle"
+            and all(f.get("finished") for f in fixtures)
+            and has_unfinalized_scores(SEASON, current)):
+        state, reason = "finalize", "GW officially finished, scores not yet finalized"
+
     log.info("State: %s (%s)", state, reason)
 
     if state == "idle":
-        return 0
+        return 0, state, next_ko
 
     if state == "live":
         from tasks.refresh_live  import run as run_refresh_live
@@ -135,7 +173,14 @@ def run() -> int:
         rc2 = run_recalc_scores()
         log.info("◀ recalc_scores exit %d", rc2)
 
-        return max(rc1, rc2)
+        return max(rc1, rc2), state, next_ko
+
+    if state == "finalize":
+        from tasks.finalize_gw import run as run_finalize
+        log.info("▶ finalize_gw (GW%d)", current)
+        rc = run_finalize(current)
+        log.info("◀ finalize_gw exit %d", rc)
+        return rc, state, next_ko
 
     # state == "provisional"
     from tasks.refresh_live  import run_provisional_pass
@@ -149,7 +194,13 @@ def run() -> int:
     rc2 = run_recalc_scores(provisional=True)
     log.info("◀ recalc_scores exit %d", rc2)
 
-    return max(rc1, rc2)
+    return max(rc1, rc2), state, next_ko
+
+
+def run() -> int:
+    """Single-shot entry point (run_task.py). See worker.py for the loop."""
+    rc, _state, _next_ko = tick()
+    return rc
 
 
 if __name__ == "__main__":

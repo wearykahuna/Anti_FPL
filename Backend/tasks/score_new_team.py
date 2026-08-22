@@ -24,6 +24,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fpl_api import (
+    fetch_all_league_team_ids,
     fetch_bootstrap,
     fetch_team_info,
     fetch_team_history,
@@ -234,10 +235,40 @@ def run(team_id: int) -> int:
     return 0
 
 
+# ── Bulk entry point — every team currently in an FPL classic league ────────────
+
+def run_league(league_id: int) -> int:
+    """Backfill every team in an FPL classic league. Used to seed a whole
+    season's worth of teams in one go (e.g. the global Anti-FPL league)."""
+    log.info("=" * 60)
+    log.info("Score league %d — %s", league_id, datetime.now().strftime("%Y-%m-%d %H:%M"))
+    log.info("=" * 60)
+
+    team_ids = fetch_all_league_team_ids(league_id)
+    if not team_ids:
+        log.error("No teams found in FPL league %d.", league_id)
+        return 1
+    log.info("League %d: %d teams to backfill", league_id, len(team_ids))
+
+    worst_rc = 0
+    for i, tid in enumerate(team_ids, 1):
+        log.info("[%d/%d] team %d", i, len(team_ids), tid)
+        rc = run(tid)
+        worst_rc = max(worst_rc, rc)
+        time.sleep(0.4)
+
+    log.info("Score league %d complete (%d teams).", league_id, len(team_ids))
+    return worst_rc
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--team", type=int, required=True, help="FPL team ID to score")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--team",   type=int, help="Single FPL team ID to score")
+    group.add_argument("--league", type=int, help="FPL classic league ID — backfills every team in it")
     args = parser.parse_args()
+    if args.league:
+        return run_league(args.league)
     return run(args.team)
 
 
