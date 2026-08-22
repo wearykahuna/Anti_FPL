@@ -212,7 +212,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
   <div class="logo">&#x1F3F4;</div>
   <div class="header-text">
     <h1>Anti FPL &#x2014; Mini League</h1>
-    <p id="header-sub">2025/26 Season &#xB7; Fight for the right to open mic</p>
+    <p id="header-sub">2026/27 Season &#xB7; G.Hooper = King Anti mong</p>
   </div>
   <div class="gw-badge" id="gw-badge">GW &#x2014;</div>
   <a href="global_dashboard.html" class="refresh-btn" style="text-decoration:none">&#x1F30D; Global</a>
@@ -470,7 +470,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 // ─── Supabase config ──────────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://qudcjhmbextpfdgdxihs.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGNqaG1iZXh0cGZkZ2R4aWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjEzMTQsImV4cCI6MjA5NDE5NzMxNH0.TRapf8KXSpM2XPrzprIhObi5cp0Sxt2wxel9novZRMA';
-const SEASON = '2025/26';
+const SEASON = '2026/27';
 
 const TEAM_COLORS = [
   '#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6',
@@ -519,14 +519,14 @@ async function loadFromSupabase() {
 
   const [gwData, mlRaw, playersRaw] = await Promise.all([
     sbFetch('gameweeks',    `${sf}&select=*&order=gw.asc`),
-    sbFetch('mini_leagues', `${sf}&invite_code=eq.OPENMIC2526&select=id&limit=1`),
+    sbFetch('mini_leagues', `${sf}&invite_code=eq.KINGANTI2627&select=id&limit=1`),
     sbFetch('players',      `${sf}&select=player_id,web_name`),
   ]);
 
-  if (!mlRaw.length) throw new Error('Mini-league OPENMIC2526 not found in Supabase.');
+  if (!mlRaw.length) throw new Error('Mini-league KINGANTI2627 not found in Supabase.');
   const mlMembers = await sbFetch('mini_league_members', `mini_league_id=eq.${mlRaw[0].id}&select=team_id`);
   const memberIds = mlMembers.map(m => m.team_id);
-  if (!memberIds.length) throw new Error('No members found in mini-league OPENMIC2526.');
+  if (!memberIds.length) throw new Error('No members found in mini-league KINGANTI2627.');
 
   const [teamsRaw, allScores] = await Promise.all([
     sbFetch('teams',    `${sf}&team_id=in.(${memberIds.join(',')})&select=*&order=team_id.asc`),
@@ -624,7 +624,7 @@ async function init() {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
     document.getElementById('header-sub').textContent =
-      '2025/26 Season \xB7 Fight for the right to open mic \xB7 Through GW' + MAX_GW +
+      '2026/27 Season \xB7 G.Hooper = King Anti mong \xB7 Through GW' + MAX_GW +
       ' \xB7 Updated ' + fmtDate(new Date().toISOString());
     if (gwInProgress) {
       document.getElementById('gw-progress-banner').style.display = 'block';
@@ -654,7 +654,7 @@ async function reloadData(btn) {
     computeMLRanks(TEAMS);
     document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
     document.getElementById('header-sub').textContent =
-      '2025/26 Season \xB7 Fight for the right to open mic \xB7 Through GW' + MAX_GW +
+      '2026/27 Season \xB7 G.Hooper = King Anti mong \xB7 Through GW' + MAX_GW +
       ' \xB7 Updated ' + fmtDate(new Date().toISOString());
     if (CHART_OBJ) { CHART_OBJ.destroy(); CHART_OBJ = null; }
     renderAll();

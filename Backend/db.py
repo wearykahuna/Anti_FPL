@@ -17,7 +17,7 @@ from postgrest import SyncPostgrestClient
 
 log = logging.getLogger(__name__)
 
-DEFAULT_SEASON = "2025/26"
+DEFAULT_SEASON = "2026/27"
 BATCH_SIZE     = 500
 PAGE_SIZE      = 1000
 
@@ -239,6 +239,24 @@ def is_provisional_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int 
     all_done  = all(f.get("finished") or f.get("finished_provisional") for f in fixtures)
     any_prov  = any(f.get("finished_provisional") and not f.get("finished") for f in fixtures)
     return all_done and any_prov, current
+
+
+# ── Finalize helper ───────────────────────────────────────────────────────────
+
+def has_unfinalized_scores(season: str, gw: int) -> bool:
+    """
+    True if any gw_scores row for this GW is still flagged is_live or
+    is_provisional — i.e. the GW has never had its final pass.
+    """
+    sb   = get_client()
+    rows = (sb.from_("gw_scores")
+              .select("id")
+              .eq("season", season)
+              .eq("gw", gw)
+              .or_("is_live.eq.true,is_provisional.eq.true")
+              .limit(1)
+              .execute().data or [])
+    return bool(rows)
 
 
 # ── Cleanup helpers ───────────────────────────────────────────────────────────

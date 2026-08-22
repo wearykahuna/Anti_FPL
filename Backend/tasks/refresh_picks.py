@@ -1,13 +1,19 @@
 """
 tasks/refresh_picks.py — Fetch team picks + chips once per GW post-deadline.
 ==============================================================================
-Self-gating: only runs if the current GW's picks have not yet been stored.
-FPL locks picks at the deadline, so we fetch each team's picks exactly once
-per GW — never again that GW.
+Self-gating: only runs for teams that are missing either their picks or
+their GW seed data for the current GW. FPL locks picks at the deadline, so
+we fetch each team's picks exactly once per GW — never again that GW.
 
 Also refreshes each team's chips_history at the same time, since chips can
 only be activated at the deadline. Single history fetch per team per GW
 keeps the chips_history in teams.chips_history up to date for recalc_scores.
+
+The history fetch also SEEDS the team's gw_scores row for the current GW
+with bank / transfer-cost / FPL rank / FPL total. These are fixed at the
+deadline, and recalc_scores reads them from the existing gw_scores row —
+without the seed, hit and bank penalties would be silently 0 all GW.
+(The seed retries on later runs until FPL publishes the history row.)
 
 For 200 teams → ~400 API calls (picks + history), but only on first run
 of each GW. Subsequent runs in the same GW exit immediately.
@@ -65,6 +71,27 @@ def build_chips_update(team_id: int, season: str, history: dict) -> dict:
     }
 
 
+def build_gw_seed_row(team_id: int, gw: int, season: str, history: dict) -> dict | None:
+    """
+    Deadline-fixed FPL fields for this GW, from the team's history.
+    recalc_scores reads bank / xfer cost from the existing gw_scores row,
+    so this seed is what makes hit and bank penalties apply during live play.
+    Returns None if FPL hasn't published the current-GW history row yet.
+    """
+    hist_gw = next((g for g in history.get("current", []) if g.get("event") == gw), None)
+    if hist_gw is None:
+        return None
+    return {
+        "season":        season,
+        "team_id":       team_id,
+        "gw":            gw,
+        "bank":          hist_gw.get("bank", 0) or 0,
+        "fpl_xfer_cost": hist_gw.get("event_transfers_cost", 0) or 0,
+        "fpl_gw_rank":   hist_gw.get("rank"),
+        "fpl_total":     hist_gw.get("total_points"),
+    }
+
+
 # ── Self-gate helpers ─────────────────────────────────────────────────────────
 
 def teams_already_have_picks(season: str, gw: int) -> set[int]:
@@ -76,6 +103,17 @@ def teams_already_have_picks(season: str, gw: int) -> set[int]:
               .eq("gw", gw)
               .execute().data or [])
     return {r["team_id"] for r in rows}
+
+
+def teams_already_seeded(season: str, gw: int) -> set[int]:
+    """Team_ids whose gw_scores row for this GW already has bank data seeded."""
+    sb   = get_client()
+    rows = (sb.from_("gw_scores")
+              .select("team_id,bank")
+              .eq("season", season)
+              .eq("gw", gw)
+              .execute().data or [])
+    return {r["team_id"] for r in rows if r.get("bank") is not None}
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
@@ -92,43 +130,59 @@ def run() -> int:
         return 0
     log.info("Current GW: %d", current_gw)
 
-    all_team_ids   = get_team_ids(SEASON)
-    already_stored = teams_already_have_picks(SEASON, current_gw)
-    todo_ids       = [tid for tid in all_team_ids if tid not in already_stored]
+    all_team_ids = get_team_ids(SEASON)
+    have_picks   = teams_already_have_picks(SEASON, current_gw)
+    have_seed    = teams_already_seeded(SEASON, current_gw)
+
+    need_picks = [tid for tid in all_team_ids if tid not in have_picks]
+    need_seed  = [tid for tid in all_team_ids if tid not in have_seed]
+    todo_ids   = [tid for tid in all_team_ids if tid in set(need_picks) | set(need_seed)]
 
     if not todo_ids:
-        log.info("All %d teams already have picks for GW%d — nothing to do.",
+        log.info("All %d teams already have picks + seed for GW%d — nothing to do.",
                  len(all_team_ids), current_gw)
         return 0
 
-    log.info("Fetching picks + chips for %d teams (%d already stored)...",
-             len(todo_ids), len(already_stored))
+    log.info("GW%d: %d teams need picks, %d need seed data (%d total to process)...",
+             current_gw, len(need_picks), len(need_seed), len(todo_ids))
 
     selection_rows: list[dict] = []
     chips_updates:  list[dict] = []
+    seed_rows:      list[dict] = []
 
     for i, tid in enumerate(todo_ids, 1):
         if i % 20 == 0:
             log.info("  Progress: %d / %d", i, len(todo_ids))
 
         # Picks
-        picks_data = fetch_picks(tid, current_gw)
-        if not picks_data:
-            log.warning("  No picks for team %d (deadline not yet passed?)", tid)
-            continue
-        sel = build_selection_row(tid, current_gw, SEASON, picks_data)
-        if sel:
-            selection_rows.append(sel)
-        time.sleep(0.3)
+        if tid in need_picks:
+            picks_data = fetch_picks(tid, current_gw)
+            if picks_data:
+                sel = build_selection_row(tid, current_gw, SEASON, picks_data)
+                if sel:
+                    selection_rows.append(sel)
+            else:
+                log.warning("  No picks for team %d (deadline not yet passed?)", tid)
+            time.sleep(0.3)
 
-        # Chips history — refresh once per GW per team
-        history = fetch_team_history(tid)
-        if history:
-            chips_updates.append(build_chips_update(tid, SEASON, history))
-        time.sleep(0.3)
+        # History → chips refresh + gw_scores seed (bank / xfer / rank / total)
+        if tid in need_seed or tid in need_picks:
+            history = fetch_team_history(tid)
+            if history:
+                chips_updates.append(build_chips_update(tid, SEASON, history))
+                seed = build_gw_seed_row(tid, current_gw, SEASON, history)
+                if seed:
+                    seed_rows.append(seed)
+                else:
+                    log.warning("  No GW%d history row for team %d yet — seed retries next run.",
+                                current_gw, tid)
+            time.sleep(0.3)
 
     log.info("Upserting %d selection rows...", len(selection_rows))
     upsert("team_gw_selections", selection_rows, on_conflict="season,team_id,gw")
+
+    log.info("Seeding %d gw_scores rows (bank / xfer cost)...", len(seed_rows))
+    upsert("gw_scores", seed_rows, on_conflict="season,team_id,gw")
 
     log.info("Updating chips_history for %d teams...", len(chips_updates))
     sb = get_client()

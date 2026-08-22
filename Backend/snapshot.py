@@ -84,6 +84,43 @@ def fetch_all(sb: SyncPostgrestClient, table: str, filters: dict) -> list[dict]:
     return rows
 
 
+# ── Change detection ──────────────────────────────────────────────────────────
+
+def _data_fingerprint(teams: list[dict], gw_scores: list[dict]) -> str:
+    """
+    Canonical JSON of the snapshot payload (metadata excluded, rows sorted)
+    so two snapshots of identical data compare equal regardless of row order.
+    """
+    key_t = lambda r: (r.get("team_id") or 0)
+    key_s = lambda r: (r.get("team_id") or 0, r.get("gw") or 0)
+    return json.dumps(
+        {"teams": sorted(teams, key=key_t), "gw_scores": sorted(gw_scores, key=key_s)},
+        sort_keys=True, default=str,
+    )
+
+
+def _latest_snapshot_path(season_dir: Path) -> Path | None:
+    if not season_dir.is_dir():
+        return None
+    files = sorted(season_dir.glob("gw*.json"))
+    return files[-1] if files else None
+
+
+def unchanged_since_last_snapshot(season_dir: Path, teams: list[dict],
+                                  gw_scores: list[dict]) -> bool:
+    """True if the latest existing snapshot holds identical teams + gw_scores."""
+    latest = _latest_snapshot_path(season_dir)
+    if latest is None:
+        return False
+    try:
+        with open(latest, encoding="utf-8") as f:
+            prev = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return False
+    prev_fp = _data_fingerprint(prev.get("teams", []), prev.get("gw_scores", []))
+    return prev_fp == _data_fingerprint(teams, gw_scores)
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -112,6 +149,12 @@ def main() -> None:
     if not teams or not gw_scores:
         log.error("No data found for season %s — aborting snapshot.", season)
         sys.exit(1)
+
+    # ── Skip if nothing changed since the last snapshot ───────────────────────
+    season_dir_check = SNAPSHOTS_DIR / season.replace("/", "-")
+    if unchanged_since_last_snapshot(season_dir_check, teams, gw_scores):
+        log.info("Data identical to latest snapshot — skipping write.")
+        return
 
     # ── Determine current GW from data ────────────────────────────────────────
     max_gw = max((r["gw"] for r in gw_scores), default=0)

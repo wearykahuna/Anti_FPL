@@ -27,7 +27,7 @@ from db import (
     upsert,
 )
 from scoring import calc_fpl_raw, score_one_gw_for_team
-from tasks.recalc_scores import to_gw_scores_row, update_cumulative_standings, update_ranks_for_gw
+from tasks.recalc_scores import to_gw_scores_row, update_rankings_for_gw
 
 log = logging.getLogger(__name__)
 
@@ -126,8 +126,7 @@ def run(gw_from: int, gw_to: int, recalc_fpl_raw: bool = False) -> int:
 
         if scored_rows:
             upsert("gw_scores", scored_rows, on_conflict="season,team_id,gw")
-            update_ranks_for_gw(SEASON, gw)
-            update_cumulative_standings(SEASON, gw)
+            update_rankings_for_gw(SEASON, gw)
             log.info("GW %d: upserted %d rows", gw, len(scored_rows))
         else:
             log.warning("GW %d: nothing to upsert", gw)

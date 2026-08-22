@@ -16,10 +16,21 @@ on:
           - refresh_live
           - recalc_scores
           - recalc_gw
+          - finalize_gw
+          - backfill_player_scores
           - snapshot
           - score_new_team
+          - create_mini_league
       team_id:
         description: 'Team ID (only for score_new_team)'
+        required: false
+        type: string
+      league_id:
+        description: 'FPL league ID (for score_new_team bulk mode or create_mini_league)'
+        required: false
+        type: string
+      invite_code:
+        description: 'Supabase invite_code label (only for create_mini_league)'
         required: false
         type: string
       gw_from:
@@ -58,7 +69,8 @@ on:
     - cron: '0 13 * * 0'
     - cron: '0 16 * * 0'
 
-    # ── scheduler: top of every hour 11:00–22:00 UTC; job loops internally every 5 mins ──
+    # ── scheduler: top of every hour 11:00–22:00 UTC; worker.py loops internally
+    #    (90s while live, 300s idle, exits early when nothing is coming up) ──
     - cron: '0 11-22 * * *'
 
     # ── snapshot: weekly Sunday 23:00 UTC ─────────────────────────────────
@@ -123,18 +135,24 @@ jobs:
             python run_task.py refresh_picks
             python run_task.py recalc_scores
           elif [ "$TASK" = "score_new_team" ]; then
-            python run_task.py "$TASK" --team "${{ github.event.inputs.team_id }}"
-          elif [ "$TASK" = "recalc_gw" ]; then
-            GW_ARGS="--gw-from ${{ github.event.inputs.gw_from }}"
-            [ -n "${{ github.event.inputs.gw_to }}" ] && GW_ARGS="$GW_ARGS --gw-to ${{ github.event.inputs.gw_to }}"
+            if [ -n "${{ github.event.inputs.league_id }}" ]; then
+              python run_task.py "$TASK" --league "${{ github.event.inputs.league_id }}"
+            else
+              python run_task.py "$TASK" --team "${{ github.event.inputs.team_id }}"
+            fi
+          elif [ "$TASK" = "create_mini_league" ]; then
+            python run_task.py "$TASK" \
+              --league "${{ github.event.inputs.league_id }}" \
+              --invite-code "${{ github.event.inputs.invite_code }}"
+          elif [ "$TASK" = "recalc_gw" ] || [ "$TASK" = "finalize_gw" ] || [ "$TASK" = "backfill_player_scores" ]; then
+            GW_ARGS=""
+            [ -n "${{ github.event.inputs.gw_from }}" ] && GW_ARGS="--gw-from ${{ github.event.inputs.gw_from }}"
+            [ -n "${{ github.event.inputs.gw_to }}" ]   && GW_ARGS="$GW_ARGS --gw-to ${{ github.event.inputs.gw_to }}"
             python run_task.py "$TASK" $GW_ARGS
           elif [ "$TASK" = "scheduler" ]; then
-            # Loop every 5 minutes for ~55 minutes; next hour's job takes over
-            END=$(( $(date +%s) + 55*60 ))
-            while [ $(date +%s) -lt $END ]; do
-              python run_task.py scheduler
-              sleep 300
-            done
+            # Adaptive loop: 90s ticks while live, 300s while idle, exits early
+            # when nothing kicks off within ~70 min (next hourly cron covers it).
+            python worker.py --max-minutes 55 --exit-when-idle
           else
             python run_task.py "$TASK"
           fi
