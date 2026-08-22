@@ -1,8 +1,13 @@
 """
 db.py — Supabase data access layer.
 =====================================
-Single responsibility: read from and write to Supabase. No FPL API calls,
-no scoring logic. Tasks compose calls to fpl_api + db + scoring.
+Single responsibility: read from and write to Supabase. No scoring logic.
+Tasks compose calls to fpl_api + db + scoring.
+
+The one deliberate exception: DEFAULT_SEASON is auto-detected from the FPL
+API at import time (see _detect_default_season below), so the season never
+needs a manual code bump when a new one starts. Falls back to a hardcoded
+string if the API is unreachable when this module loads.
 
 All functions take SEASON-aware filters where relevant.
 """
@@ -17,9 +22,25 @@ from postgrest import SyncPostgrestClient
 
 log = logging.getLogger(__name__)
 
-DEFAULT_SEASON = "2026/27"
-BATCH_SIZE     = 500
-PAGE_SIZE      = 1000
+_FALLBACK_SEASON = "2026/27"
+BATCH_SIZE       = 500
+PAGE_SIZE        = 1000
+
+
+def _detect_default_season() -> str:
+    """Best-effort auto-detect from the live FPL API; falls back on any failure."""
+    try:
+        from fpl_api import fetch_bootstrap, detect_season
+        bootstrap = fetch_bootstrap()
+        season = detect_season(bootstrap) if bootstrap else None
+        if season:
+            return season
+    except Exception:
+        log.warning("Season auto-detect failed — using fallback %s", _FALLBACK_SEASON, exc_info=True)
+    return _FALLBACK_SEASON
+
+
+DEFAULT_SEASON = _detect_default_season()
 
 
 # ── Client ────────────────────────────────────────────────────────────────────

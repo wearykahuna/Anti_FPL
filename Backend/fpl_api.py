@@ -52,6 +52,20 @@ def fetch_bootstrap() -> Optional[dict]:
     return _get(f"{FPL_BASE}/bootstrap-static/")
 
 
+def detect_season(bootstrap: dict) -> Optional[str]:
+    """
+    Derive the '2026/27'-style season string from bootstrap's events list.
+    The PL season always starts in August, so the earliest event deadline's
+    year is the season's start year — stable all season regardless of
+    today's date, and rolls over automatically once FPL publishes new events.
+    """
+    deadlines = [e["deadline_time"] for e in bootstrap.get("events", []) if e.get("deadline_time")]
+    if not deadlines:
+        return None
+    start_year = min(int(d[:4]) for d in deadlines)
+    return f"{start_year}/{str(start_year + 1)[-2:]}"
+
+
 def fetch_fixtures(gw: Optional[int] = None) -> Optional[list[dict]]:
     """All fixtures for the season, or just for one GW if specified."""
     url = f"{FPL_BASE}/fixtures/"

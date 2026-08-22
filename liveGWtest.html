@@ -136,7 +136,7 @@
 </header>
 
 <div class="tabs">
-  <a class="tab active" href="liveGWtest.html">Fight for the right to open mic</a>
+  <a class="tab active" href="liveGWtest.html">The next Badly drawn boy</a>
   <a class="tab" href="Overall_anti_fpl_league.html">Overall Anti FPL</a>
 </div>
 
@@ -202,7 +202,7 @@
         isLive = false;
       }
 
-      // Get the team IDs for "Fight for the right to open mic" mini-league
+      // Get the team IDs for "The next Badly drawn boy" mini-league
       const ml = await sbFetch('mini_leagues',
         `season=eq.${encodeURIComponent(SEASON)}&invite_code=eq.KINGANTI2627&select=id&limit=1`);
       if (!ml.length) { showError('Mini-league not found'); return; }
