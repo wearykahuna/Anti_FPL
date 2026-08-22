@@ -20,6 +20,7 @@ Usage:
 
 import argparse
 import logging
+import secrets
 import sys
 import time
 from pathlib import Path
@@ -34,7 +35,9 @@ log = logging.getLogger(__name__)
 SEASON = DEFAULT_SEASON
 
 
-def run(league_id: int, invite_code: str, season: str = SEASON, name: str | None = None) -> int:
+def run(league_id: int, invite_code: str, season: str = SEASON,
+        name: str | None = None, admin_code: str | None = None,
+        admin_team_id: int | None = None) -> int:
     log.info("=" * 60)
     log.info("Create mini-league %d -> invite_code=%s, season=%s", league_id, invite_code, season)
     log.info("=" * 60)
@@ -45,10 +48,23 @@ def run(league_id: int, invite_code: str, season: str = SEASON, name: str | None
         return 1
     log.info("Found %d teams in FPL league %d", len(team_ids), league_id)
 
+    page1 = fetch_league_standings_page(league_id, 1) or {}
+    league_meta = page1.get("league", {})
+
     if not name:
-        page1 = fetch_league_standings_page(league_id, 1) or {}
-        name = page1.get("league", {}).get("name") or f"League {league_id}"
+        name = league_meta.get("name") or f"League {league_id}"
     log.info("League name: %s", name)
+
+    if not admin_team_id:
+        admin_team_id = league_meta.get("admin_entry")
+    if not admin_team_id:
+        log.error("No admin_team_id found (FPL league has no admin_entry) — pass --admin-team-id explicitly.")
+        return 1
+    log.info("Admin team id: %s", admin_team_id)
+
+    if not admin_code:
+        admin_code = secrets.token_hex(4)
+    log.info("Admin code: %s (auto-generated unless you passed --admin-code)", admin_code)
 
     # ── Backfill any team not yet in `teams` for this season ────────────────
     existing = {t["team_id"] for t in select_all("teams", {"season": season})}
@@ -65,7 +81,8 @@ def run(league_id: int, invite_code: str, season: str = SEASON, name: str | None
 
     # ── Upsert the mini_leagues row ──────────────────────────────────────────
     upsert("mini_leagues",
-           [{"season": season, "invite_code": invite_code, "name": name}],
+           [{"season": season, "invite_code": invite_code, "name": name,
+             "admin_code": admin_code, "admin_team_id": admin_team_id}],
            on_conflict="season,invite_code")
 
     ml_rows = select_all("mini_leagues", {"season": season, "invite_code": invite_code})
@@ -77,7 +94,7 @@ def run(league_id: int, invite_code: str, season: str = SEASON, name: str | None
     log.info("mini_leagues id = %s", mini_league_id)
 
     # ── Upsert membership ─────────────────────────────────────────────────────
-    member_rows = [{"mini_league_id": mini_league_id, "team_id": tid} for tid in team_ids]
+    member_rows = [{"mini_league_id": mini_league_id, "team_id": tid, "season": season} for tid in team_ids]
     upsert("mini_league_members", member_rows, on_conflict="mini_league_id,team_id")
 
     log.info("Mini-league ready: %d members linked to mini_league_id=%s",
@@ -93,8 +110,13 @@ def main() -> int:
     p.add_argument("--season", type=str, default=SEASON)
     p.add_argument("--name", type=str, default=None,
                    help="Display name for the mini_leagues row (defaults to the FPL league's own name)")
+    p.add_argument("--admin-code", type=str, default=None, dest="admin_code",
+                   help="Admin code for the mini_leagues row (auto-generated if omitted)")
+    p.add_argument("--admin-team-id", type=int, default=None, dest="admin_team_id",
+                   help="Admin's FPL team ID (defaults to the FPL league's own admin_entry)")
     args = p.parse_args()
-    return run(args.league, args.invite_code, args.season, args.name)
+    return run(args.league, args.invite_code, args.season, args.name,
+               args.admin_code, args.admin_team_id)
 
 
 if __name__ == "__main__":
