@@ -26,7 +26,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from fpl_api import fetch_all_league_team_ids
+from fpl_api import fetch_all_league_team_ids, fetch_league_standings_page
 from db      import DEFAULT_SEASON, select_all, upsert
 
 log = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ log = logging.getLogger(__name__)
 SEASON = DEFAULT_SEASON
 
 
-def run(league_id: int, invite_code: str, season: str = SEASON) -> int:
+def run(league_id: int, invite_code: str, season: str = SEASON, name: str | None = None) -> int:
     log.info("=" * 60)
     log.info("Create mini-league %d -> invite_code=%s, season=%s", league_id, invite_code, season)
     log.info("=" * 60)
@@ -44,6 +44,11 @@ def run(league_id: int, invite_code: str, season: str = SEASON) -> int:
         log.error("No teams found in FPL league %d — aborting.", league_id)
         return 1
     log.info("Found %d teams in FPL league %d", len(team_ids), league_id)
+
+    if not name:
+        page1 = fetch_league_standings_page(league_id, 1) or {}
+        name = page1.get("league", {}).get("name") or f"League {league_id}"
+    log.info("League name: %s", name)
 
     # ── Backfill any team not yet in `teams` for this season ────────────────
     existing = {t["team_id"] for t in select_all("teams", {"season": season})}
@@ -60,7 +65,7 @@ def run(league_id: int, invite_code: str, season: str = SEASON) -> int:
 
     # ── Upsert the mini_leagues row ──────────────────────────────────────────
     upsert("mini_leagues",
-           [{"season": season, "invite_code": invite_code}],
+           [{"season": season, "invite_code": invite_code, "name": name}],
            on_conflict="season,invite_code")
 
     ml_rows = select_all("mini_leagues", {"season": season, "invite_code": invite_code})
@@ -86,8 +91,10 @@ def main() -> int:
     p.add_argument("--invite-code", type=str, required=True, dest="invite_code",
                    help="Label the frontend uses to look up this mini-league in Supabase")
     p.add_argument("--season", type=str, default=SEASON)
+    p.add_argument("--name", type=str, default=None,
+                   help="Display name for the mini_leagues row (defaults to the FPL league's own name)")
     args = p.parse_args()
-    return run(args.league, args.invite_code, args.season)
+    return run(args.league, args.invite_code, args.season, args.name)
 
 
 if __name__ == "__main__":
