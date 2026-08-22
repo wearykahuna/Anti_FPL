@@ -192,13 +192,13 @@ def update_rankings_for_gw(season: str, gw: int) -> None:
         z(r["anti_total"]), z(r["anti_gw_pts"]), r["team_id"],
     ))
 
-    updates = {r["id"]: {"id": r["id"]} for r in rows}
+    updates = {r["id"]: {"season": season, "team_id": r["team_id"], "gw": gw} for r in rows}
     for rank, r in enumerate(gw_order, 1):
         updates[r["id"]]["gw_rank"] = rank
     for pos, r in enumerate(total_order, 1):
         updates[r["id"]]["cumulative_standing"] = pos
 
-    upsert("gw_scores", list(updates.values()), on_conflict="id")
+    upsert("gw_scores", list(updates.values()), on_conflict="season,team_id,gw")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────
