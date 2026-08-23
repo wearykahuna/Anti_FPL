@@ -279,6 +279,31 @@ def test_live_inactive_only_when_fixture_done():
                                       finished_players=ALL_IDS))
     assert r2["inactive_pen_pts"] == INACTIVE_PEN
 
+def test_live_inactive_is_conservative_floor_while_bench_unresolved():
+    # Two MIDs blank (106, 107). Bench DEF (113) already played and covers
+    # 106. Bench MID/FWD (114, 115) haven't finished yet — 107 *might* still
+    # be rescued by one of them, so it must not count as inactive yet.
+    m = mins(played_zero=[106, 107])
+    m[113] = 90                                    # bench DEF already played
+    finished = ALL_IDS - {114, 115}                # 114/115 fixtures not done yet
+    r = score_gw(**base_score_kwargs(gw_finished=False, mins=m,
+                                     finished_players=finished))
+    assert r["inactive_count"] == 0
+    assert r["inactive_pen_pts"] == 0
+
+def test_live_inactive_floor_locks_in_once_bench_exhausted():
+    # Same setup, but 114 and 115 have now ALSO finished, both blank — so
+    # neither could have covered 107 either. Its inactive status is locked
+    # in for good; note this is strictly >= the previous (0), never <.
+    m = mins(played_zero=[106, 107])
+    m[113] = 90                                    # bench DEF already played
+    m[114] = 0                                     # bench MID finished blank
+    m[115] = 0                                     # bench FWD finished blank
+    r = score_gw(**base_score_kwargs(gw_finished=False, mins=m,
+                                     finished_players=ALL_IDS))
+    assert r["inactive_count"] == 1
+    assert r["inactive_pen_pts"] == INACTIVE_PEN
+
 def test_live_cvc_requires_both_fixtures_done():
     m = mins(played_zero=[110, 106], bench_played=False)
     r = score_gw(**base_score_kwargs(gw_finished=False, mins=m,

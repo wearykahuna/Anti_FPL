@@ -5,8 +5,8 @@ On-demand task. Run once per new mini-league (safe to re-run to resync
 membership if people join/leave the FPL league later).
 
 Given an FPL classic league ID and an invite_code (the label the frontend
-pages use to look this league up in Supabase — see liveGWtest.html /
-index.html), this:
+pages use to look this league up in Supabase — see mini_league.html /
+mini_league_dashboard.html), this:
   1. Pulls every team_id currently in that FPL league.
   2. Backfills any team not already in the `teams` table for the season
      (full score_new_team.run() per missing team — cheap no-op if the team

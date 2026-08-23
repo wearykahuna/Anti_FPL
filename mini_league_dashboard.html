@@ -8,22 +8,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root {
-  --bg:#080c14; --surface:#0f1623; --card:#151e2e; --border:#1e2d44;
-  --green:#10b981; --green-dim:#064e35; --blue:#3b82f6;
-  --gold:#f59e0b; --red:#ef4444; --text:#e2e8f0; --muted:#64748b;
-  --chip-wc:#8b5cf6; --chip-bb:#06b6d4; --chip-fh:#f59e0b; --chip-3xc:#ef4444;
+  --bg:#ffffff; --surface:#ffffff; --card:#ffffff; --border:#e0e0e0;
+  --green:#1a7f4b; --green-dim:#e7f5ee; --blue:#2563eb;
+  --gold:#b86e00; --red:#d62828; --text:#111111; --muted:#64748b;
+  --chip-wc:#7c3aed; --chip-bb:#0891b2; --chip-fh:#b86e00; --chip-3xc:#d62828;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;
-  background-image:radial-gradient(ellipse at 20% 0%,rgba(16,185,129,.06) 0%,transparent 60%),
-                   radial-gradient(ellipse at 80% 100%,rgba(59,130,246,.05) 0%,transparent 60%)}
+  background-image:radial-gradient(ellipse at 80% 100%,rgba(59,130,246,.05) 0%,transparent 60%)}
 
 /* HEADER */
-header{border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(16,185,129,.08) 0%,transparent 100%);
+header{border-bottom:1px solid var(--border);background:var(--bg);
   padding:20px 32px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.logo{width:44px;height:44px;background:var(--green);border-radius:10px;display:flex;
-  align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
-.header-text h1{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#fff}
+.logo-wrap{background:#fff;display:inline-block;line-height:0;flex-shrink:0}
+.logo-img{height:80px;width:auto;display:block}
+.header-text h1{font-family:'Oswald',sans-serif;font-size:26px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text)}
 .header-text p{font-size:12px;color:var(--muted);margin-top:2px}
 .gw-badge{margin-left:auto;background:var(--green-dim);border:1px solid var(--green);
   color:var(--green);font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;padding:5px 12px;border-radius:6px}
@@ -54,7 +53,7 @@ main{padding:24px 32px;max-width:1500px}
 #loading-state .spin-big{font-size:32px;display:block;animation:spin 1s linear infinite;margin-bottom:12px}
 @keyframes spin{to{transform:rotate(360deg)}}
 #error-state{display:none;padding:32px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);
-  border-radius:12px;color:#fca5a5;font-size:14px;margin:24px 32px}
+  border-radius:12px;color:#b91c1c;font-size:14px;margin:24px 32px}
 
 /* TABLE */
 .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -63,7 +62,7 @@ thead tr{background:var(--surface);border-bottom:1px solid var(--border)}
 thead th{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;text-transform:uppercase;
   color:var(--muted);padding:11px 14px;text-align:left;font-weight:500}
 thead th.num{text-align:right}
-tbody tr{border-bottom:1px solid rgba(30,45,68,.5);transition:background .15s}
+tbody tr{border-bottom:1px solid rgba(0,0,0,.08);transition:background .15s}
 tbody tr:hover{background:rgba(16,185,129,.04)}
 tbody tr:last-child{border-bottom:none}
 td{padding:11px 14px;vertical-align:middle}
@@ -72,12 +71,12 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 /* STANDINGS CELLS */
 .rank-cell{display:flex;align-items:center;gap:6px;min-width:60px}
 .rank-num{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--muted);line-height:1}
-.rank-num.top1{color:var(--gold)}.rank-num.top2{color:#94a3b8}.rank-num.top3{color:#b45309}
+.rank-num.top1{color:var(--gold)}.rank-num.top2{color:#64748b}.rank-num.top3{color:#b45309}
 .move-badge{font-family:'DM Mono',monospace;font-size:10px;font-weight:700;padding:2px 5px;border-radius:4px;line-height:1}
 .move-up{background:rgba(16,185,129,.15);color:var(--green)}
 .move-dn{background:rgba(239,68,68,.15);color:var(--red)}
 .move-eq{background:rgba(100,116,139,.15);color:var(--muted)}
-.team-info .team-name{font-weight:600;font-size:14px;color:#fff}
+.team-info .team-name{font-weight:600;font-size:14px;color:var(--text)}
 .team-info .manager{font-size:11px;color:var(--muted);margin-top:2px}
 .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:7px;flex-shrink:0}
 .team-row{display:flex;align-items:center}
@@ -93,7 +92,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 .chip-pip.avail-fh{background:rgba(245,158,11,.25);color:var(--chip-fh);border:1px solid rgba(245,158,11,.5)}
 .chip-pip.avail-bb{background:rgba(6,182,212,.25);color:var(--chip-bb);border:1px solid rgba(6,182,212,.5)}
 .chip-pip.avail-tc{background:rgba(239,68,68,.25);color:var(--chip-3xc);border:1px solid rgba(239,68,68,.5)}
-.chip-pip.used{background:rgba(30,45,68,.4);color:#2a3a55;border:1px solid rgba(30,45,68,.6)}
+.chip-pip.used{background:#ececec;color:#aaa;border:1px solid #ddd}
 
 /* GW SCORECARD */
 .gw-nav{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap}
@@ -111,9 +110,9 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 
 .score-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1px;background:var(--border)}
 .score-card{background:var(--card);padding:16px;transition:background .15s;position:relative}
-.score-card:hover{background:#1a2438}
+.score-card:hover{background:#f3f5f8}
 .sc-rank{font-family:'Oswald',sans-serif;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
-.sc-team{font-weight:600;font-size:13px;color:#fff;margin-bottom:1px;display:flex;align-items:center;gap:5px}
+.sc-team{font-weight:600;font-size:13px;color:var(--text);margin-bottom:1px;display:flex;align-items:center;gap:5px}
 .sc-manager{font-size:11px;color:var(--muted);margin-bottom:8px}
 .sc-pts{font-family:'Oswald',sans-serif;font-size:40px;font-weight:700;line-height:1;margin-bottom:3px}
 .sc-total{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:8px}
@@ -134,7 +133,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 .chart-legend{display:flex;flex-wrap:wrap;gap:10px 18px;padding:14px 24px;border-top:1px solid var(--border)}
 .legend-item{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;
   padding:3px 8px;border-radius:5px;transition:background .15s}
-.legend-item:hover{background:rgba(255,255,255,.05)}
+.legend-item:hover{background:rgba(0,0,0,.04)}
 .legend-item.hidden{opacity:.35}
 .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .chart-toolbar{display:flex;align-items:center;gap:10px;padding:12px 24px 0;border-top:1px solid var(--border)}
@@ -143,10 +142,10 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
   font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 8px;border-radius:5px;cursor:pointer}
 .chart-toolbar select:focus{outline:none;border-color:var(--green)}
 .time-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
-.time-stat-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(30,45,68,.4)}
+.time-stat-row{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid rgba(0,0,0,.08)}
 .time-stat-row:last-child{border-bottom:none}
 .time-stat-pos{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--muted);width:20px;text-align:center}
-.time-stat-pos.p1{color:var(--gold)}.time-stat-pos.p2{color:#94a3b8}.time-stat-pos.p3{color:#b45309}
+.time-stat-pos.p1{color:var(--gold)}.time-stat-pos.p2{color:#64748b}.time-stat-pos.p3{color:#b45309}
 .time-stat-name{flex:1;font-size:13px;font-weight:600}
 .time-stat-val{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700}
 @media(max-width:700px){.time-stats-grid{grid-template-columns:1fr}}
@@ -156,7 +155,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 @media(max-width:900px){.stats-grid{grid-template-columns:1fr}}
 .stat-card-header{font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;
   padding:14px 18px;border-bottom:1px solid var(--border);color:var(--muted)}
-.stat-card-header span{color:#fff;font-size:11px;letter-spacing:.5px;text-transform:none;font-family:'DM Sans',sans-serif}
+.stat-card-header span{color:var(--text);font-size:11px;letter-spacing:.5px;text-transform:none;font-family:'DM Sans',sans-serif}
 
 /* CHIP TABLE */
 .chip-table thead th{font-size:9px;padding:8px 10px;text-align:center}
@@ -165,30 +164,30 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 .chip-val{font-family:'DM Mono',monospace;font-size:11px}
 .chip-val.wc{color:var(--chip-wc)}.chip-val.fh{color:var(--chip-fh)}
 .chip-val.bb{color:var(--chip-bb)}.chip-val.tc{color:var(--chip-3xc)}
-.chip-val.unused{color:#2a3a55}
+.chip-val.unused{color:#c2c8d1}
 .chip-gw{font-size:9px;color:var(--muted);display:block}
 .crown{font-size:9px}
 
 /* TOP SCORES */
 .top-score-list{padding:6px 0}
-.top-score-item{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid rgba(30,45,68,.4)}
+.top-score-item{display:flex;align-items:center;gap:14px;padding:10px 18px;border-bottom:1px solid rgba(0,0,0,.08)}
 .top-score-item:last-child{border-bottom:none}
 .ts-pos{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--muted);width:28px;text-align:center}
-.ts-pos.p1{color:var(--gold)}.ts-pos.p2{color:#94a3b8}.ts-pos.p3{color:#b45309}
+.ts-pos.p1{color:var(--gold)}.ts-pos.p2{color:#64748b}.ts-pos.p3{color:#b45309}
 .ts-info{flex:1}
-.ts-team{font-weight:600;font-size:13px;color:#fff}
+.ts-team{font-weight:600;font-size:13px;color:var(--text)}
 .ts-meta{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
 .ts-pts{font-family:'Oswald',sans-serif;font-size:24px;font-weight:700}
 .ts-pts.best{color:var(--green)}.ts-pts.worst{color:var(--red)}
 
 /* BENCH BUMMINGS / ADV LISTS */
-.adv-row{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid rgba(30,45,68,.4)}
+.adv-row{display:flex;align-items:center;gap:12px;padding:9px 16px;border-bottom:1px solid rgba(0,0,0,.08)}
 .adv-row:last-child{border-bottom:none}
 .adv-pos{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--muted);width:22px;text-align:center}
-.adv-pos.p1{color:var(--gold)}.adv-pos.p2{color:#94a3b8}.adv-pos.p3{color:#b45309}
+.adv-pos.p1{color:var(--gold)}.adv-pos.p2{color:#64748b}.adv-pos.p3{color:#b45309}
 .adv-teamdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .adv-info{flex:1}
-.adv-name{font-weight:600;font-size:13px;color:#fff}
+.adv-name{font-weight:600;font-size:13px;color:var(--text)}
 .adv-sub{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
 .adv-val{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700}
 .gw-link{color:var(--muted);text-decoration:none}.gw-link:hover{color:var(--text);text-decoration:underline}
@@ -209,13 +208,15 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 <body>
 
 <header>
-  <div class="logo">&#x1F3F4;</div>
+  <div class="logo-wrap"><img src="logo_antifpl.png" alt="Anti FPL" class="logo-img"></div>
   <div class="header-text">
     <h1>Anti FPL &#x2014; Mini League</h1>
     <p id="header-sub">2026/27 Season &#xB7; G.Hooper = King Anti mong</p>
   </div>
   <div class="gw-badge" id="gw-badge">GW &#x2014;</div>
-  <a href="global_dashboard.html" class="refresh-btn" style="text-decoration:none">&#x1F30D; Global</a>
+  <a href="mini_league.html" class="refresh-btn" style="text-decoration:none">&#x26A1; Live</a>
+  <a href="index.html" class="refresh-btn" style="text-decoration:none">&#x1F3C6; Overall</a>
+  <a href="rules.html" class="refresh-btn" style="text-decoration:none">&#x1F4DC; Rules</a>
   <button class="refresh-btn" onclick="reloadData(this)">
     <span class="spin">&#x21BB;</span> Refresh
   </button>
@@ -231,7 +232,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 </div>
 
 <div id="error-state"></div>
-<div id="gw-progress-banner" style="display:none;background:linear-gradient(90deg,#1e2d44,#0f1623);border-bottom:1px solid var(--gold);padding:7px 32px;font-size:12px;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:.5px">
+<div id="gw-progress-banner" style="display:none;background:linear-gradient(90deg,#fff3d6,#fffaf0);border-bottom:1px solid var(--gold);padding:7px 32px;font-size:12px;color:var(--gold);font-family:'DM Mono',monospace;letter-spacing:.5px">
   &#x26A1; <span id="gw-progress-text"></span> &#x2014; Stats of Season shows completed GWs only
 </div>
 
@@ -708,7 +709,7 @@ function chipMeta(chip) { return CHIP_META[chip?.toLowerCase()] || null; }
 
 function ptsColor(pts) {
   if (pts == null) return 'var(--muted)';
-  if (pts < 20)  return '#4ade80';
+  if (pts < 20)  return '#15803d';
   if (pts < 28)  return 'var(--green)';
   if (pts < 38)  return 'var(--text)';
   if (pts < 50)  return 'var(--gold)';
@@ -953,9 +954,9 @@ function renderChart() {
         },
       },
       scales: {
-        x: {grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}}},
+        x: {grid:{color:'rgba(0,0,0,.08)'}, ticks:{color:'#475569',font:{size:10}}},
         y: {
-          grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}},
+          grid:{color:'rgba(0,0,0,.08)'}, ticks:{color:'#475569',font:{size:10}},
           title:{display:true, text: yTitles[mode] ?? yTitles['total'], color:'#475569',font:{size:11}},
         }
       }
@@ -1027,11 +1028,11 @@ function renderRankChart() {
         },
       },
       scales: {
-        x: {grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}}},
+        x: {grid:{color:'rgba(0,0,0,.08)'}, ticks:{color:'#475569',font:{size:10}}},
         y: {
           reverse: true,
           min: 1, max: 10,
-          grid:{color:'rgba(30,45,68,.6)'},
+          grid:{color:'rgba(0,0,0,.08)'},
           ticks:{color:'#475569', font:{size:10}, stepSize:1,
             callback: v => `#${v}`},
           title:{display:true, text:'Mini-League Position (1 = leading)', color:'#475569', font:{size:11}},
@@ -1389,7 +1390,7 @@ function renderScoreDNA() {
     }
   };
   const scaleOpts = (stacked, axis) => axis === 'x'
-    ? {stacked, grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}}}
+    ? {stacked, grid:{color:'rgba(0,0,0,.08)'}, ticks:{color:'#475569',font:{size:10}}}
     : {stacked, grid:{display:false}, ticks:{color:'#e2e8f0',font:{size:12,family:"'DM Sans',sans-serif"}}};
 
   DNA_CHART = new Chart(document.getElementById('dna-chart').getContext('2d'), {
@@ -1408,7 +1409,7 @@ function renderScoreDNA() {
     options: {
       indexAxis: 'y', responsive:true, maintainAspectRatio:false,
       scales: {x: scaleOpts(true,'x'), y: scaleOpts(true,'y')},
-      plugins: {legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}, tooltip:ttOpts}
+      plugins: {legend:{position:'bottom',labels:{color:'#475569',font:{size:11}}}, tooltip:ttOpts}
     }
   });
 }
@@ -1439,7 +1440,7 @@ function renderChipSplit() {
     }
   };
   const scaleOpts = (stacked, axis) => axis === 'x'
-    ? {stacked, grid:{color:'rgba(30,45,68,.6)'}, ticks:{color:'#475569',font:{size:10}}}
+    ? {stacked, grid:{color:'rgba(0,0,0,.08)'}, ticks:{color:'#475569',font:{size:10}}}
     : {stacked, grid:{display:false}, ticks:{color:'#e2e8f0',font:{size:12,family:"'DM Sans',sans-serif"}}};
 
   CHIP_SPLIT_CHART = new Chart(document.getElementById('chip-split-chart').getContext('2d'), {
@@ -1455,7 +1456,7 @@ function renderChipSplit() {
     options: {
       indexAxis: 'y', responsive:true, maintainAspectRatio:false,
       scales: {x: scaleOpts(true,'x'), y: scaleOpts(true,'y')},
-      plugins: {legend:{position:'bottom',labels:{color:'#94a3b8',font:{size:11}}}, tooltip:ttOpts}
+      plugins: {legend:{position:'bottom',labels:{color:'#475569',font:{size:11}}}, tooltip:ttOpts}
     }
   });
 }

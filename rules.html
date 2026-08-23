@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-FPL · Rules</title>
+  <style>
+    :root {
+      --bg:#fff; --surface:#fff; --border:#e0e0e0;
+      --text:#111; --muted:#888;
+      --accent:#d62828; --good:#1a7f4b; --warn:#b86e00; --live:#d62828;
+      --font:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono','Fira Code',monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:24px 16px 48px}
+
+    header{max-width:900px;margin:0 auto 32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .logo-wrap{background:#fff;display:inline-block;line-height:0}
+    .logo-img{height:120px;width:auto;display:block}
+    .meta{text-align:right;font-size:0.78rem;color:var(--muted);font-family:var(--mono);line-height:1.8}
+
+    .tabs{max-width:900px;margin:0 auto 24px;display:flex;border-bottom:1px solid var(--border);gap:0;flex-wrap:wrap}
+    .tab{padding:10px 18px;font-size:0.82rem;font-weight:600;color:var(--muted);
+         border-bottom:2px solid transparent;cursor:pointer;text-decoration:none;transition:all 0.2s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+
+    .content{max-width:900px;margin:0 auto}
+    .intro{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+           padding:18px 20px;margin-bottom:24px;font-size:0.92rem;line-height:1.6}
+    .intro strong{color:var(--accent)}
+
+    h2{font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+       color:var(--muted);margin:32px 0 12px}
+    h2:first-of-type{margin-top:0}
+
+    .rule-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+               padding:16px 20px;margin-bottom:10px;display:flex;justify-content:space-between;
+               align-items:flex-start;gap:16px;flex-wrap:wrap}
+    .rule-name{font-weight:700;font-size:0.92rem}
+    .rule-desc{font-size:0.82rem;color:var(--muted);margin-top:4px;line-height:1.5;max-width:560px}
+    .rule-pts{font-family:var(--mono);font-weight:700;font-size:1.05rem;color:var(--accent);
+              white-space:nowrap;flex-shrink:0}
+
+    .note-list{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px}
+    .note-list li{font-size:0.84rem;line-height:1.7;color:var(--text);margin-left:18px}
+    .note-list li::marker{color:var(--muted)}
+
+    footer{max-width:900px;margin:40px auto 0;font-size:0.72rem;color:var(--muted);
+           border-top:1px solid var(--border);padding-top:16px;display:flex;
+           justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+    @media (max-width:600px){
+      .logo-img{height:64px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <img src="logo_antifpl.png" alt="Anti FPL" class="logo-img">
+  </div>
+  <div class="meta"></div>
+</header>
+
+<div class="tabs">
+  <a class="tab" href="index.html">Overall Anti FPL</a>
+  <a class="tab active" href="rules.html">📜 Rules</a>
+</div>
+
+<div class="content">
+  <div class="intro">
+    <strong>Anti FPL is normal Fantasy Premier League, flipped.</strong>
+    Every manager plays a normal FPL team as usual — but on this league table, the
+    <strong>lowest score wins</strong>. Everything below is added <em>on top of</em> your
+    normal FPL gameweek score, so the goal each week is to score as few points as possible
+    while avoiding these penalties.
+  </div>
+
+  <h2>Penalties</h2>
+
+  <div class="rule-card">
+    <div>
+      <div class="rule-name">Inactive Player</div>
+      <div class="rule-desc">Per player in your final starting XI (after auto-subs) who played 0 minutes that gameweek. During a Bench Boost, this applies across all 15 players in your squad, not just the XI.</div>
+    </div>
+    <div class="rule-pts">+9 pts each</div>
+  </div>
+
+  <div class="rule-card">
+    <div>
+      <div class="rule-name">Bank</div>
+      <div class="rule-desc">Applied if you finish the gameweek with more than £3.0m sitting unused in the bank.</div>
+    </div>
+    <div class="rule-pts">+25 pts</div>
+  </div>
+
+  <div class="rule-card">
+    <div>
+      <div class="rule-name">Transfer Hits</div>
+      <div class="rule-desc">Per extra transfer beyond your free transfer(s). Unlike normal FPL — where a hit subtracts from your score — here it adds to it.</div>
+    </div>
+    <div class="rule-pts">+4 pts each</div>
+  </div>
+
+  <div class="rule-card">
+    <div>
+      <div class="rule-name">Captain / Vice-Captain</div>
+      <div class="rule-desc">Applied only if BOTH your captain and vice-captain play 0 minutes in the same gameweek.</div>
+    </div>
+    <div class="rule-pts">+15 pts</div>
+  </div>
+
+  <div class="rule-card">
+    <div>
+      <div class="rule-name">Unused Chip</div>
+      <div class="rule-desc">Per required chip (Bench Boost, Triple Captain, Free Hit) not used by the half-season deadline. Wildcard is exempt. Each of the 3 required chips is issued twice a season — once per half — so there are two deadlines: <strong>GW19</strong> for the first half, and <strong>GW38</strong> for the second.</div>
+    </div>
+    <div class="rule-pts">+25 pts each</div>
+  </div>
+
+  <h2>During a Live Gameweek</h2>
+  <div class="note-list">
+    <ul>
+      <li>Chip penalties are never applied mid-gameweek — they're only settled at the GW19/GW38 deadlines.</li>
+      <li>Inactive-player and Captain/Vice-Captain penalties only get confirmed once the relevant fixtures have finished — until then they're shown as <em>pending</em>, not final.</li>
+      <li>Bank and Transfer Hit penalties apply immediately, since both are already known at the start of the gameweek.</li>
+    </ul>
+  </div>
+</div>
+
+<footer>
+  <span>Anti-FPL · 2026/27 Season</span>
+  <span>Penalties add points</span>
+</footer>
+
+</body>
+</html>

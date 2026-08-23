@@ -1,367 +1,259 @@
-# Anti FPL Mini League Dashboard — Project Brief
+# Anti FPL Dashboard — Project Brief
 
 > Hand this document to Claude Code at the start of a new session.
 > It captures everything built so far, the data sources, all features,
-> and the target architecture for the v2 refactor.
+> and the current architecture.
 
 ---
 
 ## 1. What This Is
 
-A personal mini league dashboard for **Anti FPL** — a variant of Fantasy Premier League
-where the **lowest score wins**. The worst manager each week is the champion.
-There is a forfeit involved for the overall loser at season end.
+A live dashboard for **Anti FPL** — a variant of Fantasy Premier League
+where the **lowest score wins**. Every manager plays a completely normal FPL
+team; the twist is entirely in how it's scored afterwards — see the
+[rules.html](rules.html) page (or `Backend/scoring.py`'s docstring) for the
+full penalty list. The worst manager each week is the champion.
 
-The 2025/26 season is currently tracked. GW34 is the most recently completed gameweek
-at the time of writing, but the dashboard must handle new GWs dynamically as the
-season continues (typically 38 GWs total).
+The 2026/27 season is currently tracked. The dashboard handles new GWs
+dynamically as the season continues (38 GWs total, split into two halves at
+GW19).
 
----
+Teams are tracked at two scopes:
+- **Overall** — every eligible team the backend has ever scored (currently ~80).
+- **Mini-leagues** — a named subset of those teams, defined in Supabase by an
+  `invite_code` (e.g. `KINGANTI2627` → "The next Badly drawn boy", 10 teams).
+  New mini-leagues can be created on demand from any FPL classic league ID —
+  see `Backend/tasks/create_mini_league.py`.
 
-## 2. The Ten Teams
-
-```python
-TEAM_IDS = [
-    5388975,   # Geraint Hooper    — Sausage Roll FC
-    6703903,   # Curtis Williams   — Stranger Mings
-    6595399,   # Andrew Morris     — Expected Toulouse
-    3640882,   # Jason Farrugia    — Losing Comes Easy
-    5399604,   # Huw Jones         — The Pear Tree Pub
-    6654853,   # Richard Owen      — Cunha Afford Him
-    7667159,   # Ellison Griffiths — Funny loser!
-    1610262,   # Joe Stout         — Utter Tripe
-    3155889,   # James Elgar       — Saka on Wood
-    911549,    # Ross Farrugia     — Man Utd's dream XI
-]
-```
-
-Team names come from the official FPL site. The Anti FPL site uses the same IDs.
+A team becomes "eligible" (shows up anywhere) once it has a valid GW1 row —
+see `Backend/tasks/score_new_team.py`.
 
 ---
 
-## 3. Data Sources
+## 2. Data Sources
 
-### 3.1 Anti FPL — per-manager history page
+### 2.1 FPL Official API (the only external data source)
 ```
-GET https://antifpl.pythonanywhere.com/antifpl/manager/{team_id}/
+GET https://fantasy.premierleague.com/api/bootstrap-static/            # players, teams, GW deadlines
+GET https://fantasy.premierleague.com/api/fixtures/?event={gw}         # fixtures + live status for a GW
+GET https://fantasy.premierleague.com/api/entry/{team_id}/history/     # a team's full GW-by-GW history
+GET https://fantasy.premierleague.com/api/entry/{team_id}/event/{gw}/picks/  # a team's picks for one GW
+GET https://fantasy.premierleague.com/api/event/{gw}/live/             # every player's live score for one GW
+GET https://fantasy.premierleague.com/api/leagues-classic/{id}/standings/    # team IDs in an FPL classic league
 ```
-Returns an HTML page with a table. Each row = one gameweek. Scrape with BeautifulSoup.
+All wrapped in `Backend/fpl_api.py`. There is no scraping of any third-party
+Anti FPL site — all scoring (including penalties) is computed locally in
+`Backend/scoring.py` from this raw FPL data.
 
-**Column order (0-indexed):**
+### 2.2 Supabase (Postgres, the persisted store)
+Everything the backend computes is upserted into Supabase via
+`Backend/db.py` (using `SUPABASE_URL` / `SUPABASE_KEY` env vars — the key is
+the **anon** key, safe to embed client-side since it's read-only for the
+frontend's purposes). Tables referenced across the codebase:
 
-| Index | Field | Notes |
-|-------|-------|-------|
-| 0 | GW Rank | Rank on Anti FPL site that week |
-| 1 | Last Rank | Previous GW rank |
-| 2 | Gameweek | Integer — just the number |
-| 3 | Team Value | £ value |
-| 4 | Bank | £ in bank |
-| 5 | Transfers | Number made |
-| 6 | Transfer Cost | Points deducted (0 if none) |
-| 7 | Chip | Chip played that week — see chip names below |
-| 8 | C/VC Pens | Captain/Vice-captain penalty count |
-| 9 | Inactive Players | Count of inactive player penalties |
-| 10 | Last GW | Points last GW (ignore) |
-| 11 | Site Points | Anti FPL site points (before penalties) |
-| 12 | GW Points (With Pens) | **Primary score — use this** |
-| 13 | Total | Cumulative total — **use this** |
+| Table | Purpose |
+|---|---|
+| `teams` | One row per team per season — `team_id`, `manager`, `team_name`, `eligible` |
+| `gw_scores` | One row per team per GW — FPL raw points, every penalty breakdown, `anti_total`, `cumulative_standing`, `active_chip`, live/provisional flags |
+| `team_gw_selections` | One row per team per GW — `squad` (15 player IDs, starters first), `captain_id`, `vice_captain_id` |
+| `player_gw_scores` | One row per player per GW — `minutes`, `base_pts` (FPL score), `anti_pts` |
+| `players` | Reference data — `player_id`, `web_name`, `position`, `team_short`, `team_id` (FPL club) |
+| `fixtures` | One row per fixture per GW — `team_h`, `team_a`, `started`, `finished`, `finished_provisional` |
+| `gameweeks` | One row per GW — `is_current`, `is_finished` |
+| `mini_leagues` / `mini_league_members` | Named subsets of teams, looked up by `invite_code` |
 
-**Chip name normalisation** (stored lowercase):
-- `wildcard` — Wildcard
-- `freehit` — Free Hit
-- `bboost` — Bench Boost
-- `3xc` — Triple Captain (also written as TC)
-- Empty string `""` if no chip played
-
-Each manager gets **2 uses** of each chip across the season (FPL updated rules).
-So 8 chip slots per manager: WC×2, FH×2, BB×2, TC×2.
-
-**Penalty scoring:**
-- Each C/VC pen = **15 points added**
-- Each inactive player = **9 points added**
-- Having >£3.0m in bank = **25 points added** (already baked into GW Points (With Pens))
-- Transfer cost is already in points (shown directly in col 6)
-
-### 3.2 FPL Official API — bootstrap (player names)
-```
-GET https://fantasy.premierleague.com/api/bootstrap-static/
-```
-Returns JSON. `elements` array contains all players.
-Key fields per element: `id`, `web_name`, `first_name`, `second_name`, `team`.
-Cache this — it's large (~2MB) and rarely changes mid-season.
-
-### 3.3 FPL Official API — GW live scores
-```
-GET https://fantasy.premierleague.com/api/event/{gw}/live/
-```
-Returns JSON. `elements` array, each with `id` and `stats.total_points`.
-Use `total_points` for that player's score in that GW.
-
-### 3.4 FPL Official API — team picks per GW
-```
-GET https://fantasy.premierleague.com/api/entry/{team_id}/event/{gw}/picks/
-```
-Returns JSON with:
-- `picks` — array of 15 players:
-  - `element` — player ID
-  - `position` — 1–11 = starting XI, 12–15 = bench
-  - `is_captain` — bool
-  - `is_vice_captain` — bool
-  - `multiplier` — 2 if TC, 1 normally, 0 if benched
-- `automatic_subs` — array of auto-substitutions:
-  - `element_in` — player who came on
-  - `element_out` — player who went off
-- `active_chip` — chip played (`null` if none)
-- `entry_history.points_on_bench` — total bench points that GW (includes players who didn't sub on)
+The frontend pages query these tables **directly** via the Supabase REST API
+(PostgREST) — there is no build step and no generated JSON file.
 
 ---
 
-## 4. Target Architecture (v2)
+## 3. Architecture
 
 ```
-antifpl-dashboard/
-├── fetch_data.py          # Run locally after each GW — writes data.json
-├── data.json              # Committed to repo — static host reads this
-├── index.html             # Pure display — reads data.json via fetch()
-├── requirements.txt       # requests, beautifulsoup4, lxml
-├── .github/
-│   └── workflows/
-│       └── update.yml     # Optional: auto-run fetch_data.py on schedule
-└── BRIEF.md               # This file
+Anti_FPL/
+├── index.html                    # Overall Anti FPL — live leaderboard (site homepage)
+├── mini_league.html               # Mini-league ("The next Badly drawn boy") — live leaderboard
+├── rules.html                    # Scoring rules & penalties, shared by every page
+├── mini_league_dashboard.html    # Mini-league rich stats (standings/charts/chip tables/etc)
+├── global_dashboard.html         # Overall rich stats (same tabs, all teams)
+├── Overall_anti_fpl_league.html  # Redirect stub → index.html (kept for old links/bookmarks)
+├── logo_antifpl.png              # Site logo, used in every page header
+├── Backend/
+│   ├── fpl_api.py                # All FPL Official API calls
+│   ├── scoring.py                # Pure scoring engine — no I/O, see its docstring for full rules
+│   ├── db.py                     # Supabase read/write helpers
+│   ├── snapshot.py               # Weekly JSON snapshot of season state, committed to snapshots/
+│   ├── worker.py                 # Adaptive live-scoring loop (fast while matches are live)
+│   ├── run_task.py               # CLI entrypoint — `python run_task.py <task_name>`
+│   └── tasks/                    # One module per on-demand or scheduled job (see below)
+├── snapshots/2025-26/            # Committed weekly snapshots (history/audit trail)
+├── .github/workflows/
+│   ├── anti_fpl.yml              # Cron-driven scoring pipeline (see below)
+│   └── deploy_pages.yml          # Deploys the whole repo root to GitHub Pages on every push
+└── Brief.md                      # This file
 ```
 
-### fetch_data.py responsibilities
+**No data.json, no static site generator, no server.** Every HTML file is a
+self-contained page that calls the Supabase REST API directly from
+client-side JS on load (and on a 2-minute timer for the live boards).
+GitHub Pages just serves the repo root as-is — `deploy_pages.yml` re-deploys
+on every push to `*.html`.
 
-1. Scrape all 10 Anti FPL manager pages → per-GW history
-2. Fetch FPL bootstrap-static → player name lookup dict
-3. For each completed GW, fetch all 10 teams' picks + GW live scores
-4. Compute derived stats (best pick, worst pick, bench bummings, etc.)
-5. Write everything to `data.json`
+### Backend pipeline (`.github/workflows/anti_fpl.yml`)
+A single scheduled workflow dispatches to different `Backend/tasks/*.py`
+jobs depending on the cron slot that fired:
 
-### index.html responsibilities
+| Cadence | Task | What it does |
+|---|---|---|
+| Daily 03:00 + 14:00 UTC | `refresh_reference` | Re-pulls bootstrap data (players, GW deadlines) — catches new GWs opening |
+| Hourly, Fri evening → Sun afternoon | `refresh_picks` | Pulls picks for the upcoming/current GW before/during matches |
+| Top of every hour, 11:00–22:00 UTC | `scheduler` (via `worker.py`) | Adaptive loop — ticks every 90s while matches are live, 300s while idle, exits early if nothing is coming up. Runs live scoring (`recalc_scores`) throughout. |
+| Weekly, Sunday 23:00 UTC | `snapshot` | Commits a JSON snapshot of season state to `snapshots/` |
 
-- `fetch('./data.json')` on load — no API calls, no auth
-- Render all tabs from the JSON
-- Works on any static host (GitHub Pages, Netlify, etc.)
+On-demand tasks (run manually via `workflow_dispatch` or locally):
+`score_new_team` (backfill a newly-registered team), `create_mini_league`
+(register a new mini-league from an FPL league ID + invite code),
+`recalc_gw` / `finalize_gw` / `backfill_player_scores` (targeted fixes),
+`full_refresh` (refresh_reference → refresh_picks → recalc_scores in sequence).
 
 ---
 
-## 5. data.json Schema
+## 4. Scoring Rules
 
-```json
-{
-  "meta": {
-    "lastUpdated": "2026-01-14T20:30:00Z",
-    "currentGW": 34,
-    "season": "2025/26"
-  },
-  "players": {
-    "123": "Salah",
-    "456": "Haaland"
-  },
-  "teams": [
-    {
-      "id": 911549,
-      "manager": "Ross Farrugia",
-      "team": "Man Utd's dream XI",
-      "fplUrl": "https://fantasy.premierleague.com/entry/911549/event/34/",
-      "color": "#10b981",
-      "gws": [
-        {
-          "gw": 1,
-          "rank": 8,
-          "pts": 24,
-          "total": 24,
-          "chip": "",
-          "sitePts": 24,
-          "cvcPens": 0,
-          "transferCost": 0,
-          "inactive": 0,
-          "bestPick": { "name": "Isak", "pts": 2 },
-          "worstPick": { "name": "Haaland", "pts": 18 },
-          "captain": { "name": "Haaland", "pts": 18 },
-          "benchPts": 4,
-          "benchBummingPts": 0,
-          "benchPlayers": [
-            { "name": "Flekken", "pts": 2, "autoSubbed": false },
-            { "name": "Mykolenko", "pts": 1, "autoSubbed": false }
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
+Full canonical description lives in the `Backend/scoring.py` docstring and
+is rendered for humans on **rules.html**. Summary:
 
-**Notes on derived fields:**
-- `bestPick` — lowest scoring player in starting XI (good in Anti FPL)
-- `worstPick` — highest scoring player in starting XI (bad in Anti FPL)
-- `captain` — the designated captain and their FPL score
-- `benchPts` — `entry_history.points_on_bench` from FPL API (all bench pts)
-- `benchBummingPts` — points scored by players in `automatic_subs.element_in` only
-- `benchPlayers` — all 4 bench slots with name, pts, and whether they auto-subbed on
+- **Standings**: lowest score wins.
+- **Inactive player**: +9 pts per 0-minute player in the final starting XI
+  (after auto-subs). During Bench Boost, applies to all 15 squad players.
+- **Bank**: +25 pts if bank > £3.0m at the end of the GW.
+- **Transfer hits**: +4 pts per extra transfer (adds to score — the
+  opposite of normal FPL).
+- **Captain/Vice-Captain**: +15 pts if BOTH captain and vice-captain play 0
+  minutes.
+- **Unused chip**: +25 pts per required chip (Bench Boost, Triple Captain,
+  Free Hit — Wildcard exempt) not used by the half-season deadline. Each
+  required chip is issued twice a season (once per half): deadlines are
+  **GW19** (first half) and **GW38** (second half).
+
+**Live GW nuances** (`gw_finished=False` branch of `score_gw()`):
+- Chip penalties are never applied mid-GW.
+- Inactive / C-VC penalties only count once a player's fixture has finished
+  (a bench player with an unplayed fixture is neither "in" nor "out" yet).
+- Bank and transfer-hit penalties apply immediately (known at GW deadline).
+
+**Known gap (not yet fixed):** the live "pending" penalty total under-counts
+players who are *likely* to end up inactive but whose own or their
+replacement's fixture hasn't kicked off yet — it only counts confirmed (post
+fixture) 0-minute players. See the "pending score backend refactor" note in
+whatever session picks this up next.
 
 ---
 
-## 6. Dashboard Features (all tabs)
+## 5. Frontend Pages
 
-### Tab 1 — 📊 Standings
+### `index.html` / `mini_league.html` — live leaderboards
+The "main format" for the site: a light-themed, single sortable table,
+click-to-expand (or "See players" button) per team row. Refreshes silently
+every 2 minutes. Per team row:
+- Position (with ▲/▼ movement vs previous GW), team name (links to their
+  live FPL squad page), manager name.
+- Chip pips (2 uses each of WC/FH/BB/TC — used/available/currently-live),
+  plus a permanent small "TC · GW1" style note under any chip already played.
+- GW points (live FPL score while the GW is in progress, Anti FPL score with
+  penalties once finished).
+- **To Play** — count of *starting XI* players whose fixture hasn't finished
+  yet (upcoming, or live with 0 minutes so far).
+- Pending/confirmed penalty total, previous total, running total.
 
-League table sorted **ascending by total** (lowest = 1st place).
+Expanded squad view: starters then a clearly separated **BENCH** section
+(amber divider + tinted rows). Each player shows minutes/pts/anti-pts and a
+fixture-status glyph: ✓ finished, ● live, **?** yet to play.
 
-Columns:
-- **Pos** — mini-league position (1–10) with ▲/▼ movement badge vs previous GW
-- **Team** — team name as hyperlink to FPL team page for latest GW, manager name below
-- **Total** — cumulative Anti FPL points
-- **GW Pts** — points scored last GW
-- **Anti FPL Rank** — rank on the full Anti FPL site this GW, with ▲/▼ vs previous GW
-  - Arrow logic: rank number going DOWN is GOOD (▲ green). Going UP is BAD (▼ red).
-- **Prev Rank** — Anti FPL site rank previous GW
-- **3-GW Avg** — rolling 3-week average
-- **5-GW Avg** — rolling 5-week average
-- **Chips Left** — visual grid of 4 chip types × 2 uses each (coloured pill = available, greyed ✓ = used)
-- **Form** — mini bar chart of last 5 GW scores (shorter bar = better)
+`index.html` covers every eligible team (no mini-league filter); its nav
+never links to a mini-league page. `mini_league.html` is scoped to one
+mini-league via its Supabase `invite_code` lookup, and its nav can freely
+link out to the Overall page.
 
-### Tab 2 — 🎯 GW Scores
+### `rules.html`
+Static (no Supabase calls) — renders the penalty list from §4 above. Single
+shared page linked from every other page's nav, so the rules only need
+maintaining in one place.
 
-GW selector strip (buttons 1–N) + Prev/Next arrows.
+### `mini_league_dashboard.html` / `global_dashboard.html` — rich stats
+Six internal tabs (JS-driven, no page navigation):
+1. **📊 Standings** — sortable league table: total, GW pts, overall FPL
+   rank (▲/▼), 3-GW / 5-GW rolling averages, chips-left grid, form sparkline.
+2. **🎯 GW Scores** — card grid for one GW at a time (selector + prev/next),
+   sorted ascending by score, with best/worst pick per team.
+3. **📈 Season Chart** — cumulative Chart.js line chart, one line per team,
+   toggleable legend.
+4. **🏆 Stats of Season** — score distribution, chip points table (👑 best
+   score per chip type), top-3 best/worst single GWs.
+5. **💥 BB, Pens & Chips** — bench-bumming leaderboards, captain penalty
+   league, chip usage breakdown.
+6. **🧬 Score Breakdown** — stacked bar charts decomposing each team's
+   season total into regular picks / captain / bench bummings / penalties.
 
-Cards sorted ascending by GW score for that week. Each card shows:
-- GW Rank on Anti FPL
-- Team name + chip badge if played (colour coded: WC purple, BB cyan, FH amber, TC red)
-- Manager name
-- GW points (large, colour coded: green < 25, amber < 45, red ≥ 45)
-- Running total
-- **Best Pick** — lowest scoring starter (with name + pts)
-- **Worst Pick** — highest scoring starter (with name + pts)
-
-Best/worst picks require data from `fetch_data.py` — they come from `data.json`, no live API calls.
-
-### Tab 3 — 📈 Season Chart
-
-Cumulative line chart (Chart.js). Lower = better. Each team a distinct colour.
-Clickable legend to toggle teams on/off.
-X-axis: GW1–GWN. Y-axis: total points. Tooltip shows all teams at hovered GW.
-
-### Tab 4 — 🏆 Stats of Season
-
-**4a. GW Score Distribution table** (computed from data, instant)
-
-Per team:
-- Count of scores < 20
-- Min score (with GW number)
-- Max score (with GW number)
-- Range (max − min)
-- Count of scores > 40
-
-Highlight best (lowest/most favourable) value in each column in green.
-
-**4b. Chip Points Table** (8 columns × 10 rows)
-
-Columns: WC1, WC2, FH1, FH2, BB1, BB2, TC1, TC2
-Each cell shows: GW number (small) + points scored that GW.
-Empty `—` if chip not yet used.
-👑 highlight on the lowest score for each chip type across all teams and both uses.
-
-**4c. Penalty Breakdown table**
-
-Per team:
-- C/VC Pen count (total across season)
-- C/VC Pen points (count × 15)
-- Transfer cost points (sum of col 6 across season)
-- Inactive player count
-- Inactive player points (count × 9)
-- **Total penalty points** (highlighted red if > 0)
-
-**4d. Top 3 Best / Worst GW Scores** (side by side)
-- Best = 3 lowest single-GW scores across all teams all GWs
-- Worst = 3 highest single-GW scores across all teams all GWs
-
-**4e. Captain Penalty League**
-Ranked by total C/VC penalty points across the season (from Anti FPL data).
-Shows: total pen count, total pts, worst single GW.
-
-**4f. Bench Bummings** (3 sub-sections)
-
-- **Total Bench Bummings** — sum of `benchBummingPts` across season, ranked descending
-- **Worst Single Bench Score** — highest `benchBummingPts` in one GW (player name + GW)
-- **9 Lives Moments** — highest pts by a bench player who did NOT auto-sub on (sat on bench wasted)
+Both dashboards share identical structure; `mini_league_dashboard.html`
+filters to one mini-league, `global_dashboard.html` shows every team.
 
 ---
 
-## 7. Visual Design
+## 6. Visual Design
 
-Dark theme. CSS variables:
+Light theme (flipped from an earlier dark-mode version). CSS variables
+(live-board pages):
 ```css
---bg: #080c14
---surface: #0f1623
---card: #151e2e
---border: #1e2d44
---green: #10b981
---green-dim: #064e35
---gold: #f59e0b
---red: #ef4444
---text: #e2e8f0
---muted: #64748b
---chip-wc: #8b5cf6    (Wildcard — purple)
---chip-bb: #06b6d4    (Bench Boost — cyan)
---chip-fh: #f59e0b    (Free Hit — amber)
---chip-3xc: #ef4444   (Triple Captain — red)
+--bg:#f5f5f5; --surface:#fff; --border:#e0e0e0;
+--text:#111; --muted:#888;
+--accent:#d62828; --good:#1a7f4b; --warn:#b86e00; --live:#d62828;
+--font:'Inter',system-ui,sans-serif;
+--mono:'JetBrains Mono','Fira Code',monospace;
 ```
 
-Fonts: Oswald (headers/numbers), DM Mono (stats/values), DM Sans (body).
-All from Google Fonts.
+Rich-dashboard pages use a slightly different but harmonized light palette
+(Oswald/DM Mono/DM Sans fonts, green/gold/red accents) — see the `:root`
+block at the top of `mini_league_dashboard.html`. Chart.js tooltips
+intentionally keep a dark bubble for pop/contrast even on the light pages.
 
-Team colour palette (assign in order of league table position at season end):
-```
-#10b981, #3b82f6, #f59e0b, #ef4444,
-#8b5cf6, #06b6d4, #f97316, #ec4899,
-#84cc16, #e2e8f0
-```
+Chip colours: WC purple, BB cyan, FH amber, TC red — consistent across
+every page.
 
-Chart.js 4.4.1 via cdnjs for the cumulative line chart.
+Logo: `logo_antifpl.png` (flat RGB, no transparency, ~#f5f5f5 background
+that blends into the page), used at ~40px header height on every page.
 
 ---
 
-## 8. Arrow / Movement Logic
+## 7. Arrow / Movement Logic
 
-**Mini-league position** (1st–10th among the 10 teams):
-- Position number goes DOWN (e.g. 3→1) = ▲ green (improved)
-- Position number goes UP (e.g. 1→3) = ▼ red (worsened)
-- `delta = prevRank - currentRank` → positive = improved → green ▲
+**Mini-league / standings position**:
+- Position number goes DOWN (e.g. 3→1) = ▲ green (improved).
+- Position number goes UP (e.g. 1→3) = ▼ red (worsened).
+- `delta = prevRank - currentRank` → positive = improved → green ▲.
 
-**Anti FPL overall rank** (rank among all Anti FPL managers, e.g. #33 out of 154):
-- Rank number goes DOWN (e.g. #50→#33) = ▲ green (improved, closer to winning)
-- Rank number goes UP (e.g. #33→#50) = ▼ red (worsened)
-- Same delta logic as mini-league position
+**Overall FPL rank** (rank among all Anti FPL managers):
+- Same delta logic as above — rank number going down is good.
 
 ---
 
-## 9. Future Ideas (not yet built)
+## 8. Future Ideas (not yet built)
 
-- **Weekly commentary tab** — auto-generated match report style, with jokes/forfeits, based on a style guide Skill. The manager has a history of writing these manually each GW.
-- **Full Anti FPL player base scoring** — extending to rank all FPL managers by Anti FPL score, not just the mini-league. This is the "pipe dream" — would likely need a proper backend (Claude Code + Python API).
-- **GitHub Actions automation** — `.github/workflows/update.yml` that runs `fetch_data.py` on a cron (e.g. every Tuesday night) and auto-commits `data.json`.
-
----
-
-## 10. Hosting
-
-Target: **GitHub Pages** (free, static, public repo).
-URL pattern: `https://{username}.github.io/antifpl-dashboard/`
-
-Alternatively: **Netlify** (supports private repo, optional password protection).
-
-The v2 architecture (static HTML + pre-fetched JSON) works on any static host
-with zero server-side requirements.
+- **Fix the live "pending" penalty undercount** — see §4's known gap. Next
+  up after this doc was refreshed.
+- **Weekly commentary tab** — auto-generated match-report style GW recap.
+- **Season-ending knockout Cup** — `Backend/anti_fpl_cup.py` exists
+  (`CUP_ROUNDS=10`, starts GW29, up to 1024 entrants) but its current
+  activation status/UI isn't wired into any of the HTML pages yet — confirm
+  scope before building a Cup tab.
+- **GitHub Actions automation** — already built (`anti_fpl.yml`); future
+  work here would be tightening cron windows or adding alerting on failures.
 
 ---
 
-## 11. Repo Structure
+## 9. Hosting
 
-```
-main branch          ← last known-good HTML version (v1)
-v2-json-approach     ← new clean architecture (fetch_data.py + data.json + index.html)
-```
-
-Start all Claude Code work on `v2-json-approach`.
+**GitHub Pages**, serving the repo root as static files
+(`.github/workflows/deploy_pages.yml`, triggers on any `*.html` push).
+No build step. `index.html` is the site homepage.
+URL pattern: `https://{username}.github.io/{repo}/`.

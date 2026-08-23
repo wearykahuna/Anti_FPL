@@ -19,6 +19,10 @@ LIVE GW RULES:
   - Chip penalties never applied mid-GW.
   - Inactive / C-VC penalties only apply once fixtures are finished
     (inferred from finished_players set).
+  - Inactive penalty is a conservative floor while live: a blank starter only
+    counts once every bench player who could still be subbed in for them has
+    themselves finished playing (see live_confirmed_inactive()). This means
+    the live inactive count can only go up over a gameweek, never down.
   - Bank and hit penalties apply immediately (known at GW start).
 """
 
@@ -220,6 +224,52 @@ def infer_autosubs(
     return xi
 
 
+def live_confirmed_inactive(
+    starters:         list[dict],
+    bench:            list[dict],
+    player_type:      dict[int, int],
+    finished_players: set[int],
+    mins:             dict[int, int],
+) -> list[dict]:
+    """
+    Conservative, never-decreasing count of starters guaranteed to finish the
+    gameweek inactive (0 mins), based only on fixtures that have finished so
+    far.
+
+    A blank starter (fixture finished, 0 mins, not auto-subbed out by
+    infer_autosubs) is only counted once EVERY same-type (GK/outfield) bench
+    player who could still be subbed in for them has themselves finished
+    playing — i.e. there's no unplayed bench fixture left that could still
+    rescue this slot. Until that's true the slot is genuinely unresolved and
+    is excluded rather than guessed at, so the count this returns can only
+    grow over the course of a gameweek, never shrink and later need
+    correcting back down.
+    """
+    effective_xi   = infer_autosubs(starters, bench, player_type, finished_players, mins)
+    starter_ids    = {s["element"] for s in starters}
+    used_bench_ids = {p["element"] for p in effective_xi if p["element"] not in starter_ids}
+
+    locked = []
+    for p in effective_xi:
+        pid = p["element"]
+        if pid not in starter_ids:
+            continue                                    # a bench player already subbed in
+        if pid not in finished_players or mins.get(pid, 0) > 0:
+            continue                                     # not blank, or not finished yet
+
+        p_is_gk = player_type.get(pid, 3) == 1
+        still_unresolved = any(
+            b["element"] not in used_bench_ids
+            and (player_type.get(b["element"], 3) == 1) == p_is_gk
+            and b["element"] not in finished_players
+            for b in bench
+        )
+        if not still_unresolved:
+            locked.append(p)
+
+    return locked
+
+
 # ── Core GW scorer ────────────────────────────────────────────────────────────
 
 def score_gw(
@@ -273,13 +323,18 @@ def score_gw(
         played = finished_players or set()
 
         if bench_boost:
-            effective_xi = active_players              # all 15, no auto-sub
+            # No subs happen on a bench boost — every one of the 15 is final
+            # the moment their own fixture ends, so this is already a floor.
+            effective_xi = active_players
+            inactive     = [p for p in effective_xi
+                            if p["element"] in played and mins.get(p["element"], 0) == 0]
         else:
             effective_xi = infer_autosubs(starters, bench, player_type, played, mins)
+            # Conservative floor: only count a blank starter once every bench
+            # player who could still rescue that slot has finished playing —
+            # see live_confirmed_inactive()'s docstring for why.
+            inactive = live_confirmed_inactive(starters, bench, player_type, played, mins)
 
-        # Inactive: only count confirmed (fixture done) 0-min players
-        inactive         = [p for p in effective_xi
-                            if p["element"] in played and mins.get(p["element"], 0) == 0]
         inactive_pen_pts = len(inactive) * INACTIVE_PEN
 
         # C/VC: both fixtures must be done AND both played 0
