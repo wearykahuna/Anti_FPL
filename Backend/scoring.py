@@ -55,20 +55,33 @@ CUP_MAX_ENTRANTS = 2 ** CUP_ROUNDS               # 1024
 # ── FPL raw score calculator (finished / provisional GWs) ────────────────────
 
 def calc_fpl_raw(
-    squad:       list[int],
-    captain_id:  int | None,
-    vice_id:     int | None,
-    active_chip: str,
-    pts_map:     dict[int, int],
-    mins_map:    dict[int, int],
-    player_type: dict[int, int],
+    squad:            list[int],
+    captain_id:       int | None,
+    vice_id:          int | None,
+    active_chip:      str,
+    pts_map:          dict[int, int],
+    mins_map:         dict[int, int],
+    player_type:      dict[int, int],
+    finished_players: Optional[set[int]] = None,
 ) -> int:
     """
     Compute fpl_raw from player scores with auto-subs and VC promotion.
 
-    Use when all player minutes are final (finished or finished_provisional GW).
-    For bench-boost: all 15 count, no auto-subs.
+    For bench-boost: all 15 count, no auto-subs — already safe to call live,
+    since unplayed players simply contribute their current (possibly still 0)
+    score and the total updates naturally as they play.
+
     VC promotion: if captain played 0 mins, VC gets cap_mult bonus (incl. TC 3×).
+
+    finished_players: player IDs whose own fixture has finished. Defaults to
+    the whole squad — correct for a finished/provisional GW, where every
+    fixture is known to be done. Pass the REAL, gameweek-in-progress set to
+    get a conservative, progressively-accurate live figure instead: a given
+    auto-sub or VC promotion applies the moment it's individually locked in
+    (both sides' fixtures done), without waiting for the rest of the squad
+    to finish. Mirrors live_confirmed_inactive()'s philosophy — a sub or
+    promotion applied here is never later reversed as more fixtures resolve,
+    it can only be applied earlier or later depending on when it locks in.
     """
     cap_mult = 3 if active_chip == "3xc" else 2
 
@@ -82,8 +95,8 @@ def calc_fpl_raw(
 
     starters = [{"element": pid, "position": i + 1}  for i, pid in enumerate(squad[:11])]
     bench    = [{"element": pid, "position": i + 12} for i, pid in enumerate(squad[11:])]
-    all_ids  = set(squad)
-    xi       = infer_autosubs(starters, bench, player_type, all_ids, mins_map)
+    finished = finished_players if finished_players is not None else set(squad)
+    xi       = infer_autosubs(starters, bench, player_type, finished, mins_map)
     xi_ids   = [p["element"] for p in xi]
     raw      = sum(pts_map.get(pid, 0) for pid in xi_ids)
 

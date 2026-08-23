@@ -166,7 +166,7 @@ def tick() -> tuple[int, str, Optional[float]]:
         from tasks.recalc_scores import run as run_recalc_scores
 
         log.info("▶ refresh_live")
-        rc1 = run_refresh_live()
+        rc1 = run_refresh_live(fixtures=fixtures)  # already synced above this tick
         log.info("◀ refresh_live exit %d", rc1)
 
         log.info("▶ recalc_scores")
@@ -187,7 +187,7 @@ def tick() -> tuple[int, str, Optional[float]]:
     from tasks.recalc_scores import run as run_recalc_scores
 
     log.info("▶ provisional pass (GW%d)", current)
-    rc1 = run_provisional_pass(current)
+    rc1 = run_provisional_pass(current, fixtures=fixtures)  # already synced above this tick
     log.info("◀ provisional pass exit %d", rc1)
 
     log.info("▶ recalc_scores [provisional]")

@@ -45,10 +45,12 @@ _POS_TO_TYPE = {"GKP": 1, "DEF": 2, "MID": 3, "FWD": 4}
 
 # ── Smart filter helpers ──────────────────────────────────────────────────────
 
-def get_active_club_ids(season: str, gw: int) -> set[int]:
+def get_active_club_ids(season: str, gw: int, fixtures: list[dict] | None = None) -> set[int]:
     """Clubs that have started or finished a fixture this GW."""
+    if fixtures is None:
+        fixtures = get_fixtures(season, gw)
     active = set()
-    for f in get_fixtures(season, gw):
+    for f in fixtures:
         if f.get("started") or f.get("finished") or f.get("finished_provisional"):
             active.add(f["team_h"])
             active.add(f["team_a"])
@@ -240,12 +242,16 @@ def run(provisional: bool = False) -> int:
     teams     = get_teams(SEASON)
     team_meta = {t["team_id"]: t for t in teams}
 
+    # Fetched once and reused below for both the active-club filter and the
+    # finished-players calc — this table doesn't change within a single tick.
+    fixtures = get_fixtures(SEASON, gw=current_gw)
+
     # Active fixture filter — in provisional mode all fixtures are done so all teams count
     if provisional:
         active_teams = {s["team_id"] for s in selections}
         log.info("Teams to recalc (provisional): %d", len(active_teams))
     else:
-        active_clubs = get_active_club_ids(SEASON, current_gw)
+        active_clubs = get_active_club_ids(SEASON, current_gw, fixtures=fixtures)
         if not active_clubs:
             log.info("No active fixtures yet for GW%d — exiting.", current_gw)
             return 0
@@ -258,7 +264,6 @@ def run(provisional: bool = False) -> int:
     pts_map       = {p["player_id"]: p.get("base_pts", 0) for p in player_scores}
 
     # Players whose fixture is finished (for auto-sub inference)
-    fixtures             = get_fixtures(SEASON, gw=current_gw)
     finished_fixture_ids = {f["fixture_id"] for f in fixtures
                             if f.get("finished") or f.get("finished_provisional")}
     finished_clubs       = (
@@ -292,24 +297,24 @@ def run(provisional: bool = False) -> int:
 
         prev_row    = existing_by_team.get(tid, {})
         squad       = sel.get("squad") or []
-        starters    = squad[:11]
         captain_id  = sel.get("captain_id")
         vice_id     = sel.get("vice_captain_id")
         active_chip = sel.get("active_chip") or ""
-        cap_mult    = 3 if active_chip == "3xc" else 2
 
-        if provisional:
-            # All fixtures done — compute fpl_raw with auto-subs and VC promotion
-            fpl_raw = calc_fpl_raw(squad, captain_id, vice_id, active_chip,
-                                   pts_map, mins_map, player_type)
-        else:
-            # Live estimate: sum starters + captain bonus (no auto-subs yet for starters)
-            fpl_raw = sum(pts_map.get(pid, 0) for pid in starters)
-            if captain_id in starters:
-                fpl_raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
-            if active_chip == "bboost":
-                for pid in squad[11:]:
-                    fpl_raw += pts_map.get(pid, 0)
+        # Team-wide resolution is only used for the is_provisional flag below —
+        # a team's own squad can finish well before the rest of the gameweek
+        # does (e.g. no Monday-night player), at which point its score is as
+        # final as a provisional-pass score would be.
+        team_fully_resolved = bool(squad) and all(pid in finished_players for pid in squad)
+
+        # Pass the REAL finished_players set (not provisional mode's "treat
+        # everyone as done") so auto-subs and VC promotion apply the moment
+        # each one is individually locked in — a bench player who's already
+        # played can replace a confirmed-blank starter immediately, without
+        # waiting for the rest of either player's teammates to finish.
+        fpl_raw = calc_fpl_raw(squad, captain_id, vice_id, active_chip,
+                               pts_map, mins_map, player_type,
+                               finished_players=None if provisional else finished_players)
 
         hist_gw_row = {
             "event":                current_gw,
@@ -336,7 +341,7 @@ def run(provisional: bool = False) -> int:
         if scored:
             scored_rows.append(to_gw_scores_row(
                 tid, current_gw, SEASON, scored,
-                is_live=True, is_provisional=provisional,
+                is_live=True, is_provisional=provisional or team_fully_resolved,
             ))
 
     log.info("Upserting %d gw_scores rows...", len(scored_rows))

@@ -108,12 +108,16 @@ def build_player_gw_rows(
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def get_active_player_ids(season: str, gw: int, fixtures: list[dict] | None = None) -> set[int]:
+def get_active_player_ids(
+    season: str, gw: int,
+    fixtures: list[dict] | None = None,
+    players:  list[dict] | None = None,
+) -> set[int]:
     """
     Return player IDs whose club has a fixture this GW that is currently
     in play OR has finished. Excludes players whose fixture hasn't started yet
     (their stats are still all zeroes — no need to update).
-    Accepts an optional pre-fetched fixtures list to avoid a redundant DB query.
+    Accepts optional pre-fetched fixtures/players lists to avoid redundant DB queries.
     """
     if fixtures is None:
         fixtures = get_fixtures(season, gw)
@@ -126,11 +130,15 @@ def get_active_player_ids(season: str, gw: int, fixtures: list[dict] | None = No
     if not active_club_ids:
         return set()
 
-    players = get_players_ref(season)
+    if players is None:
+        players = get_players_ref(season)
     return {p["player_id"] for p in players if p.get("team_id") in active_club_ids}
 
 
-def _provisional_player_ids(fixtures: list[dict], season: str) -> set[int]:
+def _provisional_player_ids(
+    fixtures: list[dict], season: str,
+    players: list[dict] | None = None,
+) -> set[int]:
     """Player IDs whose fixture is finished_provisional but not yet officially finished."""
     prov_clubs: set[int] = set()
     for f in fixtures:
@@ -139,13 +147,21 @@ def _provisional_player_ids(fixtures: list[dict], season: str) -> set[int]:
             prov_clubs.add(f["team_a"])
     if not prov_clubs:
         return set()
-    players = get_players_ref(season)
+    if players is None:
+        players = get_players_ref(season)
     return {p["player_id"] for p in players if p.get("team_id") in prov_clubs}
 
 
 # ── Entry points ──────────────────────────────────────────────────────────────
 
-def run() -> int:
+def run(fixtures: list[dict] | None = None) -> int:
+    """
+    fixtures: pass an already-fresh fixture list (e.g. from the scheduler,
+    which syncs fixture state once per tick before dispatching) to skip the
+    redundant FPL API call + fixtures upsert this would otherwise do itself.
+    Standalone callers (workflow_dispatch task=refresh_live) omit it and it
+    syncs its own, unchanged.
+    """
     log.info("Refresh live — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
 
     is_open, current_gw = is_live_window_open(SEASON)
@@ -156,14 +172,16 @@ def run() -> int:
     log.info("Live window OPEN for GW%d", current_gw)
 
     # Sync fresh fixture states so scheduler can detect provisional window next cycle
-    fixtures     = sync_fixture_states(SEASON, current_gw)
-    relevant_ids = get_active_player_ids(SEASON, current_gw, fixtures=fixtures)
+    if fixtures is None:
+        fixtures = sync_fixture_states(SEASON, current_gw)
+    players      = get_players_ref(SEASON)
+    relevant_ids = get_active_player_ids(SEASON, current_gw, fixtures=fixtures, players=players)
     if not relevant_ids:
         log.info("No active fixtures this GW yet — exiting.")
         return 0
     log.info("Active players (clubs with started/finished fixtures): %d", len(relevant_ids))
 
-    prov_ids  = _provisional_player_ids(fixtures, SEASON)
+    prov_ids  = _provisional_player_ids(fixtures, SEASON, players=players)
 
     live_data = fetch_live(current_gw)
     if not live_data:
@@ -186,16 +204,20 @@ def run() -> int:
     return 0
 
 
-def run_provisional_pass(gw: int) -> int:
+def run_provisional_pass(gw: int, fixtures: list[dict] | None = None) -> int:
     """
     Fetch final player scores after all GW fixtures are finished_provisional.
     Called by the scheduler's provisional window path. No live-gate check.
+
+    fixtures: see run() — pass a pre-synced list to skip the redundant fetch.
     """
     log.info("Provisional player score pass — GW%d %s", gw, datetime.now().strftime("%Y-%m-%d %H:%M"))
 
-    fixtures     = sync_fixture_states(SEASON, gw)
-    relevant_ids = get_active_player_ids(SEASON, gw, fixtures=fixtures)
-    prov_ids     = _provisional_player_ids(fixtures, SEASON)
+    if fixtures is None:
+        fixtures = sync_fixture_states(SEASON, gw)
+    players      = get_players_ref(SEASON)
+    relevant_ids = get_active_player_ids(SEASON, gw, fixtures=fixtures, players=players)
+    prov_ids     = _provisional_player_ids(fixtures, SEASON, players=players)
 
     live_data = fetch_live(gw)
     if not live_data:

@@ -120,6 +120,10 @@
     .fix-icon.live{color:var(--live);animation:pulse 1.4s ease-in-out infinite}
     .fix-icon.upc{color:var(--warn);font-weight:800;font-size:0.8rem}
 
+    .autosub-icon{display:inline-block;width:12px;text-align:center;font-size:0.65rem;font-weight:800;margin-right:1px}
+    .autosub-icon.in{color:var(--good)}
+    .autosub-icon.out{color:var(--accent)}
+
     .state-msg{max-width:900px;margin:80px auto;text-align:center;color:var(--muted);
                font-family:var(--mono);font-size:0.85rem;line-height:2}
     .state-msg .big{font-size:2rem;display:block;margin-bottom:12px}
@@ -340,6 +344,36 @@
     }, 0);
   }
 
+  // Mirrors Backend/scoring.py's _valid_formation() exactly — must stay in sync.
+  function validFormation(ids, typeOf) {
+    const counts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+    ids.forEach(pid => { counts[typeOf(pid)] = (counts[typeOf(pid)] || 0) + 1; });
+    return counts[1] === 1 && counts[2] >= 3 && counts[3] >= 2 && counts[4] >= 1;
+  }
+
+  // Mirrors Backend/scoring.py's infer_autosubs() exactly — must stay in sync.
+  // Only credits a sub once BOTH the blank starter's and the covering bench
+  // player's own fixtures are finished, so — like the live pending-penalty
+  // floor — a sub shown here is never later reversed as more fixtures resolve.
+  function inferAutoSubs(starterIds, benchIds, typeOf, finishedSet, minsOf) {
+    const xi = starterIds.slice();
+    for (const bpId of benchIds) {
+      if (!finishedSet.has(bpId) || minsOf(bpId) === 0) continue;
+      const bpGk = typeOf(bpId) === 1;
+      for (let i = 0; i < xi.length; i++) {
+        const spId = xi[i];
+        if (!finishedSet.has(spId) || minsOf(spId) > 0) continue;
+        if ((typeOf(spId) === 1) !== bpGk) continue;
+        const test = xi.slice();
+        test[i] = bpId;
+        if (!validFormation(test, typeOf)) continue;
+        xi[i] = bpId;
+        break;
+      }
+    }
+    return xi;
+  }
+
   function render(scores, teamInfo, prevStanding, prevTotal, gw, isLive,
                   selectionMap, playerScoreMap, chipsByTeam) {
 
@@ -460,6 +494,22 @@
         const captainId = selection.captain_id;
         const viceId    = selection.vice_captain_id;
 
+        // Auto-subs: only meaningful outside Bench Boost (where all 15 count as-is).
+        const starterIds = selection.squad.slice(0, 11);
+        const benchIds   = selection.squad.slice(11);
+        const posTypeOf  = (pid) => ({ GKP: 1, DEF: 2, MID: 3, FWD: 4 }[window.playerPositions?.[pid]] || 3);
+        const finishedSet = new Set(selection.squad.filter(pid =>
+          window.clubStatus?.[window.playerTeamIds?.[pid]] === 'finished'));
+        const minsOf = (pid) => playerScoreMap[pid]?.minutes ?? 0;
+
+        const subbedOutIds = new Set();
+        const subbedInIds  = new Set();
+        if (activeChip !== 'bboost') {
+          const effectiveXi = inferAutoSubs(starterIds, benchIds, posTypeOf, finishedSet, minsOf);
+          starterIds.forEach(pid => { if (!effectiveXi.includes(pid)) subbedOutIds.add(pid); });
+          effectiveXi.forEach(pid => { if (!starterIds.includes(pid)) subbedInIds.add(pid); });
+        }
+
         const renderPlayer = (pid, i, isStarter) => {
           const isCap     = pid === captainId;
           const isVice    = pid === viceId;
@@ -488,11 +538,16 @@
           if (fixState === 'finished')      fixIcon = '<span class="fix-icon done" title="Fixture finished">✓</span>';
           else if (fixState === 'live')     fixIcon = '<span class="fix-icon live" title="Fixture in play">●</span>';
           else if (fixState === 'upcoming') fixIcon = '<span class="fix-icon upc"  title="Yet to play">?</span>';
+          const autoSubIcon = subbedOutIds.has(pid)
+            ? '<span class="autosub-icon out" title="Auto-subbed out">▼</span>'
+            : subbedInIds.has(pid)
+            ? '<span class="autosub-icon in" title="Auto-subbed in">▲</span>'
+            : '';
 
           return `
             <div class="player-row ${isStarter ? '' : 'bench'} ${inactive ? 'inactive' : ''}">
               <span class="player-pos">${posShort || (isStarter ? i+1 : 'B')}</span>
-              <span class="player-name">${fixIcon} ${name}
+              <span class="player-name">${fixIcon}${autoSubIcon} ${name}
                 ${club ? `<span class="player-club">${club}</span>` : ''}
                 ${tag ? `<span class="player-tag">${tag}</span>` : ''}
               </span>

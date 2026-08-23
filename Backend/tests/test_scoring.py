@@ -174,6 +174,43 @@ def test_raw_bench_boost_counts_all_15():
     raw = calc_fpl_raw(SQUAD, 110, 106, "bboost", p, m, PLAYER_TYPE)
     assert raw == 15 * 1 + 1                          # all 15 + captain double
 
+def test_raw_live_partial_autosub_applies_before_full_squad_done():
+    # 106 blank+finished, bench DEF 113 already played+finished. Bench MID/FWD
+    # (114, 115) haven't finished yet — but they're never needed for this sub,
+    # so it should apply immediately rather than waiting for them.
+    p = pts(default=2, **{"106": 99, "113": 7})
+    m = mins(played_zero=[106])
+    m[113] = 90
+    partial_finished = ALL_IDS - {114, 115}
+    raw_partial = calc_fpl_raw(SQUAD, 111, 109, "", p, m, PLAYER_TYPE,
+                               finished_players=partial_finished)
+    raw_full = calc_fpl_raw(SQUAD, 111, 109, "", p, m, PLAYER_TYPE)  # default: whole squad
+    assert raw_partial == raw_full == 29              # 10×2 + 113's 7 + captain bonus 2
+
+def test_raw_live_no_sub_until_covering_bench_player_has_played():
+    # Same as above, but 113 (the only player who could cover 106) hasn't
+    # finished either — the sub can't be credited yet, so 106's own score
+    # (not yet actually 0 in this synthetic case) is still counted as-is.
+    p = pts(default=2, **{"106": 99, "113": 7})
+    m = mins(played_zero=[106])
+    m[113] = 90
+    raw = calc_fpl_raw(SQUAD, 111, 109, "", p, m, PLAYER_TYPE,
+                       finished_players=ALL_IDS - {113, 114, 115})
+    assert raw == 121                                 # 10×2 + 106's 99 + captain bonus 2
+
+def test_raw_live_vc_promotion_before_full_squad_done():
+    # Same scenario as test_raw_vice_promoted_when_captain_blanks, but with
+    # unrelated bench players (114, 115) still to play — the VC promotion
+    # only actually depends on 110 and 106 (and 113, who covers 110), so it
+    # should apply just as early as it does once the whole squad is done.
+    p = pts(default=2, **{"106": 5})
+    m = mins(played_zero=[110])
+    partial_finished = ALL_IDS - {114, 115}
+    raw_partial = calc_fpl_raw(SQUAD, 110, 106, "", p, m, PLAYER_TYPE,
+                               finished_players=partial_finished)
+    raw_full = calc_fpl_raw(SQUAD, 110, 106, "", p, m, PLAYER_TYPE)
+    assert raw_partial == raw_full == 30
+
 
 # ── Chip helpers ──────────────────────────────────────────────────────────────
 
