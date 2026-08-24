@@ -58,7 +58,20 @@ def main() -> int:
     worst_rc = 0
 
     while True:
-        rc, state, next_ko = tick()
+        try:
+            rc, state, next_ko = tick()
+        except Exception:
+            # One tick failing (a transient DB race, a flaky API call, ...)
+            # shouldn't take down the rest of this hourly window — log it,
+            # back off, and let the next tick try again.
+            log.exception("Scheduler tick raised — backing off and retrying.")
+            worst_rc = max(worst_rc, 1)
+            if deadline is not None and time.monotonic() + args.idle_interval >= deadline:
+                log.info("Max runtime reached — exiting.")
+                return worst_rc
+            time.sleep(args.idle_interval)
+            continue
+
         worst_rc = max(worst_rc, rc)
 
         if state == "idle" and args.exit_when_idle:

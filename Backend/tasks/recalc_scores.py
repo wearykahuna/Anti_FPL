@@ -194,7 +194,20 @@ def update_rankings_for_gw(season: str, gw: int) -> None:
         z(r["anti_total"]), z(r["anti_gw_pts"]), r["team_id"],
     ))
 
-    updates = {r["id"]: {"season": season, "team_id": r["team_id"], "gw": gw} for r in rows}
+    # Include the fields we already fetched (not just gw_rank/cumulative_standing)
+    # so that IF the on_conflict match ever misses a row that was deleted/moved
+    # between the SELECT above and this upsert — a rare race, not the norm —
+    # the fallback INSERT still has real values instead of tripping a NOT NULL
+    # constraint on a column this function was never trying to touch.
+    updates = {
+        r["id"]: {
+            "season": season, "team_id": r["team_id"], "gw": gw,
+            "anti_gw_pts": r["anti_gw_pts"], "anti_total": z(r["anti_total"]),
+            "captain_pts": z(r["captain_pts"]), "vice_pts": z(r["vice_pts"]),
+            "total_pens_gw": z(r["total_pens_gw"]),
+        }
+        for r in rows
+    }
     for rank, r in enumerate(gw_order, 1):
         updates[r["id"]]["gw_rank"] = rank
     for pos, r in enumerate(total_order, 1):
@@ -347,7 +360,16 @@ def run(provisional: bool = False) -> int:
     log.info("Upserting %d gw_scores rows...", len(scored_rows))
     upsert("gw_scores", scored_rows, on_conflict="season,team_id,gw")
 
-    update_rankings_for_gw(SEASON, current_gw)
+    # Rankings are derived from the scores just written above, which are the
+    # part that actually matters — don't let a rare write race here (or
+    # anything else about this secondary pass) take down the whole run and
+    # any live ticks still due after it. It self-heals next tick regardless.
+    try:
+        update_rankings_for_gw(SEASON, current_gw)
+    except Exception:
+        log.exception("update_rankings_for_gw failed — scores were saved, rankings will retry next tick.")
+        log.info("Recalc scores complete (with ranking-update error).")
+        return 1
 
     log.info("Recalc scores complete.")
     return 0
