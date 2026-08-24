@@ -204,6 +204,10 @@ def is_live_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]
       - There's a current GW (gameweeks.is_current=true, is_finished=false)
       - AND at least one fixture in that GW has started=true, finished=false
         OR has started=false and kickoff_time has passed (catches kickoff window)
+        OR is finished_provisional but not yet officially finished (may still
+        get late stat corrections — e.g. bonus points — and its players'
+        scores shouldn't sit stale just because a LATER fixture in the same
+        GW hasn't kicked off yet)
 
     Returns (False, None) if no current GW or no active fixtures.
     """
@@ -220,8 +224,11 @@ def is_live_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]
     now = datetime.now(timezone.utc)
     any_active = False
     for f in fixtures:
-        if f.get("finished") or f.get("finished_provisional"):
+        if f.get("finished"):
             continue
+        if f.get("finished_provisional"):
+            any_active = True
+            break
         if f.get("started"):
             any_active = True
             break

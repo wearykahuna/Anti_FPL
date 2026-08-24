@@ -94,7 +94,16 @@ def _next_kickoff_minutes(fixtures: list[dict]) -> Optional[float]:
 def _classify(fixtures: list[dict]) -> tuple[str, str]:
     """
     Classify the current state from a fresh fixture list.
-    Returns (state, reason) where state is "live", "provisional", or "idle".
+    Returns (state, reason) where state is one of:
+      "live"      — a fixture is in play or kicks off imminently
+      "provisional" — every fixture in the GW is finished/finished_provisional
+      "settling"  — some fixtures are finished_provisional (may still get late
+                    stat corrections, e.g. bonus points) but the GW isn't all
+                    done yet, and nothing else is live/imminent (e.g. a later
+                    kickoff the same GW). Without this, those players' scores
+                    would sit stale until the next fixture goes live and
+                    incidentally drags them along — could be hours away.
+      "idle"      — nothing live, nothing settling, nothing imminent
     """
     now     = datetime.now(timezone.utc)
     horizon = now + timedelta(minutes=IMMINENT_MINUTES)
@@ -119,11 +128,13 @@ def _classify(fixtures: list[dict]) -> tuple[str, str]:
         if ko_dt and now <= ko_dt <= horizon:
             return "live", f"kickoff at {ko_dt.strftime('%H:%M UTC')}"
 
-    # No live / imminent fixture found — check if all are finished_provisional
+    # No live / imminent fixture found.
     all_done = all(f.get("finished") or f.get("finished_provisional") for f in fixtures)
     any_prov = any(f.get("finished_provisional") and not f.get("finished") for f in fixtures)
     if all_done and any_prov:
         return "provisional", "all fixtures finished_provisional"
+    if any_prov:
+        return "settling", "some fixtures finished_provisional, awaiting a later kickoff this GW"
 
     return "idle", "no live/imminent matches"
 
@@ -132,7 +143,7 @@ def tick() -> tuple[int, str, Optional[float]]:
     """
     One scheduler pass.
     Returns (exit_code, state, minutes_until_next_kickoff).
-    state is one of "live", "provisional", "finalize", "idle".
+    state is one of "live", "settling", "provisional", "finalize", "idle".
     """
     log.info("Scheduler — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
 
@@ -161,7 +172,14 @@ def tick() -> tuple[int, str, Optional[float]]:
     if state == "idle":
         return 0, state, next_ko
 
-    if state == "live":
+    if state in ("live", "settling"):
+        # "settling" reuses the exact same non-provisional calls — they're
+        # already scoped to only clubs with an active/finished_provisional
+        # fixture (get_active_player_ids / teams_with_active_players), and
+        # calc_fpl_raw already applies auto-subs progressively from the real
+        # finished_players set, so this correctly settles a team the moment
+        # every one of ITS fixtures is finished_provisional — it doesn't
+        # need to wait for an unrelated later kickoff elsewhere in the GW.
         from tasks.refresh_live  import run as run_refresh_live
         from tasks.recalc_scores import run as run_recalc_scores
 
