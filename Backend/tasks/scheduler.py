@@ -18,7 +18,13 @@ The scheduler also refreshes fixture states from the FPL API at the start of eac
 run so the DB doesn't go stale during an evening live window (the daily
 refresh_reference only runs at 03:00 and 14:00 UTC).
 
-API calls per run: 1 fixture-state call always; 1-2 live-data calls when live.
+Also calls refresh_picks first, every tick — self-gated to two SELECTs (~free)
+once a GW's picks are captured, so a deadline is picked up the same tick it
+passes regardless of which day it falls on, instead of relying on a separate
+cron guessing weekend-only deadline windows.
+
+API calls per run: 1 fixture-state call always; 1-2 live-data calls when live;
+a burst of picks/history calls only on the first tick after a deadline passes.
 """
 
 import logging
@@ -151,6 +157,17 @@ def tick() -> tuple[int, str, Optional[float]]:
     if current is None:
         log.info("No current GW — exiting.")
         return 0, "idle", None
+
+    # Capture picks/chips/bank-seed for any team whose deadline has just
+    # passed. Self-gated (two cheap SELECTs) so it's ~free on every tick once
+    # a GW's picks are captured — folding it in here (rather than a separate
+    # weekend-only cron) means a midweek/rearranged-fixture deadline gets
+    # picked up automatically too, on whichever day it actually falls.
+    try:
+        from tasks.refresh_picks import run as run_refresh_picks
+        run_refresh_picks()
+    except Exception:
+        log.exception("refresh_picks failed during tick — continuing with scoring pass.")
 
     # Refresh fixture states from FPL API before classifying
     fixtures = _sync_fixture_states(SEASON, current)

@@ -45,33 +45,25 @@ on:
   schedule:
     # Each cron line has a comment with which task it maps to.
     # The "Determine task" step uses the cron string to dispatch.
+    #
+    # refresh_picks is no longer scheduled separately — scheduler.tick() now
+    # calls it at the top of every tick below (self-gated, ~free once a GW's
+    # picks are captured), so any deadline gets picked up automatically
+    # regardless of which day it falls on, instead of guessing weekend-only
+    # deadline windows and missing midweek/rearranged-fixture GWs.
 
     # ── refresh_reference: daily 03:00 UTC + 14:00 UTC (catch post-deadline GW transitions) ──
     - cron: '0 3 * * *'
     - cron: '0 14 * * *'
 
-    # ── refresh_picks: hourly 17:00 Fri → 16:00 Sun (self-gates) ───────────
-    - cron: '0 17 * * 5'
-    - cron: '0 18 * * 5'
-    - cron: '0 19 * * 5'
-    - cron: '0 20 * * 5'
-    - cron: '0 21 * * 5'
-    - cron: '0 22 * * 5'
-    - cron: '0 23 * * 5'
-    - cron: '0 0  * * 6'
-    - cron: '0 1  * * 6'
-    - cron: '0 9  * * 6'
-    - cron: '0 10 * * 6'
-    - cron: '0 11 * * 6'
-    # ── refresh_picks: Sunday pre-match window (covers 15:00 UTC kickoffs) ──
-    - cron: '0 11 * * 0'
-    - cron: '0 12 * * 0'
-    - cron: '0 13 * * 0'
-    - cron: '0 16 * * 0'
-
-    # ── scheduler: top of every hour 11:00–22:00 UTC; worker.py loops internally
-    #    (90s while live, 300s idle, exits early when nothing is coming up) ──
-    - cron: '0 11-22 * * *'
+    # ── scheduler: tiered by day, based on actual PL kickoff-time distribution
+    #    (2021-26 fixture data: Sat/Sun spread from 11h local; every other day
+    #    is almost entirely 17h/19h/20h local evening kickoffs). worker.py loops
+    #    internally within each hour (90s tick while live, 300s idle, exits
+    #    early when nothing is coming up) ──
+    - cron: '0 11-22 * * 6,0'    # Sat/Sun: full hourly — real spread across the day
+    - cron: '0 15-22 * * 1'      # Mon: evening-only — MNF has no early kickoffs
+    - cron: '0 16-22 * * 2,3,4,5' # Tue-Fri: evening-only, +1h padded for BST/GMT drift
 
     # ── snapshot: weekly Sunday 23:00 UTC ─────────────────────────────────
     - cron: '0 23 * * 0'
@@ -109,12 +101,7 @@ jobs:
               TASK=refresh_reference ;;
             "0 23 * * 0")
               TASK=snapshot ;;
-            # Picks crons (Fri 17-23, Sat 00/01/09-11, Sun 11-13/16)
-            "0 17 * * 5"|"0 18 * * 5"|"0 19 * * 5"|"0 20 * * 5"|"0 21 * * 5"|"0 22 * * 5"|"0 23 * * 5"|\
-            "0 0 * * 6"|"0 1 * * 6"|"0 9 * * 6"|"0 10 * * 6"|"0 11 * * 6"|\
-            "0 11 * * 0"|"0 12 * * 0"|"0 13 * * 0"|"0 16 * * 0")
-              TASK=refresh_picks ;;
-            # Everything else = scheduler
+            # Everything else = scheduler (which now folds refresh_picks in too)
             *)
               TASK=scheduler ;;
           esac
