@@ -33,7 +33,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fpl_api import fetch_live, fetch_team_history
-from db      import DEFAULT_SEASON, get_client, get_team_ids, has_unfinalized_scores, upsert
+from db      import DEFAULT_SEASON, get_client, get_team_ids, has_unfinalized_scores, select_all, upsert
 
 log = logging.getLogger(__name__)
 
@@ -83,8 +83,16 @@ def run(gw: int) -> int:
     #    in one call, so this just reads two more fields out of a payload
     #    other tasks already fetch. FPL's "value" field is squad value alone,
     #    excluding the bank — team_value is the combined figure.
+    # Only teams recalc_gw actually scored this GW have a row to update —
+    # upserting against a team with none would try to INSERT one and trip
+    # NOT NULL constraints on columns this step has no way to populate
+    # (e.g. a team added mid-season has no row for a GW before it joined).
+    scored_this_gw = {r["team_id"] for r in
+                       select_all("gw_scores", {"season": SEASON, "gw": gw}, select="team_id")}
     value_rows = []
     for tid in get_team_ids(SEASON):
+        if tid not in scored_this_gw:
+            continue
         history = fetch_team_history(tid)
         hist_gw = next((g for g in (history or {}).get("current", []) if g.get("event") == gw), None)
         if hist_gw is None:

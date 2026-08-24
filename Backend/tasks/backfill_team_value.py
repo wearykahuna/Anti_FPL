@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fpl_api import fetch_team_history
-from db      import DEFAULT_SEASON, get_team_ids, upsert
+from db      import DEFAULT_SEASON, get_team_ids, select_all, upsert
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +32,17 @@ def run() -> int:
     team_ids = get_team_ids(SEASON)
     log.info("Fetching history for %d eligible teams...", len(team_ids))
 
+    # Only update rows recalc_scores/finalize_gw already created for this team+GW
+    # — an upsert against a (season, team_id, gw) combo with no existing row
+    # would try to INSERT one and trip NOT NULL constraints on columns this
+    # task has no way to populate (anti_gw_pts, etc.). team_value only ever
+    # supplements an existing row (e.g. a team added mid-season has no rows
+    # for GWs before it joined), never creates one.
+    existing = select_all("gw_scores", {"season": SEASON}, select="team_id,gw")
+    existing_keys = {(r["team_id"], r["gw"]) for r in existing}
+
     value_rows = []
+    skipped = 0
     for tid in team_ids:
         history = fetch_team_history(tid)
         if not history:
@@ -43,12 +53,16 @@ def run() -> int:
             value = hist_gw.get("value")
             if gw is None or value is None:
                 continue
+            if (tid, gw) not in existing_keys:
+                skipped += 1
+                continue
             # FPL's "value" is squad value alone, excluding bank — team_value
             # is the combined figure (matches finalize_gw.py's capture).
             team_value = value + (hist_gw.get("bank") or 0)
             value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": team_value})
 
-    log.info("Upserting %d gw_scores.team_value rows...", len(value_rows))
+    log.info("Upserting %d gw_scores.team_value rows (%d skipped — no existing gw_scores row)...",
+              len(value_rows), skipped)
     upsert("gw_scores", value_rows, on_conflict="season,team_id,gw")
 
     log.info("backfill_team_value complete.")
