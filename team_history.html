@@ -121,7 +121,8 @@
           <th class="r">Running Total</th>
           <th class="r">Global Rank</th>
           <th>Chip</th>
-          <th class="r" title="Squad value + bank">Team Value</th>
+          <th class="r" title="Squad selling value">Team Value</th>
+          <th class="r" title="Unspent budget">Bank</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -160,7 +161,7 @@
       const team = teamRows[0];
 
       const gwRows = await sbFetch('gw_scores',
-        `season=eq.${encodeURIComponent(SEASON)}&team_id=eq.${teamId}&select=gw,anti_gw_pts,anti_total,cumulative_standing,active_chip,team_value&order=gw.asc`);
+        `season=eq.${encodeURIComponent(SEASON)}&team_id=eq.${teamId}&select=gw,anti_gw_pts,anti_total,cumulative_standing,active_chip,team_value,in_the_bank&order=gw.asc`);
 
       document.getElementById('team-name').textContent = team.team_name || teamId;
       document.getElementById('manager-name').textContent = team.manager || '';
@@ -186,6 +187,7 @@
           <td class="r">${r.cumulative_standing ?? '—'}</td>
           <td>${r.active_chip ? (CHIP_LABEL[r.active_chip] || r.active_chip) : '—'}</td>
           <td class="r">${r.team_value != null ? `£${(r.team_value / 10).toFixed(1)}m` : '—'}</td>
+          <td class="r">${r.in_the_bank != null ? `£${(r.in_the_bank / 10).toFixed(1)}m` : '—'}</td>
         </tr>
       `).join('');
 

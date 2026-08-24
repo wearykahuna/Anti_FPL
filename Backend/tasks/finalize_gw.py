@@ -85,12 +85,13 @@ def run(gw: int) -> int:
     sb.from_("team_gw_selections").update({"is_live": False}) \
       .eq("season", SEASON).eq("gw", gw).execute()
 
-    # 4. Capture each team's official total worth for this GW (squad value +
-    #    bank) — an end-of-GW snapshot only (not part of the live/intra-GW
-    #    loop). fetch_team_history already returns the whole season's history
-    #    in one call, so this just reads two more fields out of a payload
-    #    other tasks already fetch. FPL's "value" field is squad value alone,
-    #    excluding the bank — team_value is the combined figure.
+    # 4. Capture each team's official squad value + bank for this GW — an
+    #    end-of-GW snapshot only (not part of the live/intra-GW loop).
+    #    fetch_team_history already returns the whole season's history in
+    #    one call, so this just reads two more fields out of a payload other
+    #    tasks already fetch. team_value = FPL's "value" field verbatim
+    #    (squad selling value — it does NOT include the bank); in_the_bank
+    #    is the separate unspent-budget figure, stored alongside it.
     # Only teams recalc_gw actually scored this GW have a row to update — this
     # is purely an optimization to skip pointless fetches/updates for teams
     # with nothing to patch. update_rows() below is a real UPDATE, not an
@@ -106,8 +107,11 @@ def run(gw: int) -> int:
         hist_gw = next((g for g in (history or {}).get("current", []) if g.get("event") == gw), None)
         if hist_gw is None:
             continue
-        team_value = (hist_gw.get("value") or 0) + (hist_gw.get("bank") or 0)
-        value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": team_value})
+        value_rows.append({
+            "season": SEASON, "team_id": tid, "gw": gw,
+            "team_value":  hist_gw.get("value"),
+            "in_the_bank": hist_gw.get("bank"),
+        })
     if value_rows:
         log.info("Updating %d team value rows for GW%d...", len(value_rows), gw)
         update_rows("gw_scores", value_rows, key_cols=["season", "team_id", "gw"])

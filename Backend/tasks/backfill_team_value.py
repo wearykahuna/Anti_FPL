@@ -1,10 +1,10 @@
 """
-tasks/backfill_team_value.py — One-off backfill of gw_scores.team_value for past GWs.
-========================================================================================
-finalize_gw.py captures each team's squad value going forward, one GW at a
-time, as part of its end-of-GW pass. This task populates history for GWs
-that were already finalized before that capture existed — run it once after
-adding the `team_value` column to gw_scores.
+tasks/backfill_team_value.py — One-off backfill of gw_scores.team_value/in_the_bank for past GWs.
+====================================================================================================
+finalize_gw.py captures each team's squad value + bank going forward, one GW
+at a time, as part of its end-of-GW pass. This task populates history for
+GWs that were already finalized before that capture existed — run it once
+after adding the `team_value`/`in_the_bank` columns to gw_scores.
 
 fetch_team_history() returns a team's ENTIRE season history in one call, so
 this is one API call per team regardless of how many past GWs need filling.
@@ -60,10 +60,14 @@ def run() -> int:
             if (tid, gw) not in existing_keys:
                 skipped += 1
                 continue
-            # FPL's "value" is squad value alone, excluding bank — team_value
-            # is the combined figure (matches finalize_gw.py's capture).
-            team_value = value + (hist_gw.get("bank") or 0)
-            value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": team_value})
+            # team_value = FPL's "value" field verbatim (squad selling value
+            # — does NOT include the bank); in_the_bank is stored separately
+            # (matches finalize_gw.py's capture).
+            value_rows.append({
+                "season": SEASON, "team_id": tid, "gw": gw,
+                "team_value":  value,
+                "in_the_bank": hist_gw.get("bank"),
+            })
 
     log.info("Updating %d gw_scores.team_value rows (%d skipped — no existing gw_scores row)...",
               len(value_rows), skipped)
