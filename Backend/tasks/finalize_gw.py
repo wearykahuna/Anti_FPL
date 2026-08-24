@@ -33,7 +33,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fpl_api import fetch_live, fetch_team_history
-from db      import DEFAULT_SEASON, get_client, get_team_ids, has_unfinalized_scores, select_all, upsert
+from db      import (
+    DEFAULT_SEASON,
+    get_client,
+    get_team_ids,
+    has_unfinalized_scores,
+    select_all,
+    update_rows,
+    upsert,
+)
 
 log = logging.getLogger(__name__)
 
@@ -83,10 +91,11 @@ def run(gw: int) -> int:
     #    in one call, so this just reads two more fields out of a payload
     #    other tasks already fetch. FPL's "value" field is squad value alone,
     #    excluding the bank — team_value is the combined figure.
-    # Only teams recalc_gw actually scored this GW have a row to update —
-    # upserting against a team with none would try to INSERT one and trip
-    # NOT NULL constraints on columns this step has no way to populate
-    # (e.g. a team added mid-season has no row for a GW before it joined).
+    # Only teams recalc_gw actually scored this GW have a row to update — this
+    # is purely an optimization to skip pointless fetches/updates for teams
+    # with nothing to patch. update_rows() below is a real UPDATE, not an
+    # upsert, so it can never INSERT a placeholder row (and trip NOT NULL
+    # constraints on unrelated columns) even if this check is stale.
     scored_this_gw = {r["team_id"] for r in
                        select_all("gw_scores", {"season": SEASON, "gw": gw}, select="team_id")}
     value_rows = []
@@ -100,8 +109,8 @@ def run(gw: int) -> int:
         team_value = (hist_gw.get("value") or 0) + (hist_gw.get("bank") or 0)
         value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": team_value})
     if value_rows:
-        log.info("Upserting %d team value rows for GW%d...", len(value_rows), gw)
-        upsert("gw_scores", value_rows, on_conflict="season,team_id,gw")
+        log.info("Updating %d team value rows for GW%d...", len(value_rows), gw)
+        update_rows("gw_scores", value_rows, key_cols=["season", "team_id", "gw"])
 
     log.info("GW%d finalized.", gw)
     return 0

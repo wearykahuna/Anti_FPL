@@ -9,6 +9,10 @@ adding the `team_value` column to gw_scores.
 fetch_team_history() returns a team's ENTIRE season history in one call, so
 this is one API call per team regardless of how many past GWs need filling.
 
+Writes via update_rows() (a real UPDATE per row, not an upsert) so it can
+never INSERT a placeholder gw_scores row for a team+GW that hasn't been
+scored yet — that would trip NOT NULL constraints on unrelated columns.
+
 API calls: 1 per eligible team.
 """
 
@@ -19,7 +23,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from fpl_api import fetch_team_history
-from db      import DEFAULT_SEASON, get_team_ids, select_all, upsert
+from db      import DEFAULT_SEASON, get_team_ids, select_all, update_rows
 
 log = logging.getLogger(__name__)
 
@@ -33,11 +37,11 @@ def run() -> int:
     log.info("Fetching history for %d eligible teams...", len(team_ids))
 
     # Only update rows recalc_scores/finalize_gw already created for this team+GW
-    # — an upsert against a (season, team_id, gw) combo with no existing row
-    # would try to INSERT one and trip NOT NULL constraints on columns this
-    # task has no way to populate (anti_gw_pts, etc.). team_value only ever
-    # supplements an existing row (e.g. a team added mid-season has no rows
-    # for GWs before it joined), never creates one.
+    # (e.g. a team added mid-season has no rows for GWs before it joined).
+    # This is purely an optimization to skip pointless update() calls —
+    # update_rows() below is a real UPDATE, not an upsert, so it can never
+    # INSERT a placeholder row even if this check races against a concurrent
+    # write and goes stale.
     existing = select_all("gw_scores", {"season": SEASON}, select="team_id,gw")
     existing_keys = {(r["team_id"], r["gw"]) for r in existing}
 
@@ -61,9 +65,9 @@ def run() -> int:
             team_value = value + (hist_gw.get("bank") or 0)
             value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": team_value})
 
-    log.info("Upserting %d gw_scores.team_value rows (%d skipped — no existing gw_scores row)...",
+    log.info("Updating %d gw_scores.team_value rows (%d skipped — no existing gw_scores row)...",
               len(value_rows), skipped)
-    upsert("gw_scores", value_rows, on_conflict="season,team_id,gw")
+    update_rows("gw_scores", value_rows, key_cols=["season", "team_id", "gw"])
 
     log.info("backfill_team_value complete.")
     return 0
