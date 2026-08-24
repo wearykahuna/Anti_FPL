@@ -364,6 +364,24 @@ def test_live_inactive_floor_locks_in_once_bench_exhausted():
     assert r["inactive_count"] == 1
     assert r["inactive_pen_pts"] == INACTIVE_PEN
 
+def test_live_inactive_locks_slot_blocked_by_formation_even_if_other_bench_unresolved():
+    # Two DEFs blank (102, 103) — bench DEF (113) is also blank+finished, so
+    # it can't cover either. Bench MID (114) and FWD (115) haven't finished
+    # yet. At most ONE of the two blank DEFs can ever legally be covered by
+    # an outfield swap (4 DEF -> 3 DEF is fine, 4 DEF -> 2 DEF breaks the
+    # min-3-DEF rule) — bench priority means 114 would take the first slot
+    # (102) if it plays, leaving 103 mathematically stuck regardless of how
+    # 114/115 turn out. 103 must be locked in now, not held back just
+    # because 114/115 share its outfield "type".
+    m = mins(played_zero=[102, 103])
+    m[113] = 0                                     # bench DEF already blank+finished
+    finished = ALL_IDS - {114, 115}                # 114/115 fixtures not done yet
+    r = score_gw(**base_score_kwargs(gw_finished=False, mins=m,
+                                     finished_players=finished))
+    assert r["inactive_count"] == 1
+    assert r["inactive_pen_pts"] == INACTIVE_PEN
+
+
 def test_live_cvc_requires_both_fixtures_done():
     m = mins(played_zero=[110, 106], bench_played=False)
     r = score_gw(**base_score_kwargs(gw_finished=False, mins=m,

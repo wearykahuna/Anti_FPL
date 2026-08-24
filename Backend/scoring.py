@@ -254,18 +254,36 @@ def live_confirmed_inactive(
     far.
 
     A blank starter (fixture finished, 0 mins, not auto-subbed out by
-    infer_autosubs) is only counted once EVERY same-type (GK/outfield) bench
-    player who could still be subbed in for them has themselves finished
-    playing — i.e. there's no unplayed bench fixture left that could still
-    rescue this slot. Until that's true the slot is genuinely unresolved and
-    is excluded rather than guessed at, so the count this returns can only
+    infer_autosubs) is locked in as confirmed-inactive only once no outcome
+    of the still-unfinished bench fixtures could ever rescue that slot.
+    That's determined by re-running the auto-sub simulation in the most
+    optimistic case — every bench player whose fixture hasn't finished yet
+    is assumed to eventually play — and checking whether the same blank
+    starter is still stuck in that slot even then. If even the best case
+    can't save it (formation rules block any further swap into that slot,
+    or every eligible bench player is already exhausted/blank), it's locked
+    for real; some *other* unresolved bench fixture being same-type is not
+    enough on its own, since formation limits may mean it could only ever
+    rescue a different slot. This means the count this returns can only
     grow over the course of a gameweek, never shrink and later need
     correcting back down.
     """
-    effective_xi   = infer_autosubs(starters, bench, player_type, finished_players, mins)
-    starter_ids    = {s["element"] for s in starters}
-    used_bench_ids = {p["element"] for p in effective_xi if p["element"] not in starter_ids}
+    effective_xi = infer_autosubs(starters, bench, player_type, finished_players, mins)
 
+    # Best case for every still-unresolved bench player: assume they finish
+    # having played, and see which slots that could ever unstick.
+    optimistic_finished = set(finished_players)
+    optimistic_mins      = dict(mins)
+    for b in bench:
+        bid = b["element"]
+        if bid not in optimistic_finished:
+            optimistic_finished.add(bid)
+            if optimistic_mins.get(bid, 0) == 0:
+                optimistic_mins[bid] = 1
+    optimistic_xi           = infer_autosubs(starters, bench, player_type, optimistic_finished, optimistic_mins)
+    optimistic_by_position  = {p["position"]: p["element"] for p in optimistic_xi}
+
+    starter_ids = {s["element"] for s in starters}
     locked = []
     for p in effective_xi:
         pid = p["element"]
@@ -273,16 +291,8 @@ def live_confirmed_inactive(
             continue                                    # a bench player already subbed in
         if pid not in finished_players or mins.get(pid, 0) > 0:
             continue                                     # not blank, or not finished yet
-
-        p_is_gk = player_type.get(pid, 3) == 1
-        still_unresolved = any(
-            b["element"] not in used_bench_ids
-            and (player_type.get(b["element"], 3) == 1) == p_is_gk
-            and b["element"] not in finished_players
-            for b in bench
-        )
-        if not still_unresolved:
-            locked.append(p)
+        if optimistic_by_position.get(p["position"]) == pid:
+            locked.append(p)                             # unrescuable even in the best case
 
     return locked
 
