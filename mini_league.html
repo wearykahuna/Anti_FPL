@@ -37,8 +37,6 @@
              padding:8px 16px;font-size:0.78rem;color:var(--muted)}
     .gw-pill strong{color:var(--text);font-size:1rem;display:block}
 
-    .refresh-bar{max-width:900px;margin:0 auto 16px;font-size:0.75rem;color:var(--muted);font-family:var(--mono)}
-
     .table-wrap{max-width:900px;margin:0 auto;overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:0.85rem}
     thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
@@ -166,10 +164,6 @@
 </div>
 
 <div class="gw-bar" id="gw-bar"></div>
-
-<div class="refresh-bar">
-  <span id="team-count">Loading...</span>
-</div>
 
 <div class="table-wrap">
   <div id="state-msg" class="state-msg"><span class="big">⚽</span>Loading leaderboard...</div>
@@ -496,8 +490,6 @@
       <div class="gw-pill"><strong>${avg}</strong>GW average</div>
       <div class="gw-pill"><strong>${topNAvg}</strong>Top ${topN} Avg GW Score</div>
     `;
-    document.getElementById('team-count').textContent =
-      `${scores.length} eligible teams`;
 
     document.getElementById('pens-header').textContent = isLive ? 'Pending' : '+Pens';
 
@@ -560,7 +552,7 @@
       tr.innerHTML = `
         <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
         <td>
-          <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
             <button type="button" class="see-players-btn">See team</button>
             <div>
               <div class="team-name">
