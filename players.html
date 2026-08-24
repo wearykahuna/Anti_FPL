@@ -72,12 +72,7 @@
   </div>
 </header>
 
-<div class="tabs">
-  <a class="tab" href="index.html">Overall Anti FPL</a>
-  <a class="tab" href="mini_league.html">The next Badly drawn boy</a>
-  <a class="tab active" href="players.html">🎽 Players</a>
-  <a class="tab" href="rules.html">📜 Rules</a>
-</div>
+<div class="tabs" id="tabs-bar"></div>
 
 <div class="gw-bar" id="gw-bar"></div>
 
@@ -122,6 +117,22 @@
   let ROWS = [];
   let sortKey = 'ownedPct';
   let sortDir = -1;
+
+  // Nav is context-sensitive: only show the mini-league link if we arrived via
+  // mini_league.html's own "?from=mini_league" — otherwise a global (Overall)
+  // visitor could use this page as a back door into a mini-league they weren't
+  // given the invite code for.
+  (function renderNav() {
+    const from = new URLSearchParams(location.search).get('from');
+    const links = [];
+    if (from === 'mini_league') {
+      links.push('<a class="tab" href="mini_league.html">The next Badly drawn boy</a>');
+    }
+    links.push('<a class="tab" href="index.html">Overall Anti FPL</a>');
+    links.push('<a class="tab active" href="players.html">Players</a>');
+    links.push('<a class="tab" href="rules.html">Rules</a>');
+    document.getElementById('tabs-bar').innerHTML = links.join('');
+  })();
 
   async function sbFetch(table, params = '') {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,

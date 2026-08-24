@@ -77,17 +77,20 @@ def run(gw: int) -> int:
     sb.from_("team_gw_selections").update({"is_live": False}) \
       .eq("season", SEASON).eq("gw", gw).execute()
 
-    # 4. Capture each team's official squad value for this GW — an end-of-GW
-    #    snapshot only (not part of the live/intra-GW loop). fetch_team_history
-    #    already returns the whole season's history in one call, so this just
-    #    reads one more field out of a payload other tasks already fetch.
+    # 4. Capture each team's official total worth for this GW (squad value +
+    #    bank) — an end-of-GW snapshot only (not part of the live/intra-GW
+    #    loop). fetch_team_history already returns the whole season's history
+    #    in one call, so this just reads two more fields out of a payload
+    #    other tasks already fetch. FPL's "value" field is squad value alone,
+    #    excluding the bank — team_value is the combined figure.
     value_rows = []
     for tid in get_team_ids(SEASON):
         history = fetch_team_history(tid)
         hist_gw = next((g for g in (history or {}).get("current", []) if g.get("event") == gw), None)
         if hist_gw is None:
             continue
-        value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": hist_gw.get("value")})
+        team_value = (hist_gw.get("value") or 0) + (hist_gw.get("bank") or 0)
+        value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": team_value})
     if value_rows:
         log.info("Upserting %d team value rows for GW%d...", len(value_rows), gw)
         upsert("gw_scores", value_rows, on_conflict="season,team_id,gw")

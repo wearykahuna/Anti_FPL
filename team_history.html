@@ -40,6 +40,10 @@
       color:var(--muted);margin-bottom:12px}
     .chart-wrap{position:relative;height:220px}
 
+    .charts-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+    .charts-toggle-label{font-size:0.75rem;color:var(--muted);font-family:var(--mono)}
+    .charts-toggle:hover .charts-toggle-label{color:var(--text)}
+
     .table-wrap{max-width:900px;margin:0 auto 24px;overflow-x:auto;background:var(--surface);
       border:1px solid var(--border);border-radius:10px}
     table{width:100%;border-collapse:collapse;font-size:0.85rem}
@@ -82,13 +86,16 @@
   <div class="gw-bar" id="gw-bar"></div>
 
   <div class="panel">
-    <div class="panel-title">Cumulative Total &mdash; Lower Is Better</div>
-    <div class="chart-wrap"><canvas id="total-chart"></canvas></div>
-  </div>
-
-  <div class="panel">
-    <div class="panel-title">Global Rank By GW &mdash; Lower Is Better</div>
-    <div class="chart-wrap"><canvas id="rank-chart"></canvas></div>
+    <div class="charts-toggle" id="charts-toggle">
+      <span class="panel-title" style="margin-bottom:0">Charts</span>
+      <span class="charts-toggle-label" id="charts-toggle-label">Show &#x25BE;</span>
+    </div>
+    <div id="charts-body" style="display:none">
+      <div class="panel-title" style="margin-top:16px">Cumulative Total &mdash; Lower Is Better</div>
+      <div class="chart-wrap"><canvas id="total-chart"></canvas></div>
+      <div class="panel-title" style="margin-top:20px">Global Rank By GW &mdash; Lower Is Better</div>
+      <div class="chart-wrap"><canvas id="rank-chart"></canvas></div>
+    </div>
   </div>
 
   <div class="table-wrap">
@@ -100,7 +107,7 @@
           <th class="r">Running Total</th>
           <th class="r">Global Rank</th>
           <th>Chip</th>
-          <th class="r">Team Value</th>
+          <th class="r" title="Squad value + bank">Team Value</th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -168,7 +175,7 @@
         </tr>
       `).join('');
 
-      renderCharts(gwRows);
+      CURRENT_GW_ROWS = gwRows;
 
       document.getElementById('state-msg').style.display = 'none';
       document.getElementById('content').style.display = '';
@@ -177,6 +184,23 @@
       showError(err.message);
     }
   }
+
+  // Charts are collapsed by default and only built the first time they're
+  // expanded — Chart.js sizes itself off the canvas's rendered dimensions,
+  // which are meaningless while the container is display:none.
+  let CURRENT_GW_ROWS = null;
+  let chartsBuilt = false;
+  document.getElementById('charts-toggle').addEventListener('click', () => {
+    const body = document.getElementById('charts-body');
+    const label = document.getElementById('charts-toggle-label');
+    const showing = body.style.display !== 'none';
+    body.style.display = showing ? 'none' : '';
+    label.innerHTML = showing ? 'Show &#x25BE;' : 'Hide &#x25B4;';
+    if (!showing && !chartsBuilt && CURRENT_GW_ROWS) {
+      renderCharts(CURRENT_GW_ROWS);
+      chartsBuilt = true;
+    }
+  });
 
   function renderCharts(gwRows) {
     const labels = gwRows.map(r => `GW${r.gw}`);

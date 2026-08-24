@@ -65,6 +65,9 @@
                animation:chip-pulse 1.4s ease-in-out infinite}
     @keyframes chip-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.96)}}
 
+    .badge-provisional{display:inline-block;animation:badge-flash 1.8s ease-in-out infinite}
+    @keyframes badge-flash{0%,100%{opacity:0.25}50%{opacity:0.7}}
+
     .chips-used-gws{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
     .chip-used-gw{font-family:var(--mono);font-size:0.6rem;color:var(--muted)}
 
@@ -158,8 +161,8 @@
 <div class="tabs">
   <a class="tab active" href="mini_league.html">The next Badly drawn boy</a>
   <a class="tab" href="index.html">Overall Anti FPL</a>
-  <a class="tab" href="players.html">🎽 Players</a>
-  <a class="tab" href="rules.html">📜 Rules</a>
+  <a class="tab" href="players.html?from=mini_league">Players</a>
+  <a class="tab" href="rules.html">Rules</a>
 </div>
 
 <div class="gw-bar" id="gw-bar"></div>
@@ -247,6 +250,24 @@
     });
     window.weeklyBadges = badges;
     lastBadgeGw = completedGw;
+  }
+
+  // Provisional badge for the CURRENT (still-live) GW only — gw_rank updates
+  // every live tick, so this can still flip before the GW is confirmed.
+  // Rendered faded + pulsing so it reads as "not locked in yet". Computed
+  // across ALL teams (global), same as the confirmed badges above.
+  window.provisionalBadges = {};
+  async function refreshProvisionalBadge(currentGw, isLive) {
+    window.provisionalBadges = {};
+    if (!isLive) return;
+    const rows = await sbFetch('gw_scores',
+      `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=team_id,gw_rank`);
+    const valid = rows.filter(r => typeof r.gw_rank === 'number');
+    if (!valid.length) return;
+    const maxRank = Math.max(...valid.map(r => r.gw_rank));
+    valid.forEach(r => {
+      window.provisionalBadges[r.team_id] = { star: r.gw_rank === 1, circle: r.gw_rank === maxRank };
+    });
   }
 
   async function loadData() {
@@ -345,7 +366,10 @@
       const playerScoreMap = Object.fromEntries(playerScores.map(p => [p.player_id, p]));
 
       const completedGw = isLive ? currentGw - 1 : currentGw;
-      await refreshWeeklyBadges(completedGw);
+      await Promise.all([
+        refreshWeeklyBadges(completedGw),
+        refreshProvisionalBadge(currentGw, isLive),
+      ]);
 
       render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive,
              selectionMap, playerScoreMap, chipsByTeam);
@@ -520,9 +544,14 @@
       const chipsHtml   = buildChipsRow(chipsByTeam[s.team_id] || [], activeChip, gw);
       const chipsGwHtml = buildChipsUsedGwsLine(chipsByTeam[s.team_id] || []);
       const badges      = window.weeklyBadges?.[s.team_id];
-      const badgeHtml    = badges
+      const provBadges  = window.provisionalBadges?.[s.team_id];
+      const confirmedBadgeHtml = badges
         ? `${badges.stars > 0 ? `<span title="Lowest score of the week ×${badges.stars}">${'⭐'.repeat(badges.stars)}</span>` : ''}${badges.circles > 0 ? `<span title="Highest score of the week ×${badges.circles}">${'⚫'.repeat(badges.circles)}</span>` : ''}`
         : '';
+      const provisionalBadgeHtml = provBadges
+        ? `${provBadges.star ? `<span class="badge-provisional" title="Provisional — lowest score this week, not yet confirmed">⭐</span>` : ''}${provBadges.circle ? `<span class="badge-provisional" title="Provisional — highest score this week, not yet confirmed">⚫</span>` : ''}`
+        : '';
+      const badgeHtml = confirmedBadgeHtml + provisionalBadgeHtml;
 
       // ── Team row ──
       const tr = document.createElement('tr');

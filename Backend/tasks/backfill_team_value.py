@@ -43,7 +43,10 @@ def run() -> int:
             value = hist_gw.get("value")
             if gw is None or value is None:
                 continue
-            value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": value})
+            # FPL's "value" is squad value alone, excluding bank — team_value
+            # is the combined figure (matches finalize_gw.py's capture).
+            team_value = value + (hist_gw.get("bank") or 0)
+            value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": team_value})
 
     log.info("Upserting %d gw_scores.team_value rows...", len(value_rows))
     upsert("gw_scores", value_rows, on_conflict="season,team_id,gw")
