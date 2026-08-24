@@ -87,6 +87,29 @@ def upsert(table: str, rows: list[dict], on_conflict: str) -> None:
                  table, min(i + BATCH_SIZE, total), total)
 
 
+def update_rows(table: str, rows: list[dict], key_cols: list[str]) -> None:
+    """
+    Update each row individually, matched by key_cols — unlike upsert(), this
+    can never INSERT a new row, so it's safe for supplementary fields (like
+    gw_scores.team_value) that should only ever patch a row another task
+    already created. An upsert() on a stale/missing key would try to INSERT
+    a placeholder row and trip NOT NULL constraints on unrelated columns;
+    a plain UPDATE just matches zero rows silently instead.
+    One HTTP request per row — fine for the small, infrequent call sites
+    this is meant for (not the live scoring loop).
+    """
+    if not rows:
+        return
+    sb = get_client()
+    for row in rows:
+        keys  = {k: row[k] for k in key_cols}
+        patch = {k: v for k, v in row.items() if k not in key_cols}
+        q = sb.from_(table).update(patch)
+        for k, v in keys.items():
+            q = q.eq(k, v)
+        q.execute()
+
+
 def select_all(table: str, filters: dict | None = None,
                select: str = "*") -> list[dict]:
     """

@@ -37,8 +37,6 @@
              padding:8px 16px;font-size:0.78rem;color:var(--muted)}
     .gw-pill strong{color:var(--text);font-size:1rem;display:block}
 
-    .refresh-bar{max-width:900px;margin:0 auto 16px;font-size:0.75rem;color:var(--muted);font-family:var(--mono)}
-
     .table-wrap{max-width:900px;margin:0 auto;overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:0.85rem}
     thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
@@ -65,6 +63,9 @@
                animation:chip-pulse 1.4s ease-in-out infinite}
     @keyframes chip-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.96)}}
 
+    .badge-provisional{display:inline-block;animation:badge-flash 1.8s ease-in-out infinite}
+    @keyframes badge-flash{0%,100%{opacity:0.25}50%{opacity:0.7}}
+
     .chips-used-gws{display:flex;gap:6px;flex-wrap:wrap;margin-top:3px}
     .chip-used-gw{font-family:var(--mono);font-size:0.6rem;color:var(--muted)}
 
@@ -81,6 +82,12 @@
                background:rgba(214,40,40,0.08);border:1px solid rgba(214,40,40,0.25);border-radius:6px;
                padding:4px 9px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background 0.15s}
     .see-players-btn:hover{background:rgba(214,40,40,0.16)}
+
+    .gw-history-btn{font-family:var(--font);font-size:0.62rem;font-weight:600;color:var(--muted);
+               background:#f0f0f0;border:1px solid var(--border);border-radius:6px;
+               padding:4px 8px;cursor:pointer;white-space:nowrap;text-decoration:none;
+               display:inline-block;margin-right:8px;transition:background 0.15s}
+    .gw-history-btn:hover{background:#e6e6e6;color:var(--text)}
 
     .chevron{font-size:0.7rem;color:var(--muted);transition:transform 0.2s;display:inline-block}
     .chevron.open{transform:rotate(180deg)}
@@ -102,7 +109,7 @@
     .bench-divider{font-family:var(--mono);font-size:0.62rem;letter-spacing:0.12em;text-transform:uppercase;
                    color:#fff;background:var(--warn);border-radius:3px;padding:3px 8px;display:inline-block;
                    margin:10px 0 4px}
-    .player-row{display:grid;grid-template-columns:36px 1fr 48px 48px 48px;gap:8px;align-items:center;
+    .player-row{display:grid;grid-template-columns:36px 1fr 48px 48px 48px 48px;gap:8px;align-items:center;
                 padding:5px 0;font-size:0.82rem;border-bottom:1px dashed #ececec}
     .player-row.bench{background:#fbeedd;padding:5px 6px;margin:0 -6px;border-left:3px solid var(--warn);
                       border-bottom:1px dashed #f0dcc0}
@@ -111,9 +118,10 @@
     .player-name{font-weight:500}
     .player-tag{display:inline-block;font-size:0.62rem;color:var(--warn);font-weight:700;margin-left:4px}
     .player-club{display:inline-block;font-size:0.6rem;color:var(--muted);letter-spacing:0.05em;margin-left:4px}
-    .player-mins,.player-pts,.player-anti{font-family:var(--mono);text-align:right;font-size:0.8rem}
+    .player-mins,.player-pts,.player-anti,.player-cost{font-family:var(--mono);text-align:right;font-size:0.8rem}
     .player-mins{color:var(--muted)}
     .player-anti{color:var(--accent);font-weight:600}
+    .player-cost{color:var(--muted)}
 
     .fix-icon{display:inline-block;width:14px;text-align:center;font-size:0.7rem;margin-right:2px;font-weight:700}
     .fix-icon.done{color:var(--good)}
@@ -150,14 +158,11 @@
 
 <div class="tabs">
   <a class="tab active" href="index.html">Overall Anti FPL</a>
-  <a class="tab" href="rules.html">📜 Rules</a>
+  <a class="tab" href="players.html?from=index">Players</a>
+  <a class="tab" href="rules.html">Rules</a>
 </div>
 
 <div class="gw-bar" id="gw-bar"></div>
-
-<div class="refresh-bar">
-  <span id="team-count">Loading...</span>
-</div>
 
 <div class="table-wrap">
   <div id="state-msg" class="state-msg"><span class="big">⚽</span>Loading leaderboard...</div>
@@ -192,6 +197,67 @@
       { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
     if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
     return r.json();
+  }
+
+  // Paginated fetch — needed for season-long, all-team queries that can exceed 1000 rows
+  // (e.g. gw_rank history across ~80 teams × 38 GWs).
+  async function sbFetchAll(table, params = '') {
+    const rows = [];
+    let offset = 0;
+    while (true) {
+      const sep = params ? '&' : '';
+      const batch = await sbFetch(table, `${params}${sep}limit=1000&offset=${offset}`);
+      rows.push(...batch);
+      if (batch.length < 1000) break;
+      offset += 1000;
+    }
+    return rows;
+  }
+
+  // Weekly global lowest/highest-score "credit" badges. gw_rank = rank of that
+  // SINGLE GW's score across ALL tracked teams (1 = lowest/best that week) —
+  // distinct from cumulative_standing (running league position). Stable once a
+  // GW is finished, so only refetched when the finished-GW count changes, not
+  // on every silent 2-minute poll.
+  let lastBadgeGw = null;
+  window.weeklyBadges = {};
+  async function refreshWeeklyBadges(completedGw) {
+    if (completedGw < 1 || completedGw === lastBadgeGw) return;
+    const rows = await sbFetchAll('gw_scores',
+      `season=eq.${encodeURIComponent(SEASON)}&gw=lte.${completedGw}&select=team_id,gw,gw_rank&order=gw.asc`);
+    const byGw = {};
+    rows.forEach(r => {
+      if (typeof r.gw_rank !== 'number') return;
+      (byGw[r.gw] ||= []).push(r);
+    });
+    const badges = {};
+    Object.values(byGw).forEach(gwRows => {
+      const maxRank = Math.max(...gwRows.map(r => r.gw_rank));
+      gwRows.forEach(r => {
+        badges[r.team_id] ||= { stars: 0, circles: 0 };
+        if (r.gw_rank === 1) badges[r.team_id].stars++;
+        if (r.gw_rank === maxRank) badges[r.team_id].circles++;
+      });
+    });
+    window.weeklyBadges = badges;
+    lastBadgeGw = completedGw;
+  }
+
+  // Provisional badge for the CURRENT (still-live) GW only — gw_rank updates
+  // every live tick, so this can still flip before the GW is confirmed.
+  // Rendered faded + pulsing so it reads as "not locked in yet".
+  window.provisionalBadges = {};
+  async function refreshProvisionalBadge(currentGw, isLive) {
+    window.provisionalBadges = {};
+    if (!isLive) return;
+    const rows = await sbFetch('gw_scores',
+      `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=team_id,gw_rank`);
+    const valid = rows.filter(r => typeof r.gw_rank === 'number');
+    if (!valid.length) return;
+    const maxRank = Math.max(...valid.map(r => r.gw_rank));
+    valid.forEach(r => {
+      window.provisionalBadges[r.team_id] = { star: r.gw_rank === 1, circle: r.gw_rank === maxRank };
+    });
   }
 
   async function loadData() {
@@ -238,11 +304,12 @@
 
       if (!window.playerNames) {
         const allPlayers = await sbFetch('players',
-          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,team_id&limit=1000`);
+          `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,team_id,now_cost&limit=1000`);
         window.playerNames = Object.fromEntries(allPlayers.map(p => [p.player_id, p.web_name]));
         window.playerPositions = Object.fromEntries(allPlayers.map(p => [p.player_id, p.position]));
         window.playerTeams = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_short]));
         window.playerTeamIds = Object.fromEntries(allPlayers.map(p => [p.player_id, p.team_id]));
+        window.playerCosts = Object.fromEntries(allPlayers.map(p => [p.player_id, p.now_cost]));
       }
 
       // Fixtures for the current GW
@@ -275,6 +342,12 @@
       const teamInfo     = Object.fromEntries(teams.map(t => [t.team_id, t]));
       const selectionMap = Object.fromEntries(selections.map(s => [s.team_id, s]));
       const playerScoreMap = Object.fromEntries(playerScores.map(p => [p.player_id, p]));
+
+      const completedGw = isLive ? currentGw - 1 : currentGw;
+      await Promise.all([
+        refreshWeeklyBadges(completedGw),
+        refreshProvisionalBadge(currentGw, isLive),
+      ]);
 
       render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive,
              selectionMap, playerScoreMap, chipsByTeam);
@@ -374,15 +447,6 @@
     const best  = displayPts.length ? Math.min(...displayPts) : 0;
     const worst = displayPts.length ? Math.max(...displayPts) : 0;
     const avg   = displayPts.length ? Math.round(displayPts.reduce((a, b) => a + b, 0) / displayPts.length) : 0;
-    document.getElementById('gw-bar').innerHTML = `
-      <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
-      <div class="gw-pill"><strong>${scores.length}</strong>Teams</div>
-      <div class="gw-pill"><strong>${best}</strong>Best GW score</div>
-      <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
-      <div class="gw-pill"><strong>${avg}</strong>GW average</div>
-    `;
-    document.getElementById('team-count').textContent =
-      `${scores.length} eligible teams`;
 
     const sorted = [...scores].sort((a, b) => {
       const aTot = isLive ? ((prevTotal[a.team_id] ?? 0) + (a.fpl_raw_pts ?? 0)) : (a.anti_total ?? 99999);
@@ -390,6 +454,20 @@
       return aTot - bTot;
     });
 
+    // Top-N% Avg GW Score: N = 3 for small leagues (<=30 teams), else floor(10%).
+    // Averages the current-GW score of the N teams currently leading the table.
+    const topN = sorted.length <= 30 ? Math.min(3, sorted.length) : Math.floor(sorted.length * 0.10);
+    const topNPts = sorted.slice(0, topN).map(s => isLive ? (s.fpl_raw_pts ?? 0) : (s.anti_gw_pts ?? 0));
+    const topNAvg = topNPts.length ? Math.round(topNPts.reduce((a, b) => a + b, 0) / topNPts.length) : 0;
+
+    document.getElementById('gw-bar').innerHTML = `
+      <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
+      <div class="gw-pill"><strong>${scores.length}</strong>Teams</div>
+      <div class="gw-pill"><strong>${best}</strong>Best GW score</div>
+      <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
+      <div class="gw-pill"><strong>${avg}</strong>GW average</div>
+      <div class="gw-pill"><strong>${topNAvg}</strong>Top ${topN} Avg GW Score</div>
+    `;
     document.getElementById('pens-header').textContent = isLive ? 'Pending' : '+Pens';
 
     const tbody = document.getElementById('tbody');
@@ -406,12 +484,20 @@
       const prevTot    = prevTotal[s.team_id];
       const selection  = selectionMap[s.team_id];
 
+      const toPlay = toPlayCount(selection?.squad?.slice(0, 11));
+      const toPlayHtml = toPlay == null ? '—'
+        : `<span class="to-play-cell ${toPlay > 0 ? 'has-some' : ''}">${toPlay} to play</span>`;
+
       const isProvisional = isLive && !!s.is_provisional;
+      // Only show the "~" while this team still has a starter left to play —
+      // once their own XI is all done, the GW-wide is_provisional flag (waiting
+      // on FPL's official confirmation) shouldn't keep offsetting this row.
+      const showProvBadge = isProvisional && (toPlay == null || toPlay > 0);
       const provBadge = '<span title="Provisional — awaiting FPL official confirmation" style="font-size:9px;color:var(--muted);vertical-align:super;margin-left:2px">~</span>';
       const displayGwRaw = isProvisional ? (s.anti_gw_pts ?? '—')
                          : isLive        ? (s.fpl_raw_pts ?? '—')
                          :                 (s.anti_gw_pts ?? '—');
-      const displayGw  = typeof displayGwRaw === 'number' && isProvisional
+      const displayGw  = typeof displayGwRaw === 'number' && showProvBadge
                          ? `${displayGwRaw}${provBadge}` : displayGwRaw;
       const displayTot = isLive ? ((prevTot ?? 0) + (s.fpl_raw_pts ?? 0)) : (s.anti_total ?? '—');
 
@@ -423,17 +509,22 @@
 
       const chipsHtml   = buildChipsRow(chipsByTeam[s.team_id] || [], activeChip, gw);
       const chipsGwHtml = buildChipsUsedGwsLine(chipsByTeam[s.team_id] || []);
-
-      const toPlay = toPlayCount(selection?.squad?.slice(0, 11));
-      const toPlayHtml = toPlay == null ? '—'
-        : `<span class="to-play-cell ${toPlay > 0 ? 'has-some' : ''}">${toPlay} to play</span>`;
+      const badges      = window.weeklyBadges?.[s.team_id];
+      const provBadges  = window.provisionalBadges?.[s.team_id];
+      const confirmedBadgeHtml = badges
+        ? `${badges.stars > 0 ? `<span title="Lowest score of the week ×${badges.stars}">${'⭐'.repeat(badges.stars)}</span>` : ''}${badges.circles > 0 ? `<span title="Highest score of the week ×${badges.circles}">${'⚫'.repeat(badges.circles)}</span>` : ''}`
+        : '';
+      const provisionalBadgeHtml = provBadges
+        ? `${provBadges.star ? `<span class="badge-provisional" title="Provisional — lowest score this week, not yet confirmed">⭐</span>` : ''}${provBadges.circle ? `<span class="badge-provisional" title="Provisional — highest score this week, not yet confirmed">⚫</span>` : ''}`
+        : '';
+      const badgeHtml = confirmedBadgeHtml + provisionalBadgeHtml;
 
       const tr = document.createElement('tr');
       tr.className = `team-row${isExpanded ? ' expanded' : ''}`;
       tr.innerHTML = `
         <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
         <td>
-          <div style="display:flex;align-items:flex-start;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
             <button type="button" class="see-players-btn">See team</button>
             <div>
               <div class="team-name">
@@ -441,6 +532,7 @@
                    target="_blank" rel="noopener"
                    style="color:inherit;text-decoration:none;border-bottom:1px dotted var(--muted)"
                    onclick="event.stopPropagation()">${info.team_name || s.team_id}</a>
+                ${badgeHtml ? `<span style="font-size:0.7rem;margin-left:4px">${badgeHtml}</span>` : ''}
               </div>
               <div class="manager-name">${info.manager || ''}</div>
               ${chipsHtml}
@@ -455,7 +547,10 @@
           : '<span style="color:var(--muted)">—</span>'}</td>
         <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">${prevTot ?? '—'}</td>
         <td class="r total-pts">${displayTot}</td>
-        <td style="text-align:right"><span class="chevron ${isExpanded ? 'open' : ''}">▾</span></td>
+        <td style="text-align:right">
+          <a href="team_history.html?team_id=${s.team_id}" class="gw-history-btn" onclick="event.stopPropagation()">GW History</a>
+          <span class="chevron ${isExpanded ? 'open' : ''}">▾</span>
+        </td>
       `;
       tr.addEventListener('click', () => toggleExpand(s.team_id));
       tr.querySelector('.see-players-btn').addEventListener('click', (e) => {
@@ -507,6 +602,8 @@
           const antiPts = rawAnti != null ? (rawPts * capMult) + penaltyPortion : '—';
           const mins = p.minutes != null ? p.minutes : '—';
           const inactive = p.minutes === 0;
+          const cost = window.playerCosts?.[pid];
+          const costStr = cost != null ? `£${(cost / 10).toFixed(1)}m` : '—';
           let fixIcon = '';
           if (fixState === 'finished')      fixIcon = '<span class="fix-icon done" title="Fixture finished">✓</span>';
           else if (fixState === 'live')     fixIcon = '<span class="fix-icon live" title="Fixture in play">●</span>';
@@ -526,18 +623,21 @@
               <span class="player-mins">${mins}'</span>
               <span class="player-pts">${pts}</span>
               <span class="player-anti">${antiPts}</span>
+              <span class="player-cost">${costStr}</span>
             </div>
           `;
         };
 
         const starterRows = selection.squad.slice(0, 11).map((pid, i) => renderPlayer(pid, i, true)).join('');
         const benchRows   = selection.squad.slice(11).map((pid, i) => renderPlayer(pid, i, false)).join('');
+        const squadValue   = selection.squad.reduce((sum, pid) => sum + (window.playerCosts?.[pid] || 0), 0);
+        const squadValueStr = `£${(squadValue / 10).toFixed(1)}m`;
 
         squadHtml = `
           <div class="squad-section">
             <div class="squad-header">
-              <span>Squad (GW${gw})</span>
-              <span class="squad-legend">mins · pts · anti</span>
+              <span>Squad (GW${gw}) <span class="squad-legend" style="text-transform:none">&middot; ${squadValueStr}</span></span>
+              <span class="squad-legend">mins · pts · anti · cost</span>
             </div>
             ${starterRows}
             <div class="bench-divider">Bench</div>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-FPL · Players</title>
+  <style>
+    :root {
+      --bg:#fff; --surface:#fff; --border:#e0e0e0;
+      --text:#111; --muted:#888;
+      --accent:#d62828; --good:#1a7f4b; --warn:#b86e00; --live:#d62828;
+      --font:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono','Fira Code',monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:24px 16px 48px}
+
+    header{max-width:1100px;margin:0 auto 32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .logo-wrap{background:#fff;display:inline-block;line-height:0}
+    .logo-img{height:120px;width:auto;display:block}
+    .meta{text-align:right;font-size:0.78rem;color:var(--muted);font-family:var(--mono);line-height:1.8}
+
+    .tabs{max-width:1100px;margin:0 auto 24px;display:flex;border-bottom:1px solid var(--border);gap:0;flex-wrap:wrap}
+    .tab{padding:10px 18px;font-size:0.82rem;font-weight:600;color:var(--muted);
+         border-bottom:2px solid transparent;cursor:pointer;text-decoration:none;transition:all 0.2s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+
+    .gw-bar{max-width:1100px;margin:0 auto 20px;display:flex;gap:12px;flex-wrap:wrap}
+    .gw-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+             padding:8px 16px;font-size:0.78rem;color:var(--muted)}
+    .gw-pill strong{color:var(--text);font-size:1rem;display:block}
+
+    .filter-bar{max-width:1100px;margin:0 auto 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .filter-bar input,.filter-bar select{font-family:var(--font);font-size:0.8rem;padding:7px 10px;
+      border:1px solid var(--border);border-radius:6px;color:var(--text);background:#fff}
+    .filter-bar input{flex:1;min-width:160px}
+
+    .table-wrap{max-width:1100px;margin:0 auto;overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:0.83rem}
+    thead th{text-align:left;padding:9px 12px;font-size:0.65rem;font-weight:600;letter-spacing:0.06em;
+             color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;
+             user-select:none}
+    thead th:hover{color:var(--text)}
+    thead th.r{text-align:right}
+    thead th.sorted{color:var(--accent)}
+    tbody tr{border-bottom:1px solid var(--border)}
+    tbody tr:hover{background:#fafafa}
+    td{padding:9px 12px;vertical-align:middle;white-space:nowrap}
+    td.r{text-align:right;font-family:var(--mono);font-size:0.82rem}
+    td.player-name-cell{font-weight:600}
+    td.player-club-cell{color:var(--muted);font-size:0.75rem}
+
+    .state-msg{max-width:1100px;margin:80px auto;text-align:center;color:var(--muted);
+               font-family:var(--mono);font-size:0.85rem;line-height:2}
+    .state-msg .big{font-size:2rem;display:block;margin-bottom:12px}
+
+    @media (max-width:600px){
+      .logo{font-size:1.3rem}
+      td,th{padding:8px 6px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <img src="logo_antifpl.png" alt="Anti FPL" class="logo-img">
+  </div>
+  <div class="meta">
+    <div id="last-updated">—</div>
+  </div>
+</header>
+
+<div class="tabs" id="tabs-bar"></div>
+
+<div class="gw-bar" id="gw-bar"></div>
+
+<div class="filter-bar">
+  <input type="text" id="search-box" placeholder="Search player name...">
+  <select id="pos-filter">
+    <option value="">All positions</option>
+    <option value="GKP">GKP</option>
+    <option value="DEF">DEF</option>
+    <option value="MID">MID</option>
+    <option value="FWD">FWD</option>
+  </select>
+</div>
+
+<div class="table-wrap">
+  <div id="state-msg" class="state-msg"><span class="big">🎽</span>Loading players...</div>
+  <table id="players-table" style="display:none">
+    <thead>
+      <tr>
+        <th data-key="web_name">Player</th>
+        <th data-key="position">Pos</th>
+        <th data-key="team_short">Club</th>
+        <th class="r" data-key="now_cost">Cost</th>
+        <th class="r" data-key="ownedPct">Owned %</th>
+        <th class="r" data-key="ownedCount">Owned</th>
+        <th class="r" data-key="xiCount">In XI</th>
+        <th class="r" data-key="capCount">Captain</th>
+        <th class="r" data-key="vcCount">VC</th>
+        <th class="r" data-key="totalAnti">Total Anti Pts</th>
+        <th class="r" data-key="form5">5GW Form</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://qudcjhmbextpfdgdxihs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGNqaG1iZXh0cGZkZ2R4aWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjEzMTQsImV4cCI6MjA5NDE5NzMxNH0.TRapf8KXSpM2XPrzprIhObi5cp0Sxt2wxel9novZRMA';
+  const SEASON = '2026/27';
+
+  let ROWS = [];
+  let sortKey = 'ownedPct';
+  let sortDir = -1;
+
+  // Nav is context-sensitive: only show the mini-league link if we arrived via
+  // mini_league.html's own "?from=mini_league" — otherwise a global (Overall)
+  // visitor could use this page as a back door into a mini-league they weren't
+  // given the invite code for.
+  (function renderNav() {
+    const from = new URLSearchParams(location.search).get('from');
+    const links = [];
+    if (from === 'mini_league') {
+      links.push('<a class="tab" href="mini_league.html">The next Badly drawn boy</a>');
+    }
+    links.push('<a class="tab" href="index.html">Overall Anti FPL</a>');
+    links.push('<a class="tab active" href="players.html">Players</a>');
+    links.push('<a class="tab" href="rules.html">Rules</a>');
+    document.getElementById('tabs-bar').innerHTML = links.join('');
+  })();
+
+  async function sbFetch(table, params = '') {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+    if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
+    return r.json();
+  }
+
+  async function sbFetchAll(table, params = '') {
+    const rows = [];
+    let offset = 0;
+    while (true) {
+      const sep = params ? '&' : '';
+      const batch = await sbFetch(table, `${params}${sep}limit=1000&offset=${offset}`);
+      rows.push(...batch);
+      if (batch.length < 1000) break;
+      offset += 1000;
+    }
+    return rows;
+  }
+
+  function showError(msg) {
+    document.getElementById('state-msg').innerHTML = `<span class="big">⚠️</span>${msg}`;
+    document.getElementById('state-msg').style.display = '';
+  }
+
+  async function loadData() {
+    try {
+      const gwData = await sbFetch('gameweeks',
+        `season=eq.${encodeURIComponent(SEASON)}&is_current=eq.true&select=*&limit=1`);
+      let currentGw, isLive;
+      if (gwData.length > 0) {
+        currentGw = gwData[0].gw;
+        isLive = !gwData[0].is_finished;
+      } else {
+        const latest = await sbFetch('gw_scores',
+          `season=eq.${encodeURIComponent(SEASON)}&select=gw&order=gw.desc&limit=1`);
+        currentGw = latest[0]?.gw || 1;
+        isLive = false;
+      }
+      // Ownership/XI/captaincy is read from the last GW with published selections —
+      // while the current GW is live that's still valid (picks are locked at deadline).
+      const selectionGw = currentGw;
+
+      const teams = await sbFetch('teams',
+        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id&limit=1000`);
+      const totalTeams = teams.length;
+
+      const players = await sbFetchAll('players',
+        `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name,position,team_short,now_cost`);
+
+      const selections = await sbFetchAll('team_gw_selections',
+        `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${selectionGw}&select=squad,captain_id,vice_captain_id`);
+
+      const seasonScores = await sbFetchAll('player_gw_scores',
+        `season=eq.${encodeURIComponent(SEASON)}&gw=lte.${currentGw}&select=player_id,gw,anti_pts`);
+
+      // Ownership / XI / captain / VC tallies
+      const owned = {}, xi = {}, cap = {}, vc = {};
+      selections.forEach(sel => {
+        (sel.squad || []).forEach((pid, i) => {
+          owned[pid] = (owned[pid] || 0) + 1;
+          if (i < 11) xi[pid] = (xi[pid] || 0) + 1;
+        });
+        if (sel.captain_id)      cap[sel.captain_id] = (cap[sel.captain_id] || 0) + 1;
+        if (sel.vice_captain_id) vc[sel.vice_captain_id] = (vc[sel.vice_captain_id] || 0) + 1;
+      });
+
+      // Season totals + 5-GW form
+      const byPlayer = {};
+      seasonScores.forEach(r => (byPlayer[r.player_id] ||= []).push(r));
+      const totalAnti = {}, form5 = {};
+      Object.entries(byPlayer).forEach(([pid, rows]) => {
+        rows.sort((a, b) => a.gw - b.gw);
+        totalAnti[pid] = rows.reduce((sum, r) => sum + (r.anti_pts ?? 0), 0);
+        const last5 = rows.slice(-5).map(r => r.anti_pts).filter(p => p != null);
+        form5[pid] = last5.length ? last5.reduce((a, b) => a + b, 0) / last5.length : null;
+      });
+
+      ROWS = players.map(p => ({
+        ...p,
+        ownedCount: owned[p.player_id] || 0,
+        ownedPct:   totalTeams ? (100 * (owned[p.player_id] || 0) / totalTeams) : 0,
+        xiCount:    xi[p.player_id] || 0,
+        capCount:   cap[p.player_id] || 0,
+        vcCount:    vc[p.player_id] || 0,
+        totalAnti:  totalAnti[p.player_id] ?? 0,
+        form5:      form5[p.player_id],
+      }));
+
+      document.getElementById('gw-bar').innerHTML = `
+        <div class="gw-pill"><strong>${currentGw}</strong>Through GW</div>
+        <div class="gw-pill"><strong>${totalTeams}</strong>Tracked Teams</div>
+        <div class="gw-pill"><strong>${players.length}</strong>Players</div>
+      `;
+      document.getElementById('last-updated').textContent =
+        `Updated ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+
+      renderTable();
+      document.getElementById('state-msg').style.display = 'none';
+      document.getElementById('players-table').style.display = '';
+    } catch (err) {
+      console.error('loadData error:', err);
+      showError(err.message);
+    }
+  }
+
+  function renderTable() {
+    const q = document.getElementById('search-box').value.trim().toLowerCase();
+    const posFilter = document.getElementById('pos-filter').value;
+
+    let rows = ROWS.filter(r =>
+      (!q || r.web_name.toLowerCase().includes(q)) &&
+      (!posFilter || r.position === posFilter));
+
+    rows.sort((a, b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === 'string') return sortDir * av.localeCompare(bv);
+      return sortDir * (av - bv);
+    });
+
+    document.querySelectorAll('#players-table thead th').forEach(th => {
+      th.classList.toggle('sorted', th.dataset.key === sortKey);
+    });
+
+    document.getElementById('tbody').innerHTML = rows.map(r => `
+      <tr>
+        <td class="player-name-cell">${r.web_name}</td>
+        <td>${r.position}</td>
+        <td class="player-club-cell">${r.team_short || ''}</td>
+        <td class="r">£${r.now_cost != null ? (r.now_cost / 10).toFixed(1) : '—'}m</td>
+        <td class="r">${r.ownedPct.toFixed(1)}%</td>
+        <td class="r">${r.ownedCount}</td>
+        <td class="r">${r.xiCount}</td>
+        <td class="r">${r.capCount}</td>
+        <td class="r">${r.vcCount}</td>
+        <td class="r">${r.totalAnti}</td>
+        <td class="r">${r.form5 != null ? r.form5.toFixed(1) : '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  document.querySelectorAll('#players-table thead th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = -1; }
+      renderTable();
+    });
+  });
+  document.getElementById('search-box').addEventListener('input', renderTable);
+  document.getElementById('pos-filter').addEventListener('change', renderTable);
+
+  loadData();
+</script>
+</body>
+</html>

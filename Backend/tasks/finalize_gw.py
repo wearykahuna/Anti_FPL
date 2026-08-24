@@ -32,8 +32,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from fpl_api import fetch_live
-from db      import DEFAULT_SEASON, get_client, has_unfinalized_scores, upsert
+from fpl_api import fetch_live, fetch_team_history
+from db      import (
+    DEFAULT_SEASON,
+    get_client,
+    get_team_ids,
+    has_unfinalized_scores,
+    select_all,
+    update_rows,
+    upsert,
+)
 
 log = logging.getLogger(__name__)
 
@@ -76,6 +84,37 @@ def run(gw: int) -> int:
     sb = get_client()
     sb.from_("team_gw_selections").update({"is_live": False}) \
       .eq("season", SEASON).eq("gw", gw).execute()
+
+    # 4. Capture each team's official squad value + bank for this GW — an
+    #    end-of-GW snapshot only (not part of the live/intra-GW loop).
+    #    fetch_team_history already returns the whole season's history in
+    #    one call, so this just reads two more fields out of a payload other
+    #    tasks already fetch. team_value = FPL's "value" field verbatim
+    #    (squad selling value — it does NOT include the bank); in_the_bank
+    #    is the separate unspent-budget figure, stored alongside it.
+    # Only teams recalc_gw actually scored this GW have a row to update — this
+    # is purely an optimization to skip pointless fetches/updates for teams
+    # with nothing to patch. update_rows() below is a real UPDATE, not an
+    # upsert, so it can never INSERT a placeholder row (and trip NOT NULL
+    # constraints on unrelated columns) even if this check is stale.
+    scored_this_gw = {r["team_id"] for r in
+                       select_all("gw_scores", {"season": SEASON, "gw": gw}, select="team_id")}
+    value_rows = []
+    for tid in get_team_ids(SEASON):
+        if tid not in scored_this_gw:
+            continue
+        history = fetch_team_history(tid)
+        hist_gw = next((g for g in (history or {}).get("current", []) if g.get("event") == gw), None)
+        if hist_gw is None:
+            continue
+        value_rows.append({
+            "season": SEASON, "team_id": tid, "gw": gw,
+            "team_value":  hist_gw.get("value"),
+            "in_the_bank": hist_gw.get("bank"),
+        })
+    if value_rows:
+        log.info("Updating %d team value rows for GW%d...", len(value_rows), gw)
+        update_rows("gw_scores", value_rows, key_cols=["season", "team_id", "gw"])
 
     log.info("GW%d finalized.", gw)
     return 0

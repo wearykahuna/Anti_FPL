@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-FPL · GW History</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:#fff; --surface:#fff; --border:#e0e0e0;
+      --text:#111; --muted:#888;
+      --accent:#d62828; --good:#1a7f4b; --warn:#b86e00; --live:#d62828;
+      --font:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono','Fira Code',monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:24px 16px 48px}
+
+    header{max-width:900px;margin:0 auto 24px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .logo-wrap{background:#fff;display:inline-block;line-height:0}
+    .logo-img{height:120px;width:auto;display:block}
+    .meta{text-align:right;font-size:0.78rem;color:var(--muted);font-family:var(--mono);line-height:1.8}
+
+    .back-link{max-width:900px;margin:0 auto 12px;display:block;font-size:0.78rem;color:var(--muted);
+      text-decoration:none}
+    .back-link:hover{color:var(--text)}
+
+    .team-header{max-width:900px;margin:0 auto 20px}
+    .team-header h1{font-size:1.4rem}
+    .team-header .manager{color:var(--muted);font-size:0.9rem;margin-top:2px}
+
+    .gw-bar{max-width:900px;margin:0 auto 20px;display:flex;gap:12px;flex-wrap:wrap}
+    .gw-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+             padding:8px 16px;font-size:0.78rem;color:var(--muted)}
+    .gw-pill strong{color:var(--text);font-size:1rem;display:block}
+
+    .panel{max-width:900px;margin:0 auto 24px;background:var(--surface);border:1px solid var(--border);
+      border-radius:10px;padding:16px}
+    .panel-title{font-size:0.7rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;
+      color:var(--muted);margin-bottom:12px}
+
+    .charts-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
+    .charts-toggle-label{font-size:0.75rem;color:var(--muted);font-family:var(--mono)}
+    .charts-toggle:hover .charts-toggle-label{color:var(--text)}
+
+    .charts-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:16px}
+    .chart-title{font-size:0.62rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+      color:var(--muted);margin-bottom:8px}
+    .chart-wrap-sm{position:relative;height:130px}
+
+    .table-wrap{max-width:900px;margin:0 auto 24px;overflow-x:auto;background:var(--surface);
+      border:1px solid var(--border);border-radius:10px}
+    table{width:100%;border-collapse:collapse;font-size:0.85rem}
+    thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
+             color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
+    thead th.r{text-align:right}
+    tbody tr{border-bottom:1px solid var(--border)}
+    tbody tr:hover{background:#fafafa}
+    td{padding:10px 14px;vertical-align:middle;white-space:nowrap}
+    td.r{text-align:right;font-family:var(--mono)}
+
+    .state-msg{max-width:900px;margin:80px auto;text-align:center;color:var(--muted);
+               font-family:var(--mono);font-size:0.85rem;line-height:2}
+    .state-msg .big{font-size:2rem;display:block;margin-bottom:12px}
+
+    @media (max-width:600px){td,th{padding:8px 6px}}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <img src="logo_antifpl.png" alt="Anti FPL" class="logo-img">
+  </div>
+  <div class="meta">
+    <div id="last-updated">—</div>
+  </div>
+</header>
+
+<a class="back-link" href="index.html">&larr; Back to Overall Anti FPL</a>
+
+<div id="state-msg" class="state-msg"><span class="big">📈</span>Loading GW history...</div>
+
+<div id="content" style="display:none">
+  <div class="team-header">
+    <h1 id="team-name"></h1>
+    <div class="manager" id="manager-name"></div>
+  </div>
+
+  <div class="gw-bar" id="gw-bar"></div>
+
+  <div class="panel">
+    <div class="charts-toggle" id="charts-toggle">
+      <span class="panel-title" style="margin-bottom:0">Charts</span>
+      <span class="charts-toggle-label" id="charts-toggle-label">Show &#x25BE;</span>
+    </div>
+    <div id="charts-body" style="display:none">
+      <div class="charts-grid">
+        <div>
+          <div class="chart-title">Cumulative Total &mdash; Lower Is Better</div>
+          <div class="chart-wrap-sm"><canvas id="total-chart"></canvas></div>
+        </div>
+        <div>
+          <div class="chart-title">Global Rank By GW &mdash; Lower Is Better</div>
+          <div class="chart-wrap-sm"><canvas id="rank-chart"></canvas></div>
+        </div>
+        <div>
+          <div class="chart-title">Team Value By GW</div>
+          <div class="chart-wrap-sm"><canvas id="value-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>GW</th>
+          <th class="r">Anti Score</th>
+          <th class="r">Running Total</th>
+          <th class="r">Global Rank</th>
+          <th>Chip</th>
+          <th class="r" title="Squad selling value">Team Value</th>
+          <th class="r" title="Unspent budget">Bank</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://qudcjhmbextpfdgdxihs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGNqaG1iZXh0cGZkZ2R4aWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjEzMTQsImV4cCI6MjA5NDE5NzMxNH0.TRapf8KXSpM2XPrzprIhObi5cp0Sxt2wxel9novZRMA';
+  const SEASON = '2026/27';
+
+  const CHIP_LABEL = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
+
+  async function sbFetch(table, params = '') {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+    if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
+    return r.json();
+  }
+
+  function showError(msg) {
+    document.getElementById('state-msg').innerHTML = `<span class="big">⚠️</span>${msg}`;
+    document.getElementById('state-msg').style.display = '';
+    document.getElementById('content').style.display = 'none';
+  }
+
+  async function loadData() {
+    const teamId = new URLSearchParams(location.search).get('team_id');
+    if (!teamId) { showError('No team_id given.'); return; }
+
+    try {
+      const teamRows = await sbFetch('teams',
+        `season=eq.${encodeURIComponent(SEASON)}&team_id=eq.${teamId}&select=team_id,team_name,manager&limit=1`);
+      if (!teamRows.length) { showError('Team not found.'); return; }
+      const team = teamRows[0];
+
+      const gwRows = await sbFetch('gw_scores',
+        `season=eq.${encodeURIComponent(SEASON)}&team_id=eq.${teamId}&select=gw,anti_gw_pts,anti_total,cumulative_standing,active_chip,team_value,in_the_bank&order=gw.asc`);
+
+      document.getElementById('team-name').textContent = team.team_name || teamId;
+      document.getElementById('manager-name').textContent = team.manager || '';
+      document.getElementById('last-updated').textContent =
+        `Updated ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+
+      const gwsPlayed = gwRows.length;
+      const latest = gwRows.at(-1);
+      const bestRank = gwRows.reduce((min, r) =>
+        r.cumulative_standing != null && r.cumulative_standing < min ? r.cumulative_standing : min, Infinity);
+      document.getElementById('gw-bar').innerHTML = `
+        <div class="gw-pill"><strong>${gwsPlayed}</strong>GWs Played</div>
+        <div class="gw-pill"><strong>${latest?.anti_total ?? '—'}</strong>Current Total</div>
+        <div class="gw-pill"><strong>${latest?.cumulative_standing ?? '—'}</strong>Current Global Rank</div>
+        <div class="gw-pill"><strong>${bestRank === Infinity ? '—' : bestRank}</strong>Best Global Rank</div>
+      `;
+
+      document.getElementById('tbody').innerHTML = gwRows.slice().reverse().map(r => `
+        <tr>
+          <td>${r.gw}</td>
+          <td class="r">${r.anti_gw_pts ?? '—'}</td>
+          <td class="r">${r.anti_total ?? '—'}</td>
+          <td class="r">${r.cumulative_standing ?? '—'}</td>
+          <td>${r.active_chip ? (CHIP_LABEL[r.active_chip] || r.active_chip) : '—'}</td>
+          <td class="r">${r.team_value != null ? `£${(r.team_value / 10).toFixed(1)}m` : '—'}</td>
+          <td class="r">${r.in_the_bank != null ? `£${(r.in_the_bank / 10).toFixed(1)}m` : '—'}</td>
+        </tr>
+      `).join('');
+
+      CURRENT_GW_ROWS = gwRows;
+
+      document.getElementById('state-msg').style.display = 'none';
+      document.getElementById('content').style.display = '';
+    } catch (err) {
+      console.error('loadData error:', err);
+      showError(err.message);
+    }
+  }
+
+  // Charts are collapsed by default and only built the first time they're
+  // expanded — Chart.js sizes itself off the canvas's rendered dimensions,
+  // which are meaningless while the container is display:none.
+  let CURRENT_GW_ROWS = null;
+  let chartsBuilt = false;
+  document.getElementById('charts-toggle').addEventListener('click', () => {
+    const body = document.getElementById('charts-body');
+    const label = document.getElementById('charts-toggle-label');
+    const showing = body.style.display !== 'none';
+    body.style.display = showing ? 'none' : '';
+    label.innerHTML = showing ? 'Show &#x25BE;' : 'Hide &#x25B4;';
+    if (!showing && !chartsBuilt && CURRENT_GW_ROWS) {
+      renderCharts(CURRENT_GW_ROWS);
+      chartsBuilt = true;
+    }
+  });
+
+  function renderCharts(gwRows) {
+    const labels = gwRows.map(r => `GW${r.gw}`);
+
+    new Chart(document.getElementById('total-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: gwRows.map(r => r.anti_total),
+          borderColor: '#d62828',
+          backgroundColor: 'rgba(214,40,40,0.08)',
+          fill: true,
+          tension: 0.3,
+          spanGaps: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#888', font: { size: 9 } } },
+          y: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#888', font: { size: 9 } } },
+        },
+      },
+    });
+
+    new Chart(document.getElementById('rank-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: gwRows.map(r => r.cumulative_standing),
+          borderColor: '#1a7f4b',
+          backgroundColor: 'rgba(26,127,75,0.08)',
+          fill: true,
+          tension: 0.3,
+          spanGaps: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#888', font: { size: 9 } } },
+          y: {
+            reverse: true,
+            min: 1,
+            grid: { color: 'rgba(0,0,0,.06)' },
+            ticks: { color: '#888', font: { size: 9 }, stepSize: 1, callback: v => `#${v}` },
+          },
+        },
+      },
+    });
+
+    new Chart(document.getElementById('value-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          data: gwRows.map(r => r.team_value != null ? r.team_value / 10 : null),
+          borderColor: '#b86e00',
+          backgroundColor: 'rgba(184,110,0,0.08)',
+          fill: true,
+          tension: 0.3,
+          spanGaps: true,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: item => `£${item.raw?.toFixed(1)}m` } },
+        },
+        scales: {
+          x: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#888', font: { size: 9 } } },
+          y: {
+            grid: { color: 'rgba(0,0,0,.06)' },
+            ticks: { color: '#888', font: { size: 9 }, callback: v => `£${v}m` },
+          },
+        },
+      },
+    });
+  }
+
+  loadData();
+</script>
+</body>
+</html>

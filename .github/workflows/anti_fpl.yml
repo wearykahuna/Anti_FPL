@@ -18,6 +18,7 @@ on:
           - recalc_gw
           - finalize_gw
           - backfill_player_scores
+          - backfill_team_value
           - snapshot
           - score_new_team
           - create_mini_league
