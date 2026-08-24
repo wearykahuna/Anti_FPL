@@ -32,8 +32,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from fpl_api import fetch_live
-from db      import DEFAULT_SEASON, get_client, has_unfinalized_scores, upsert
+from fpl_api import fetch_live, fetch_team_history
+from db      import DEFAULT_SEASON, get_client, get_team_ids, has_unfinalized_scores, upsert
 
 log = logging.getLogger(__name__)
 
@@ -76,6 +76,21 @@ def run(gw: int) -> int:
     sb = get_client()
     sb.from_("team_gw_selections").update({"is_live": False}) \
       .eq("season", SEASON).eq("gw", gw).execute()
+
+    # 4. Capture each team's official squad value for this GW — an end-of-GW
+    #    snapshot only (not part of the live/intra-GW loop). fetch_team_history
+    #    already returns the whole season's history in one call, so this just
+    #    reads one more field out of a payload other tasks already fetch.
+    value_rows = []
+    for tid in get_team_ids(SEASON):
+        history = fetch_team_history(tid)
+        hist_gw = next((g for g in (history or {}).get("current", []) if g.get("event") == gw), None)
+        if hist_gw is None:
+            continue
+        value_rows.append({"season": SEASON, "team_id": tid, "gw": gw, "team_value": hist_gw.get("value")})
+    if value_rows:
+        log.info("Upserting %d team value rows for GW%d...", len(value_rows), gw)
+        upsert("gw_scores", value_rows, on_conflict="season,team_id,gw")
 
     log.info("GW%d finalized.", gw)
     return 0
