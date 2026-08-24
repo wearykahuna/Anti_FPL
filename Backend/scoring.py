@@ -71,7 +71,11 @@ def calc_fpl_raw(
     since unplayed players simply contribute their current (possibly still 0)
     score and the total updates naturally as they play.
 
-    VC promotion: if captain played 0 mins, VC gets cap_mult bonus (incl. TC 3×).
+    VC promotion: once the captain's own fixture is finished and they played 0
+    mins, VC gets the cap_mult bonus instead (incl. TC 3×). Gated on the
+    captain's fixture being finished (not just currently 0 mins) so a captain
+    who simply hasn't kicked off yet doesn't prematurely hand the multiplier
+    to the vice-captain.
 
     finished_players: player IDs whose own fixture has finished. Defaults to
     the whole squad — correct for a finished/provisional GW, where every
@@ -84,25 +88,25 @@ def calc_fpl_raw(
     it can only be applied earlier or later depending on when it locks in.
     """
     cap_mult = 3 if active_chip == "3xc" else 2
+    finished = finished_players if finished_players is not None else set(squad)
 
     if active_chip == "bboost":
         raw = sum(pts_map.get(pid, 0) for pid in squad)
         if captain_id in squad and mins_map.get(captain_id, 0) > 0:
             raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
-        elif vice_id in squad and mins_map.get(vice_id, 0) > 0:
+        elif captain_id in finished and vice_id in squad and mins_map.get(vice_id, 0) > 0:
             raw += pts_map.get(vice_id, 0) * (cap_mult - 1)
         return raw
 
     starters = [{"element": pid, "position": i + 1}  for i, pid in enumerate(squad[:11])]
     bench    = [{"element": pid, "position": i + 12} for i, pid in enumerate(squad[11:])]
-    finished = finished_players if finished_players is not None else set(squad)
     xi       = infer_autosubs(starters, bench, player_type, finished, mins_map)
     xi_ids   = [p["element"] for p in xi]
     raw      = sum(pts_map.get(pid, 0) for pid in xi_ids)
 
     if captain_id in xi_ids and mins_map.get(captain_id, 0) > 0:
         raw += pts_map.get(captain_id, 0) * (cap_mult - 1)
-    elif vice_id in xi_ids and mins_map.get(vice_id, 0) > 0:
+    elif captain_id in finished and vice_id in xi_ids and mins_map.get(vice_id, 0) > 0:
         raw += pts_map.get(vice_id, 0) * (cap_mult - 1)
 
     return raw

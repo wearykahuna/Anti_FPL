@@ -211,6 +211,29 @@ def test_raw_live_vc_promotion_before_full_squad_done():
     raw_full = calc_fpl_raw(SQUAD, 110, 106, "", p, m, PLAYER_TYPE)
     assert raw_partial == raw_full == 30
 
+def test_raw_no_vc_promotion_before_captain_fixture_finishes():
+    # Captain (110) shows 0 mins only because their own fixture hasn't kicked
+    # off yet — not a confirmed blank. The VC bonus must not be handed to 106
+    # until 110's own fixture is in finished_players. Regression test for a
+    # bug where mins==0 alone (regardless of fixture status) triggered the
+    # promotion, prematurely doubling the vice-captain's live score.
+    p = pts(default=2, **{"106": 5, "110": 0})
+    m = mins(played_zero=[110])
+    not_yet_finished = ALL_IDS - {110}
+    raw = calc_fpl_raw(SQUAD, 110, 106, "", p, m, PLAYER_TYPE,
+                       finished_players=not_yet_finished)
+    assert raw == 9 * 2 + 5 + 0                       # no captain or vice bonus yet
+
+def test_raw_bench_boost_no_vc_promotion_before_captain_fixture_finishes():
+    # Same guard, but for the Bench Boost branch (which has its own separate
+    # captain/vice promotion block, previously ungated entirely).
+    p = pts(default=1, **{"106": 5, "110": 0})
+    m = mins(played_zero=[110])
+    not_yet_finished = ALL_IDS - {110}
+    raw = calc_fpl_raw(SQUAD, 110, 106, "bboost", p, m, PLAYER_TYPE,
+                       finished_players=not_yet_finished)
+    assert raw == 13 * 1 + 5 + 0                      # all 15, no bonus yet
+
 
 # ── Chip helpers ──────────────────────────────────────────────────────────────
 
