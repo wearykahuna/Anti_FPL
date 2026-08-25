@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Anti-FPL · Weekly Stats</title>
+  <style>
+    :root {
+      --bg:#fff; --surface:#fff; --border:#e0e0e0;
+      --text:#111; --muted:#888;
+      --accent:#d62828; --good:#1a7f4b; --warn:#b86e00; --live:#d62828;
+      --font:'Inter',system-ui,sans-serif;
+      --mono:'JetBrains Mono','Fira Code',monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;padding:24px 16px 48px}
+
+    header{max-width:1000px;margin:0 auto 32px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+    .logo-wrap{background:#fff;display:inline-block;line-height:0}
+    .logo-img{height:120px;width:auto;display:block}
+    .meta{text-align:right;font-size:0.78rem;color:var(--muted);font-family:var(--mono);line-height:1.8}
+
+    .tabs{max-width:1000px;margin:0 auto 24px;display:flex;border-bottom:1px solid var(--border);gap:0;flex-wrap:wrap}
+    .tab{padding:10px 18px;font-size:0.82rem;font-weight:600;color:var(--muted);
+         border-bottom:2px solid transparent;cursor:pointer;text-decoration:none;transition:all 0.2s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+
+    .gw-bar{max-width:1000px;margin:0 auto 20px;display:flex;gap:12px;flex-wrap:wrap}
+    .gw-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+             padding:8px 16px;font-size:0.78rem;color:var(--muted)}
+    .gw-pill strong{color:var(--text);font-size:1rem;display:block}
+
+    .table-wrap{max-width:1000px;margin:0 auto;overflow-x:auto}
+    table{width:100%;border-collapse:collapse;font-size:0.83rem}
+    thead th{text-align:left;padding:9px 12px;font-size:0.65rem;font-weight:600;letter-spacing:0.06em;
+             color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;
+             user-select:none}
+    thead th:hover{color:var(--text)}
+    thead th.r{text-align:right}
+    thead th.sorted{color:var(--accent)}
+    tbody tr{border-bottom:1px solid var(--border)}
+    tbody tr:hover{background:#fafafa}
+    td{padding:9px 12px;vertical-align:middle;white-space:nowrap}
+    td.r{text-align:right;font-family:var(--mono);font-size:0.82rem}
+    td.gw-cell{font-weight:600}
+
+    .state-msg{max-width:1000px;margin:80px auto;text-align:center;color:var(--muted);
+               font-family:var(--mono);font-size:0.85rem;line-height:2}
+
+    @media (max-width:600px){
+      td,th{padding:8px 6px}
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-wrap">
+    <img src="logo_antifpl.png" alt="Anti FPL" class="logo-img">
+  </div>
+  <div class="meta">
+    <div id="last-updated">—</div>
+  </div>
+</header>
+
+<div class="tabs" id="tabs-bar"></div>
+
+<div class="gw-bar" id="gw-bar"></div>
+
+<div class="table-wrap">
+  <div id="state-msg" class="state-msg">Loading weekly stats...</div>
+  <table id="stats-table" style="display:none">
+    <thead>
+      <tr>
+        <th data-key="gw">GW</th>
+        <th class="r" data-key="teams">Teams</th>
+        <th class="r" data-key="best" title="Lowest (best) GW score">Best</th>
+        <th class="r" data-key="worst" title="Highest (worst) GW score">Worst</th>
+        <th class="r" data-key="avg">Average</th>
+        <th class="r" data-key="topNAvg" title="Average GW score of the teams currently leading the table">Top N Avg</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://qudcjhmbextpfdgdxihs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF1ZGNqaG1iZXh0cGZkZ2R4aWhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MjEzMTQsImV4cCI6MjA5NDE5NzMxNH0.TRapf8KXSpM2XPrzprIhObi5cp0Sxt2wxel9novZRMA';
+  const SEASON = '2026/27';
+
+  let ROWS = [];
+  let sortKey = 'gw';
+  let sortDir = 1;
+
+  // Nav is context-sensitive: only show the mini-league link if we arrived via
+  // mini_league.html's own "?from=mini_league" — otherwise a global (Overall)
+  // visitor could use this page as a back door into a mini-league they weren't
+  // given the invite code for.
+  (function renderNav() {
+    const from = new URLSearchParams(location.search).get('from');
+    const links = [];
+    if (from === 'mini_league') {
+      links.push('<a class="tab" href="mini_league.html">The next Badly drawn boy</a>');
+    }
+    links.push('<a class="tab" href="index.html">Overall Anti FPL</a>');
+    links.push('<a class="tab" href="players.html' + (from ? `?from=${from}` : '') + '">Players</a>');
+    links.push('<a class="tab active" href="weekly_stats.html' + (from ? `?from=${from}` : '') + '">Weekly Stats</a>');
+    links.push('<a class="tab" href="rules.html">Rules</a>');
+    document.getElementById('tabs-bar').innerHTML = links.join('');
+  })();
+
+  async function sbFetch(table, params = '') {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } });
+    if (!r.ok) throw new Error(`${table}: ${r.status} ${r.statusText}`);
+    return r.json();
+  }
+
+  // Paginated fetch — needed for season-long, all-team queries that can exceed 1000 rows.
+  async function sbFetchAll(table, params = '') {
+    const rows = [];
+    let offset = 0;
+    while (true) {
+      const sep = params ? '&' : '';
+      const batch = await sbFetch(table, `${params}${sep}limit=1000&offset=${offset}`);
+      rows.push(...batch);
+      if (batch.length < 1000) break;
+      offset += 1000;
+    }
+    return rows;
+  }
+
+  function showError(msg) {
+    document.getElementById('state-msg').innerHTML = msg;
+    document.getElementById('state-msg').style.display = '';
+  }
+
+  async function loadData() {
+    try {
+      const teams = await sbFetch('teams',
+        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id&limit=1000`);
+      const totalTeams = teams.length;
+
+      // All teams, all GWs — anti_gw_pts (this week's score) + anti_total
+      // (running total through this GW, used to find the current leaders for
+      // the Top N Avg column) already live on every gw_scores row, so this
+      // whole page is a pure client-side aggregation of existing data — no
+      // new table or backend computation needed.
+      const allRows = await sbFetchAll('gw_scores',
+        `season=eq.${encodeURIComponent(SEASON)}&select=team_id,gw,anti_gw_pts,anti_total&order=gw.asc`);
+
+      const byGw = {};
+      allRows.forEach(r => {
+        if (typeof r.anti_gw_pts !== 'number') return;
+        (byGw[r.gw] ||= []).push(r);
+      });
+
+      ROWS = Object.entries(byGw).map(([gw, rows]) => {
+        const pts = rows.map(r => r.anti_gw_pts);
+        const best  = Math.min(...pts);
+        const worst = Math.max(...pts);
+        const avg   = Math.round(pts.reduce((a, b) => a + b, 0) / pts.length);
+
+        // Same definition as the live "Top N Avg GW Score" pill: the N teams
+        // currently leading the table (by running total through this GW),
+        // averaged on their score for this GW specifically.
+        const withTotal = rows.filter(r => typeof r.anti_total === 'number');
+        const topN = withTotal.length <= 30 ? Math.min(3, withTotal.length) : Math.floor(withTotal.length * 0.10);
+        const leaders = [...withTotal].sort((a, b) => a.anti_total - b.anti_total).slice(0, topN);
+        const topNAvg = leaders.length
+          ? Math.round(leaders.reduce((sum, r) => sum + r.anti_gw_pts, 0) / leaders.length)
+          : null;
+
+        return { gw: Number(gw), teams: rows.length, best, worst, avg, topNAvg };
+      });
+
+      document.getElementById('gw-bar').innerHTML = `
+        <div class="gw-pill"><strong>${ROWS.length}</strong>Gameweeks Tracked</div>
+        <div class="gw-pill"><strong>${totalTeams}</strong>Tracked Teams</div>
+      `;
+      document.getElementById('last-updated').textContent =
+        `Updated ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
+
+      renderTable();
+      document.getElementById('state-msg').style.display = 'none';
+      document.getElementById('stats-table').style.display = '';
+    } catch (err) {
+      console.error('loadData error:', err);
+      showError(err.message);
+    }
+  }
+
+  function renderTable() {
+    const rows = [...ROWS].sort((a, b) => {
+      const av = a[sortKey], bv = b[sortKey];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      return sortDir * (av - bv);
+    });
+
+    document.querySelectorAll('#stats-table thead th').forEach(th => {
+      th.classList.toggle('sorted', th.dataset.key === sortKey);
+    });
+
+    document.getElementById('tbody').innerHTML = rows.map(r => `
+      <tr>
+        <td class="gw-cell">GW${r.gw}</td>
+        <td class="r">${r.teams}</td>
+        <td class="r">${r.best}</td>
+        <td class="r">${r.worst}</td>
+        <td class="r">${r.avg}</td>
+        <td class="r">${r.topNAvg ?? '—'}</td>
+      </tr>
+    `).join('');
+  }
+
+  document.querySelectorAll('#stats-table thead th').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = key === 'gw' ? 1 : -1; }
+      renderTable();
+    });
+  });
+
+  loadData();
+</script>
+</body>
+</html>

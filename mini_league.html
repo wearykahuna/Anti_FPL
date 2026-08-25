@@ -160,6 +160,7 @@
   <a class="tab active" href="mini_league.html">The next Badly drawn boy</a>
   <a class="tab" href="index.html">Overall Anti FPL</a>
   <a class="tab" href="players.html?from=mini_league">Players</a>
+  <a class="tab" href="weekly_stats.html?from=mini_league">Weekly Stats</a>
   <a class="tab" href="rules.html">Rules</a>
 </div>
 
@@ -558,7 +559,7 @@
       <div class="gw-pill"><strong>${topNAvg}</strong>Top ${topN} Avg GW Score</div>
     `;
 
-    document.getElementById('pens-header').textContent = isLive ? 'Pending' : '+Pens';
+    document.getElementById('pens-header').textContent = isLive ? 'Penalty Pts' : '+Pens';
 
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
@@ -744,7 +745,7 @@
         `;
       }
 
-      const penPrefix = isLive ? 'Pending: ' : '';
+      const penPrefix = isLive ? 'Penalty Pts: ' : '';
       const detailTr = document.createElement('tr');
       detailTr.className = 'detail-row';
       detailTr.style.display = isExpanded ? '' : 'none';

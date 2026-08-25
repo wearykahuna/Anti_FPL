@@ -102,11 +102,11 @@
     <div id="charts-body" style="display:none">
       <div class="charts-grid">
         <div>
-          <div class="chart-title">Cumulative Total &mdash; Lower Is Better</div>
+          <div class="chart-title">Cumulative Total</div>
           <div class="chart-wrap-sm"><canvas id="total-chart"></canvas></div>
         </div>
         <div>
-          <div class="chart-title">Global Rank By GW &mdash; Lower Is Better</div>
+          <div class="chart-title">Global Rank By GW</div>
           <div class="chart-wrap-sm"><canvas id="rank-chart"></canvas></div>
         </div>
         <div>
@@ -247,12 +247,10 @@
       document.getElementById('last-updated').textContent =
         `Updated ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
 
-      const gwsPlayed = gwRows.length;
       const latest = gwRows.at(-1);
       const bestRank = gwRows.reduce((min, r) =>
         r.shared_rank != null && r.shared_rank < min ? r.shared_rank : min, Infinity);
       document.getElementById('gw-bar').innerHTML = `
-        <div class="gw-pill"><strong>${gwsPlayed}</strong>GWs Played</div>
         <div class="gw-pill"><strong>${latest?.anti_total ?? '—'}</strong>Current Total</div>
         <div class="gw-pill"><strong>${latest?.rank_tied ? '=' : ''}${latest?.shared_rank ?? '—'}</strong>Current Global Rank</div>
         <div class="gw-pill"><strong>${bestRank === Infinity ? '—' : bestRank}</strong>Best Global Rank</div>

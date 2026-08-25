@@ -137,6 +137,7 @@
     }
     links.push('<a class="tab" href="index.html">Overall Anti FPL</a>');
     links.push('<a class="tab active" href="players.html">Players</a>');
+    links.push('<a class="tab" href="weekly_stats.html' + (from ? `?from=${from}` : '') + '">Weekly Stats</a>');
     links.push('<a class="tab" href="rules.html">Rules</a>');
     document.getElementById('tabs-bar').innerHTML = links.join('');
   })();
