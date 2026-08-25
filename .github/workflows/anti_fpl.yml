@@ -19,6 +19,7 @@ on:
           - finalize_gw
           - backfill_player_scores
           - backfill_team_value
+          - backfill_transfers
           - snapshot
           - score_new_team
           - create_mini_league
