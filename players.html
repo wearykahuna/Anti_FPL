@@ -85,10 +85,15 @@
     <option value="MID">MID</option>
     <option value="FWD">FWD</option>
   </select>
+  <select id="team-filter">
+    <option value="">All teams</option>
+  </select>
+  <input type="number" id="price-min" placeholder="Min £m" step="0.1" min="0" style="width:90px">
+  <input type="number" id="price-max" placeholder="Max £m" step="0.1" min="0" style="width:90px">
 </div>
 
 <div class="table-wrap">
-  <div id="state-msg" class="state-msg"><span class="big">🎽</span>Loading players...</div>
+  <div id="state-msg" class="state-msg">Loading players...</div>
   <table id="players-table" style="display:none">
     <thead>
       <tr>
@@ -101,6 +106,8 @@
         <th class="r" data-key="xiCount">In XI</th>
         <th class="r" data-key="capCount">Captain</th>
         <th class="r" data-key="vcCount">VC</th>
+        <th class="r" data-key="matches">Matches</th>
+        <th class="r" data-key="minutes">Minutes</th>
         <th class="r" data-key="totalAnti">Total Anti Pts</th>
         <th class="r" data-key="form5">5GW Form</th>
       </tr>
@@ -155,7 +162,7 @@
   }
 
   function showError(msg) {
-    document.getElementById('state-msg').innerHTML = `<span class="big">⚠️</span>${msg}`;
+    document.getElementById('state-msg').innerHTML = msg;
     document.getElementById('state-msg').style.display = '';
   }
 
@@ -188,7 +195,7 @@
         `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${selectionGw}&select=squad,captain_id,vice_captain_id`);
 
       const seasonScores = await sbFetchAll('player_gw_scores',
-        `season=eq.${encodeURIComponent(SEASON)}&gw=lte.${currentGw}&select=player_id,gw,anti_pts`);
+        `season=eq.${encodeURIComponent(SEASON)}&gw=lte.${currentGw}&select=player_id,gw,anti_pts,minutes`);
 
       // Ownership / XI / captain / VC tallies
       const owned = {}, xi = {}, cap = {}, vc = {};
@@ -201,15 +208,17 @@
         if (sel.vice_captain_id) vc[sel.vice_captain_id] = (vc[sel.vice_captain_id] || 0) + 1;
       });
 
-      // Season totals + 5-GW form
+      // Season totals + 5-GW form + matches/minutes played
       const byPlayer = {};
       seasonScores.forEach(r => (byPlayer[r.player_id] ||= []).push(r));
-      const totalAnti = {}, form5 = {};
+      const totalAnti = {}, form5 = {}, matches = {}, minutesPlayed = {};
       Object.entries(byPlayer).forEach(([pid, rows]) => {
         rows.sort((a, b) => a.gw - b.gw);
         totalAnti[pid] = rows.reduce((sum, r) => sum + (r.anti_pts ?? 0), 0);
         const last5 = rows.slice(-5).map(r => r.anti_pts).filter(p => p != null);
         form5[pid] = last5.length ? last5.reduce((a, b) => a + b, 0) / last5.length : null;
+        matches[pid] = rows.filter(r => (r.minutes ?? 0) > 0).length;
+        minutesPlayed[pid] = rows.reduce((sum, r) => sum + (r.minutes ?? 0), 0);
       });
 
       ROWS = players.map(p => ({
@@ -219,13 +228,21 @@
         xiCount:    xi[p.player_id] || 0,
         capCount:   cap[p.player_id] || 0,
         vcCount:    vc[p.player_id] || 0,
+        matches:    matches[p.player_id] ?? 0,
+        minutes:    minutesPlayed[p.player_id] ?? 0,
         totalAnti:  totalAnti[p.player_id] ?? 0,
         form5:      form5[p.player_id],
       }));
 
+      const teamOptions = [...new Set(players.map(p => p.team_short).filter(Boolean))].sort();
+      const teamFilterEl = document.getElementById('team-filter');
+      if (!teamFilterEl.dataset.populated) {
+        teamFilterEl.innerHTML = '<option value="">All teams</option>' +
+          teamOptions.map(t => `<option value="${t}">${t}</option>`).join('');
+        teamFilterEl.dataset.populated = 'true';
+      }
+
       document.getElementById('gw-bar').innerHTML = `
-        <div class="gw-pill"><strong>${currentGw}</strong>Through GW</div>
-        <div class="gw-pill"><strong>${totalTeams}</strong>Tracked Teams</div>
         <div class="gw-pill"><strong>${players.length}</strong>Players</div>
       `;
       document.getElementById('last-updated').textContent =
@@ -243,10 +260,18 @@
   function renderTable() {
     const q = document.getElementById('search-box').value.trim().toLowerCase();
     const posFilter = document.getElementById('pos-filter').value;
+    const teamFilter = document.getElementById('team-filter').value;
+    const priceMin = parseFloat(document.getElementById('price-min').value);
+    const priceMax = parseFloat(document.getElementById('price-max').value);
 
-    let rows = ROWS.filter(r =>
-      (!q || r.web_name.toLowerCase().includes(q)) &&
-      (!posFilter || r.position === posFilter));
+    let rows = ROWS.filter(r => {
+      const priceM = r.now_cost != null ? r.now_cost / 10 : null;
+      return (!q || r.web_name.toLowerCase().includes(q)) &&
+        (!posFilter || r.position === posFilter) &&
+        (!teamFilter || r.team_short === teamFilter) &&
+        (isNaN(priceMin) || (priceM != null && priceM >= priceMin)) &&
+        (isNaN(priceMax) || (priceM != null && priceM <= priceMax));
+    });
 
     rows.sort((a, b) => {
       const av = a[sortKey], bv = b[sortKey];
@@ -272,6 +297,8 @@
         <td class="r">${r.xiCount}</td>
         <td class="r">${r.capCount}</td>
         <td class="r">${r.vcCount}</td>
+        <td class="r">${r.matches}</td>
+        <td class="r">${r.minutes}</td>
         <td class="r">${r.totalAnti}</td>
         <td class="r">${r.form5 != null ? r.form5.toFixed(1) : '—'}</td>
       </tr>
@@ -288,6 +315,9 @@
   });
   document.getElementById('search-box').addEventListener('input', renderTable);
   document.getElementById('pos-filter').addEventListener('change', renderTable);
+  document.getElementById('team-filter').addEventListener('change', renderTable);
+  document.getElementById('price-min').addEventListener('input', renderTable);
+  document.getElementById('price-max').addEventListener('input', renderTable);
 
   loadData();
 </script>

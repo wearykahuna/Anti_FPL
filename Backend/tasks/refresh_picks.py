@@ -10,9 +10,10 @@ only be activated at the deadline. Single history fetch per team per GW
 keeps the chips_history in teams.chips_history up to date for recalc_scores.
 
 The history fetch also SEEDS the team's gw_scores row for the current GW
-with bank / transfer-cost / FPL rank / FPL total. These are fixed at the
-deadline, and recalc_scores reads them from the existing gw_scores row —
-without the seed, hit and bank penalties would be silently 0 all GW.
+with bank / transfer-cost / transfer-count / FPL rank / FPL total. These are
+fixed at the deadline, and recalc_scores reads them from the existing
+gw_scores row — without the seed, hit and bank penalties would be silently
+0 all GW.
 (The seed retries on later runs until FPL publishes the history row.)
 
 For 200 teams → ~400 API calls (picks + history), but only on first run
@@ -87,6 +88,7 @@ def build_gw_seed_row(team_id: int, gw: int, season: str, history: dict) -> dict
         "gw":            gw,
         "bank":          hist_gw.get("bank", 0) or 0,
         "fpl_xfer_cost": hist_gw.get("event_transfers_cost", 0) or 0,
+        "transfers_gw":  hist_gw.get("event_transfers", 0) or 0,
         "fpl_gw_rank":   hist_gw.get("rank"),
         "fpl_total":     hist_gw.get("total_points"),
     }
@@ -181,7 +183,7 @@ def run() -> int:
     log.info("Upserting %d selection rows...", len(selection_rows))
     upsert("team_gw_selections", selection_rows, on_conflict="season,team_id,gw")
 
-    log.info("Seeding %d gw_scores rows (bank / xfer cost)...", len(seed_rows))
+    log.info("Seeding %d gw_scores rows (bank / xfer cost / transfers)...", len(seed_rows))
     upsert("gw_scores", seed_rows, on_conflict="season,team_id,gw")
 
     log.info("Updating chips_history for %d teams...", len(chips_updates))

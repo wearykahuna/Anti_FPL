@@ -15,6 +15,7 @@ Usage:
     python run_task.py finalize_gw --gw-from 38       # explicit GW
     python run_task.py backfill_player_scores --gw-from 30 --gw-to 38
     python run_task.py backfill_team_value                            # one-off, after adding gw_scores.team_value
+    python run_task.py backfill_transfers                              # one-off, after adding gw_scores.transfers_gw
     python run_task.py score_new_team --team 5388975
     python run_task.py score_new_team --league 400754        # bulk-backfill a whole FPL league
     python run_task.py create_mini_league --league 795730 --invite-code KINGANTI2627
@@ -119,10 +120,15 @@ def _task_backfill_team_value(args):
     from tasks.backfill_team_value import run
     return run()
 
+def _task_backfill_transfers(args):
+    from tasks.backfill_transfers import run
+    return run()
+
 
 TASKS = {
     "backfill_player_scores": _task_backfill_player_scores,
     "backfill_team_value": _task_backfill_team_value,
+    "backfill_transfers": _task_backfill_transfers,
     "create_mini_league": _task_create_mini_league,
     "finalize_gw":       _task_finalize_gw,
     "recalc_gw":         _task_recalc_gw,

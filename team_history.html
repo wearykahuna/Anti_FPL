@@ -25,6 +25,11 @@
       text-decoration:none}
     .back-link:hover{color:var(--text)}
 
+    .fpl-link{font-family:var(--font);font-size:0.68rem;font-weight:600;color:var(--muted);
+      background:#f0f0f0;border:1px solid var(--border);border-radius:6px;padding:4px 8px;
+      text-decoration:none;display:inline-block;transition:background 0.15s}
+    .fpl-link:hover{background:#e6e6e6;color:var(--text)}
+
     .team-header{max-width:900px;margin:0 auto 20px}
     .team-header h1{font-size:1.4rem}
     .team-header .manager{color:var(--muted);font-size:0.9rem;margin-top:2px}
@@ -79,7 +84,7 @@
 
 <a class="back-link" href="index.html">&larr; Back to Overall Anti FPL</a>
 
-<div id="state-msg" class="state-msg"><span class="big">📈</span>Loading GW history...</div>
+<div id="state-msg" class="state-msg">Loading GW history...</div>
 
 <div id="content" style="display:none">
   <div class="team-header">
@@ -120,9 +125,13 @@
           <th class="r">Anti Score</th>
           <th class="r">Running Total</th>
           <th class="r">Global Rank</th>
+          <th>Badges</th>
+          <th class="r">Transfers</th>
+          <th class="r">Pens</th>
           <th>Chip</th>
           <th class="r" title="Squad selling value">Team Value</th>
           <th class="r" title="Unspent budget">Bank</th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
@@ -144,8 +153,42 @@
     return r.json();
   }
 
+  // Paginated fetch — needed for season-long, all-team queries that can exceed 1000 rows.
+  async function sbFetchAll(table, params = '') {
+    const rows = [];
+    let offset = 0;
+    while (true) {
+      const sep = params ? '&' : '';
+      const batch = await sbFetch(table, `${params}${sep}limit=1000&offset=${offset}`);
+      rows.push(...batch);
+      if (batch.length < 1000) break;
+      offset += 1000;
+    }
+    return rows;
+  }
+
+  // Standard competition ("1,2,2,4") ranking: ties share the same rank and
+  // the next distinct value skips ahead by the number of teams tied above it.
+  function competitionRank(rows, valueOf) {
+    const sorted = [...rows].sort((a, b) => valueOf(a) - valueOf(b));
+    const rankOf = new Map();
+    let rank = 0, seen = 0, prevVal = null;
+    sorted.forEach(r => {
+      seen++;
+      const v = valueOf(r);
+      if (prevVal === null || v !== prevVal) { rank = seen; prevVal = v; }
+      rankOf.set(r, rank);
+    });
+    const countByRank = {};
+    rankOf.forEach(rk => { countByRank[rk] = (countByRank[rk] || 0) + 1; });
+    return {
+      rank: row => rankOf.get(row),
+      tied: row => countByRank[rankOf.get(row)] > 1,
+    };
+  }
+
   function showError(msg) {
-    document.getElementById('state-msg').innerHTML = `<span class="big">⚠️</span>${msg}`;
+    document.getElementById('state-msg').innerHTML = msg;
     document.getElementById('state-msg').style.display = '';
     document.getElementById('content').style.display = 'none';
   }
@@ -161,7 +204,43 @@
       const team = teamRows[0];
 
       const gwRows = await sbFetch('gw_scores',
-        `season=eq.${encodeURIComponent(SEASON)}&team_id=eq.${teamId}&select=gw,anti_gw_pts,anti_total,cumulative_standing,active_chip,team_value,in_the_bank&order=gw.asc`);
+        `season=eq.${encodeURIComponent(SEASON)}&team_id=eq.${teamId}&select=gw,anti_gw_pts,anti_total,active_chip,team_value,in_the_bank,total_pens_gw,transfers_gw&order=gw.asc`);
+
+      // All teams, all GWs up to this team's latest — needed to compute a
+      // true shared-tie Global Rank and the weekly best/worst badges (which
+      // are global accolades, not scoped to any one team).
+      const maxGw = gwRows.length ? Math.max(...gwRows.map(r => r.gw)) : 0;
+      const allTeamsRows = maxGw
+        ? await sbFetchAll('gw_scores',
+            `season=eq.${encodeURIComponent(SEASON)}&gw=lte.${maxGw}&select=team_id,gw,anti_total,anti_gw_pts&order=gw.asc`)
+        : [];
+      const byGw = {};
+      allTeamsRows.forEach(r => {
+        if (typeof r.anti_total !== 'number') return;
+        (byGw[r.gw] ||= []).push(r);
+      });
+      const rankByGw = {};
+      const badgeByGw = {};
+      Object.entries(byGw).forEach(([gw, rows]) => {
+        rankByGw[gw] = competitionRank(rows, r => r.anti_total);
+        const ptsRows = rows.filter(r => typeof r.anti_gw_pts === 'number');
+        if (ptsRows.length) {
+          const best  = Math.min(...ptsRows.map(r => r.anti_gw_pts));
+          const worst = Math.max(...ptsRows.map(r => r.anti_gw_pts));
+          badgeByGw[gw] = { best, worst };
+        }
+      });
+      gwRows.forEach(r => {
+        const rows = byGw[r.gw] || [];
+        const thisRow = rows.find(x => x.team_id == teamId);
+        if (thisRow && rankByGw[r.gw]) {
+          r.shared_rank = rankByGw[r.gw].rank(thisRow);
+          r.rank_tied   = rankByGw[r.gw].tied(thisRow);
+        }
+        const bw = badgeByGw[r.gw];
+        r.badge_star   = !!(bw && r.anti_gw_pts === bw.best);
+        r.badge_circle = !!(bw && r.anti_gw_pts === bw.worst);
+      });
 
       document.getElementById('team-name').textContent = team.team_name || teamId;
       document.getElementById('manager-name').textContent = team.manager || '';
@@ -171,25 +250,35 @@
       const gwsPlayed = gwRows.length;
       const latest = gwRows.at(-1);
       const bestRank = gwRows.reduce((min, r) =>
-        r.cumulative_standing != null && r.cumulative_standing < min ? r.cumulative_standing : min, Infinity);
+        r.shared_rank != null && r.shared_rank < min ? r.shared_rank : min, Infinity);
       document.getElementById('gw-bar').innerHTML = `
         <div class="gw-pill"><strong>${gwsPlayed}</strong>GWs Played</div>
         <div class="gw-pill"><strong>${latest?.anti_total ?? '—'}</strong>Current Total</div>
-        <div class="gw-pill"><strong>${latest?.cumulative_standing ?? '—'}</strong>Current Global Rank</div>
+        <div class="gw-pill"><strong>${latest?.rank_tied ? '=' : ''}${latest?.shared_rank ?? '—'}</strong>Current Global Rank</div>
         <div class="gw-pill"><strong>${bestRank === Infinity ? '—' : bestRank}</strong>Best Global Rank</div>
       `;
 
-      document.getElementById('tbody').innerHTML = gwRows.slice().reverse().map(r => `
+      document.getElementById('tbody').innerHTML = gwRows.slice().reverse().map(r => {
+        const badges = `${r.badge_star ? '⭐' : ''}${r.badge_circle ? '⚫' : ''}`;
+        return `
         <tr>
           <td>${r.gw}</td>
           <td class="r">${r.anti_gw_pts ?? '—'}</td>
           <td class="r">${r.anti_total ?? '—'}</td>
-          <td class="r">${r.cumulative_standing ?? '—'}</td>
+          <td class="r">${r.rank_tied ? '=' : ''}${r.shared_rank ?? '—'}</td>
+          <td>${badges}</td>
+          <td class="r">${r.transfers_gw ?? ''}</td>
+          <td class="r">${r.total_pens_gw ?? '—'}</td>
           <td>${r.active_chip ? (CHIP_LABEL[r.active_chip] || r.active_chip) : '—'}</td>
           <td class="r">${r.team_value != null ? `£${(r.team_value / 10).toFixed(1)}m` : '—'}</td>
           <td class="r">${r.in_the_bank != null ? `£${(r.in_the_bank / 10).toFixed(1)}m` : '—'}</td>
+          <td style="text-align:right">
+            <a href="https://fantasy.premierleague.com/entry/${teamId}/event/${r.gw}"
+               target="_blank" rel="noopener" class="fpl-link">FPL &#x2197;</a>
+          </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
 
       CURRENT_GW_ROWS = gwRows;
 
@@ -250,7 +339,7 @@
       data: {
         labels,
         datasets: [{
-          data: gwRows.map(r => r.cumulative_standing),
+          data: gwRows.map(r => r.shared_rank),
           borderColor: '#1a7f4b',
           backgroundColor: 'rgba(26,127,75,0.08)',
           fill: true,

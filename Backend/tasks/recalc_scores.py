@@ -137,6 +137,7 @@ def to_gw_scores_row(
         "gw":               gw,
         "fpl_raw_pts":      scored.get("fpl_raw_pts"),
         "fpl_xfer_cost":    scored.get("fpl_xfer_cost"),
+        "transfers_gw":     scored.get("transfers_gw", 0) or 0,
         "fpl_gw_rank":      scored.get("fpl_gw_rank"),
         "fpl_total":        scored.get("fpl_total"),
         "active_chip":      scored.get("active_chip") or "",
@@ -288,7 +289,7 @@ def run(provisional: bool = False) -> int:
     # Existing current-GW scores (bank, transfer cost, FPL rank — static within GW)
     sb = get_client()
     existing_rows = (sb.from_("gw_scores")
-                       .select("team_id,fpl_raw_pts,fpl_xfer_cost,fpl_total,fpl_gw_rank,bank")
+                       .select("team_id,fpl_raw_pts,fpl_xfer_cost,transfers_gw,fpl_total,fpl_gw_rank,bank")
                        .eq("season", SEASON)
                        .eq("gw", current_gw)
                        .execute().data or [])
@@ -333,6 +334,7 @@ def run(provisional: bool = False) -> int:
             "event":                current_gw,
             "points":               fpl_raw,
             "event_transfers_cost": prev_row.get("fpl_xfer_cost", 0) or 0,
+            "event_transfers":      prev_row.get("transfers_gw", 0) or 0,
             "bank":                 prev_row.get("bank", 0) or 0,
             "rank":                 prev_row.get("fpl_gw_rank"),
             "total_points":         prev_row.get("fpl_total"),

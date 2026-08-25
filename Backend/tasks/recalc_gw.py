@@ -104,6 +104,7 @@ def run(gw_from: int, gw_to: int, recalc_fpl_raw: bool = False) -> int:
                 "event":                gw,
                 "points":               fpl_raw,
                 "event_transfers_cost": existing.get("fpl_xfer_cost", 0) or 0,
+                "event_transfers":      existing.get("transfers_gw", 0) or 0,
                 "bank":                 existing.get("bank", 0) or 0,
                 "rank":                 existing.get("fpl_gw_rank"),
                 "total_points":         existing.get("fpl_total"),

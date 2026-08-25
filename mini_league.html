@@ -42,6 +42,9 @@
     thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
              color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
     thead th.r{text-align:right}
+    thead th[data-key]{cursor:pointer;user-select:none}
+    thead th[data-key]:hover{color:var(--text)}
+    thead th[data-key].sorted{color:var(--accent)}
     tbody tr.team-row{border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
     tbody tr.team-row:hover,tbody tr.team-row.expanded{background:var(--surface)}
     td{padding:12px 14px;vertical-align:middle;white-space:nowrap}
@@ -88,9 +91,6 @@
                padding:4px 8px;cursor:pointer;white-space:nowrap;text-decoration:none;
                display:inline-block;margin-right:8px;transition:background 0.15s}
     .gw-history-btn:hover{background:#e6e6e6;color:var(--text)}
-
-    .chevron{font-size:0.7rem;color:var(--muted);transition:transform 0.2s;display:inline-block}
-    .chevron.open{transform:rotate(180deg)}
 
     tr.detail-row td{padding:0;border-bottom:1px solid var(--border)}
     .detail-inner{padding:16px 14px 16px 46px;display:grid;
@@ -166,17 +166,16 @@
 <div class="gw-bar" id="gw-bar"></div>
 
 <div class="table-wrap">
-  <div id="state-msg" class="state-msg"><span class="big">⚽</span>Loading leaderboard...</div>
+  <div id="state-msg" class="state-msg">Loading leaderboard...</div>
   <table id="leaderboard" style="display:none">
     <thead>
       <tr>
-        <th>#</th>
-        <th>Team</th>
-        <th class="r">GW</th>
-        <th class="r">To Play</th>
-        <th class="r" id="pens-header">+Pens</th>
-        <th class="r">Prev Total</th>
-        <th class="r">Total</th>
+        <th data-key="rank">#</th>
+        <th data-key="team">Team</th>
+        <th class="r" data-key="gw">GW</th>
+        <th class="r" data-key="toplay">To Play</th>
+        <th class="r" data-key="pens" id="pens-header">+Pens</th>
+        <th class="r" data-key="total">Total</th>
         <th></th>
       </tr>
     </thead>
@@ -192,6 +191,18 @@
 
   let refreshTimer;
   let expandedTeam = null;
+  let lastRenderArgs = null;
+  let sortKey = 'total';
+  let sortDir = 1;
+
+  document.querySelectorAll('#leaderboard thead th[data-key]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = 1; }
+      if (lastRenderArgs) render(...lastRenderArgs);
+    });
+  });
 
   async function sbFetch(table, params = '') {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${params}`,
@@ -215,52 +226,75 @@
     return rows;
   }
 
+  // Standard competition ("1,2,2,4") ranking: ties share the same rank and
+  // the next distinct value skips ahead by the number of teams tied above it.
+  // valueOf(row) — lower is better (anti-fpl totals/scores: lower = best).
+  // Returns {rank(row), tied(row)} — tied() is true when 2+ rows share a rank.
+  function competitionRank(rows, valueOf) {
+    const sorted = [...rows].sort((a, b) => valueOf(a) - valueOf(b));
+    const rankOf = new Map();
+    let rank = 0, seen = 0, prevVal = null;
+    sorted.forEach(r => {
+      seen++;
+      const v = valueOf(r);
+      if (prevVal === null || v !== prevVal) { rank = seen; prevVal = v; }
+      rankOf.set(r, rank);
+    });
+    const countByRank = {};
+    rankOf.forEach(rk => { countByRank[rk] = (countByRank[rk] || 0) + 1; });
+    return {
+      rank: row => rankOf.get(row),
+      tied: row => countByRank[rankOf.get(row)] > 1,
+    };
+  }
+
   // Weekly global lowest/highest-score "credit" badges — computed across ALL
   // tracked teams (not just this mini-league), since the accolade is a global
-  // one: a mini-league team's star reflects the global weekly win. gw_rank =
-  // rank of that SINGLE GW's score across all teams (1 = lowest/best that
-  // week) — distinct from cumulative_standing (running league position).
-  // Stable once a GW is finished, so only refetched when the finished-GW
-  // count changes, not on every silent 2-minute poll.
+  // one: a mini-league team's star reflects the global weekly win. Every team
+  // tied for best (lowest) or worst (highest) anti_gw_pts in a GW shares the
+  // badge. Stable once a GW is finished, so only refetched when the
+  // finished-GW count changes, not on every silent 2-minute poll.
   let lastBadgeGw = null;
   window.weeklyBadges = {};
   async function refreshWeeklyBadges(completedGw) {
     if (completedGw < 1 || completedGw === lastBadgeGw) return;
     const rows = await sbFetchAll('gw_scores',
-      `season=eq.${encodeURIComponent(SEASON)}&gw=lte.${completedGw}&select=team_id,gw,gw_rank&order=gw.asc`);
+      `season=eq.${encodeURIComponent(SEASON)}&gw=lte.${completedGw}&select=team_id,gw,anti_gw_pts&order=gw.asc`);
     const byGw = {};
     rows.forEach(r => {
-      if (typeof r.gw_rank !== 'number') return;
+      if (typeof r.anti_gw_pts !== 'number') return;
       (byGw[r.gw] ||= []).push(r);
     });
     const badges = {};
     Object.values(byGw).forEach(gwRows => {
-      const maxRank = Math.max(...gwRows.map(r => r.gw_rank));
+      const best  = Math.min(...gwRows.map(r => r.anti_gw_pts));
+      const worst = Math.max(...gwRows.map(r => r.anti_gw_pts));
       gwRows.forEach(r => {
         badges[r.team_id] ||= { stars: 0, circles: 0 };
-        if (r.gw_rank === 1) badges[r.team_id].stars++;
-        if (r.gw_rank === maxRank) badges[r.team_id].circles++;
+        if (r.anti_gw_pts === best)  badges[r.team_id].stars++;
+        if (r.anti_gw_pts === worst) badges[r.team_id].circles++;
       });
     });
     window.weeklyBadges = badges;
     lastBadgeGw = completedGw;
   }
 
-  // Provisional badge for the CURRENT (still-live) GW only — gw_rank updates
-  // every live tick, so this can still flip before the GW is confirmed.
-  // Rendered faded + pulsing so it reads as "not locked in yet". Computed
-  // across ALL teams (global), same as the confirmed badges above.
+  // Provisional badge for the CURRENT (still-live) GW only — anti_gw_pts
+  // updates every live tick, so this can still flip before the GW is
+  // confirmed. Rendered faded + pulsing so it reads as "not locked in yet".
+  // Computed across ALL teams (global), same as the confirmed badges above.
   window.provisionalBadges = {};
   async function refreshProvisionalBadge(currentGw, isLive) {
     window.provisionalBadges = {};
     if (!isLive) return;
     const rows = await sbFetch('gw_scores',
-      `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=team_id,gw_rank`);
-    const valid = rows.filter(r => typeof r.gw_rank === 'number');
+      `season=eq.${encodeURIComponent(SEASON)}&gw=eq.${currentGw}&select=team_id,anti_gw_pts`);
+    const valid = rows.filter(r => typeof r.anti_gw_pts === 'number');
     if (!valid.length) return;
-    const maxRank = Math.max(...valid.map(r => r.gw_rank));
+    const best  = Math.min(...valid.map(r => r.anti_gw_pts));
+    const worst = Math.max(...valid.map(r => r.anti_gw_pts));
     valid.forEach(r => {
-      window.provisionalBadges[r.team_id] = { star: r.gw_rank === 1, circle: r.gw_rank === maxRank };
+      window.provisionalBadges[r.team_id] = { star: r.anti_gw_pts === best, circle: r.anti_gw_pts === worst };
     });
   }
 
@@ -353,7 +387,6 @@
         chipsByTeam[r.team_id].push({ gw: r.gw, chip: r.active_chip });
       });
 
-      const prevStanding = Object.fromEntries(prevScores.map(r => [r.team_id, r.cumulative_standing]));
       const prevTotal    = Object.fromEntries(prevScores.map(r => [r.team_id, r.anti_total]));
       const teamInfo     = Object.fromEntries(teams.map(t => [t.team_id, t]));
       const selectionMap = Object.fromEntries(selections.map(s => [s.team_id, s]));
@@ -365,8 +398,9 @@
         refreshProvisionalBadge(currentGw, isLive),
       ]);
 
-      render(scores, teamInfo, prevStanding, prevTotal, currentGw, isLive,
-             selectionMap, playerScoreMap, chipsByTeam);
+      lastRenderArgs = [scores, teamInfo, prevTotal, currentGw, isLive,
+                        selectionMap, playerScoreMap, chipsByTeam];
+      render(...lastRenderArgs);
       scheduleRefresh();
 
     } catch (err) {
@@ -450,7 +484,7 @@
     return xi;
   }
 
-  function render(scores, teamInfo, prevStanding, prevTotal, gw, isLive,
+  function render(scores, teamInfo, prevTotal, gw, isLive,
                   selectionMap, playerScoreMap, chipsByTeam) {
 
     // Live badge
@@ -463,23 +497,56 @@
     document.getElementById('last-updated').textContent =
       `Updated ${now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}`;
 
+    // A team's GW contribution: once its GW score is provisional (fixtures
+    // done, awaiting FPL's official confirmation) the backend has already
+    // computed the real anti-adjusted score, so use that instead of the raw
+    // live points — this is also what feeds the Total/ranking column below.
+    const gwPtsOf = s => {
+      const prov = isLive && !!s.is_provisional;
+      return prov ? (s.anti_gw_pts ?? 0) : isLive ? (s.fpl_raw_pts ?? 0) : (s.anti_gw_pts ?? 0);
+    };
+    const totalOf = s => isLive ? ((prevTotal[s.team_id] ?? 0) + gwPtsOf(s)) : (s.anti_total ?? 99999);
+
+    // Standard competition ranking (ties share a rank; e.g. 1,2,2,4) — the
+    // rank number shown never changes with the user's chosen sort column.
+    const rankMap = competitionRank(scores, totalOf);
+    const prevRankMap = competitionRank(
+      scores.filter(s => prevTotal[s.team_id] != null),
+      s => prevTotal[s.team_id]);
+
     // GW summary pills
-    const displayPts = scores.map(s => isLive ? (s.fpl_raw_pts ?? 0) : (s.anti_gw_pts ?? 0));
+    const displayPts = scores.map(gwPtsOf);
     const best  = displayPts.length ? Math.min(...displayPts) : 0;
     const worst = displayPts.length ? Math.max(...displayPts) : 0;
     const avg   = displayPts.length ? Math.round(displayPts.reduce((a, b) => a + b, 0) / displayPts.length) : 0;
 
-    // Sort by displayed total ascending (lowest = best)
+    // Row display order follows the clicked column header; the rank number
+    // in the "#" column always reflects true Total standings (rankMap above).
+    const sortValue = s => {
+      switch (sortKey) {
+        case 'team':   return (teamInfo[s.team_id]?.team_name || '').toLowerCase();
+        case 'gw':     return gwPtsOf(s);
+        case 'toplay': return toPlayCount(selectionMap[s.team_id]?.squad?.slice(0, 11)) ?? -1;
+        case 'pens':   return s.total_pens_gw ?? 0;
+        case 'rank':
+        case 'total':
+        default:       return totalOf(s);
+      }
+    };
     const sorted = [...scores].sort((a, b) => {
-      const aTot = isLive ? ((prevTotal[a.team_id] ?? 0) + (a.fpl_raw_pts ?? 0)) : (a.anti_total ?? 99999);
-      const bTot = isLive ? ((prevTotal[b.team_id] ?? 0) + (b.fpl_raw_pts ?? 0)) : (b.anti_total ?? 99999);
-      return aTot - bTot;
+      const av = sortValue(a), bv = sortValue(b);
+      return sortDir * (typeof av === 'string' ? av.localeCompare(bv) : av - bv);
+    });
+
+    document.querySelectorAll('#leaderboard thead th[data-key]').forEach(th => {
+      th.classList.toggle('sorted', th.dataset.key === sortKey);
     });
 
     // Top-N% Avg GW Score: N = 3 for small leagues (<=30 teams, mini-leagues
     // always qualify), else floor(10%). Scoped to this mini-league's own teams.
-    const topN = sorted.length <= 30 ? Math.min(3, sorted.length) : Math.floor(sorted.length * 0.10);
-    const topNPts = sorted.slice(0, topN).map(s => isLive ? (s.fpl_raw_pts ?? 0) : (s.anti_gw_pts ?? 0));
+    const byRank = [...scores].sort((a, b) => totalOf(a) - totalOf(b));
+    const topN = byRank.length <= 30 ? Math.min(3, byRank.length) : Math.floor(byRank.length * 0.10);
+    const topNPts = byRank.slice(0, topN).map(gwPtsOf);
     const topNAvg = topNPts.length ? Math.round(topNPts.reduce((a, b) => a + b, 0) / topNPts.length) : 0;
 
     document.getElementById('gw-bar').innerHTML = `
@@ -496,10 +563,11 @@
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
 
-    sorted.forEach((s, idx) => {
+    sorted.forEach((s) => {
       const info       = teamInfo[s.team_id] || {};
-      const pos        = idx + 1;
-      const prevPos    = prevStanding[s.team_id];
+      const pos        = rankMap.rank(s);
+      const posTied    = rankMap.tied(s);
+      const prevPos    = prevRankMap.rank(s);
       const move       = prevPos ? prevPos - pos : 0;
       const activeChip = s.active_chip || '';
       const hasPens    = s.total_pens_gw > 0;
@@ -524,7 +592,7 @@
       const displayGw  = typeof displayGwRaw === 'number' && showProvBadge
                          ? `${displayGwRaw}${provBadge}` : displayGwRaw;
       const displayTot = isLive
-        ? ((prevTot ?? 0) + (s.fpl_raw_pts ?? 0))
+        ? ((prevTot ?? 0) + gwPtsOf(s))
         : (s.anti_total ?? '—');
 
       const moveStr = move > 0
@@ -550,7 +618,7 @@
       tr.className = `team-row${isExpanded ? ' expanded' : ''}`;
       tr.dataset.teamId = s.team_id;
       tr.innerHTML = `
-        <td class="pos ${pos <= 3 ? 'top3' : ''}">${pos}${moveStr}</td>
+        <td class="pos ${pos <= 3 ? 'top3' : ''}">${posTied ? '=' : ''}${pos}${moveStr}</td>
         <td>
           <div style="display:flex;align-items:center;gap:10px">
             <button type="button" class="see-players-btn">See team</button>
@@ -573,11 +641,9 @@
         <td class="r">${hasPens
           ? `<span class="${isLive ? 'pending-tag' : 'pen-tag'}">${isLive ? '⏳' : '+'}${s.total_pens_gw}</span>`
           : '<span style="color:var(--muted)">—</span>'}</td>
-        <td class="r" style="color:var(--muted);font-family:var(--mono);font-size:0.78rem">${prevTot ?? '—'}</td>
         <td class="r total-pts">${displayTot}</td>
         <td style="text-align:right">
           <a href="team_history.html?team_id=${s.team_id}" class="gw-history-btn" onclick="event.stopPropagation()">GW History</a>
-          <span class="chevron ${isExpanded ? 'open' : ''}">▾</span>
         </td>
       `;
       tr.addEventListener('click', () => toggleExpand(s.team_id));
@@ -683,7 +749,7 @@
       detailTr.className = 'detail-row';
       detailTr.style.display = isExpanded ? '' : 'none';
       detailTr.innerHTML = `
-        <td colspan="8">
+        <td colspan="7">
           <div class="detail-inner">
             ${detailItem('FPL Raw', s.fpl_raw_pts ?? '—')}
             ${detailItem(penPrefix + 'Transfer Hits', s.hit_pts || 0, s.hit_pts > 0)}
@@ -724,7 +790,7 @@
 
   function showError(msg) {
     document.getElementById('state-msg').innerHTML = `
-      <span class="big">⚠️</span>Failed to load data<br>
+      Failed to load data<br>
       <span style="font-size:0.75rem">${msg}</span>
     `;
     document.getElementById('state-msg').style.display = '';

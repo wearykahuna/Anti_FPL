@@ -107,6 +107,7 @@ def to_gw_scores_row(team_id: int, season: str, scored: dict, live_gw: int | Non
         "gw":                  scored["gw"],
         "fpl_raw_pts":         scored.get("fpl_raw_pts"),
         "fpl_xfer_cost":       scored.get("fpl_xfer_cost"),
+        "transfers_gw":        scored.get("transfers_gw", 0) or 0,
         "fpl_gw_rank":         scored.get("fpl_gw_rank"),
         "fpl_total":           scored.get("fpl_total"),
         "active_chip":         scored.get("active_chip") or "",

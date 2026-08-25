@@ -50,7 +50,8 @@ main{padding:24px 32px;max-width:1500px}
 
 /* LOADING / ERROR */
 #loading-state{padding:60px 32px;text-align:center;color:var(--muted)}
-#loading-state .spin-big{font-size:32px;display:block;animation:spin 1s linear infinite;margin-bottom:12px}
+#loading-state .spin-big{width:28px;height:28px;margin:0 auto 12px;border:3px solid var(--border);
+  border-top-color:var(--muted);border-radius:50%;display:block;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #error-state{display:none;padding:32px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);
   border-radius:12px;color:#b91c1c;font-size:14px;margin:24px 32px}
@@ -239,7 +240,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 <main>
   <!-- loading placeholder -->
   <div id="loading-state">
-    <span class="spin-big">&#x23F3;</span>
+    <span class="spin-big"></span>
     Loading from Supabase&#x2026;
   </div>
 
@@ -596,19 +597,30 @@ async function loadFromSupabase() {
 }
 
 // ─── Mini-league rank computation ────────────────────────────────────────────
+let MAX_ML_RANK_BY_GW = {};
 function computeMLRanks(teams) {
   // For every GW find the set of loaded teams and rank by anti_total (lower = better).
-  // Writes ml_rank + mini_rank (alias) onto each gw entry in-place.
+  // Writes ml_rank + mini_rank (alias) onto each gw entry in-place. Standard
+  // competition ranking (1,2,2,4): ties share a rank, next distinct value
+  // skips ahead by the number of teams tied above it.
   const maxGw = Math.max(0, ...teams.flatMap(t => t.gws.map(g => g.gw)));
   for (let gw = 1; gw <= maxGw; gw++) {
     const entries = teams
       .map(t => ({ team: t, e: t.gws.find(g => g.gw === gw) }))
       .filter(x => x.e != null)
       .sort((a, b) => (a.e.total ?? 99999) - (b.e.total ?? 99999));
-    entries.forEach((x, i) => {
-      x.e.ml_rank   = i + 1;
-      x.e.mini_rank = i + 1;  // kept for backwards compat with score-card rendering
+    let rank = 0, seen = 0, prevVal = null;
+    entries.forEach((x) => {
+      seen++;
+      const v = x.e.total ?? 99999;
+      if (prevVal === null || v !== prevVal) { rank = seen; prevVal = v; }
+      x.e.ml_rank   = rank;
+      x.e.mini_rank = rank;  // kept for backwards compat with score-card rendering
     });
+    const countByRank = {};
+    entries.forEach(x => { countByRank[x.e.ml_rank] = (countByRank[x.e.ml_rank] || 0) + 1; });
+    entries.forEach(x => { x.e.ml_tied = countByRank[x.e.ml_rank] > 1; });
+    if (entries.length) MAX_ML_RANK_BY_GW[gw] = rank;
   }
 }
 
@@ -743,6 +755,7 @@ function renderStandings() {
 
     // Mini-league position (1-10, computed locally)
     const mlPos     = cur?.ml_rank ?? idx + 1;
+    const mlTied    = !!cur?.ml_tied;
     const prevMlPos = prev?.ml_rank ?? mlPos;
     const diff      = prevMlPos - mlPos;  // positive = moved up
 
@@ -782,7 +795,7 @@ function renderStandings() {
 
     return `<tr>
       <td><div class="rank-cell">
-        <span class="rank-num ${rankCls}">${mlPos}</span>${movHtml}
+        <span class="rank-num ${rankCls}">${mlTied ? '=' : ''}${mlPos}</span>${movHtml}
       </div></td>
       <td><div class="team-row">
         <span class="dot" style="background:${team.color}"></span>
@@ -857,7 +870,7 @@ function renderGWScores(gw) {
     }
 
     const gwRankLabel = g.mini_rank
-      ? `<span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">rank ${g.mini_rank}</span>`
+      ? `<span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">rank ${g.ml_tied ? '=' : ''}${g.mini_rank}</span>`
       : '';
 
     return `<div class="score-card">
@@ -1054,7 +1067,8 @@ function renderTimeStats() {
   const teamWeeks = TEAMS.map(team => ({
     team,
     top:    team.gws.filter(g => g.gw <= COMPLETED_GW && g.ml_rank === 1).length,
-    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW && g.ml_rank === 10).length,
+    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW &&
+              g.ml_rank === (MAX_ML_RANK_BY_GW[g.gw] ?? TEAMS.length)).length,
   }));
 
   const topList    = [...teamWeeks].filter(x => x.top > 0)   .sort((a,b) => b.top    - a.top).slice(0, 3);

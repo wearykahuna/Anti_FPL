@@ -337,6 +337,7 @@ def score_gw(
     cap_multiplier = captain.get("multiplier", 1) if captain else 1
 
     xfer_cost = hist_gw.get("event_transfers_cost", 0) or 0
+    transfers = hist_gw.get("event_transfers", 0) or 0
     fpl_raw   = hist_gw.get("points", 0) or 0
 
     # Bank and hits — same in both live and finished branches
@@ -412,6 +413,7 @@ def score_gw(
         # FPL base
         "fpl_raw_pts":       fpl_raw,
         "fpl_xfer_cost":     xfer_cost,
+        "transfers_gw":      transfers,
         "fpl_gw_rank":       hist_gw.get("rank"),
         "fpl_total":         hist_gw.get("total_points"),
         # Anti penalties breakdown

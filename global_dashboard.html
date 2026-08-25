@@ -50,7 +50,8 @@ main{padding:24px 32px;max-width:1500px}
 
 /* LOADING / ERROR */
 #loading-state{padding:60px 32px;text-align:center;color:var(--muted)}
-#loading-state .spin-big{font-size:32px;display:block;animation:spin 1s linear infinite;margin-bottom:12px}
+#loading-state .spin-big{width:28px;height:28px;margin:0 auto 12px;border:3px solid var(--border);
+  border-top-color:var(--muted);border-radius:50%;display:block;animation:spin 1s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 #error-state{display:none;padding:32px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);
   border-radius:12px;color:#b91c1c;font-size:14px;margin:24px 32px}
@@ -238,7 +239,7 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
 <main>
   <!-- loading placeholder -->
   <div id="loading-state">
-    <span class="spin-big">&#x23F3;</span>
+    <span class="spin-big"></span>
     Loading from Supabase&#x2026;
   </div>
 
@@ -586,6 +587,34 @@ async function loadFromSupabase() {
   return { teams, currentGW, completedGW, gwInProgress };
 }
 
+// Standard competition ranking (1,2,2,4): ties share a rank, next distinct
+// value skips ahead by the number of teams tied above it. Overrides the
+// strict-tiebreak cumulative_standing/mini_rank read from the DB (which stay
+// tie-broken there for other consumers, e.g. cup seeding) for display here.
+function computeGlobalRanks(teams) {
+  const maxGw = Math.max(0, ...teams.flatMap(t => t.gws.map(g => g.gw)));
+  const maxRankByGw = {};
+  for (let gw = 1; gw <= maxGw; gw++) {
+    const entries = teams
+      .map(t => ({ team: t, e: t.gws.find(g => g.gw === gw) }))
+      .filter(x => x.e != null)
+      .sort((a, b) => (a.e.total ?? 99999) - (b.e.total ?? 99999));
+    let rank = 0, seen = 0, prevVal = null;
+    entries.forEach((x) => {
+      seen++;
+      const v = x.e.total ?? 99999;
+      if (prevVal === null || v !== prevVal) { rank = seen; prevVal = v; }
+      x.e.standing  = rank;
+      x.e.mini_rank = rank;
+    });
+    const countByRank = {};
+    entries.forEach(x => { countByRank[x.e.standing] = (countByRank[x.e.standing] || 0) + 1; });
+    entries.forEach(x => { x.e.tied = countByRank[x.e.standing] > 1; });
+    if (entries.length) maxRankByGw[gw] = rank;
+  }
+  window.GLOBAL_MAX_RANK_BY_GW = maxRankByGw;
+}
+
 // ─── bootstrap ────────────────────────────────────────────────────────────────
 async function init() {
   try {
@@ -594,7 +623,7 @@ async function init() {
     MAX_GW       = currentGW;
     CUR_GW       = currentGW;
     COMPLETED_GW = completedGW;
-
+    computeGlobalRanks(TEAMS);
 
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
@@ -626,6 +655,7 @@ async function reloadData(btn) {
     MAX_GW       = currentGW;
     CUR_GW       = currentGW;
     COMPLETED_GW = completedGW;
+    computeGlobalRanks(TEAMS);
 
     document.getElementById('gw-badge').textContent = 'GW ' + MAX_GW + (gwInProgress ? ' ⚡' : ' ✓');
     document.getElementById('header-sub').textContent =
@@ -716,10 +746,11 @@ function renderStandings() {
     const prev = gwEntry(team, MAX_GW - 1);
 
     const standing = cur?.standing ?? idx + 1;
+    const standingTied = !!cur?.tied;
     const prevStanding = prev?.standing ?? standing;
     const diff = prevStanding - standing;
 
-    const rankCls = idx===0?'top1':idx===1?'top2':idx===2?'top3':'';
+    const rankCls = standing===1?'top1':standing===2?'top2':standing===3?'top3':'';
     const movHtml = diff===0
       ? `<span class="move-badge move-eq">–</span>`
       : diff>0
@@ -729,8 +760,10 @@ function renderStandings() {
     const total    = team.summary?.total_points ?? '?';
     const provMark = cur?.is_provisional ? '<span title="Provisional — awaiting FPL official confirmation" style="color:var(--muted);font-size:10px;vertical-align:super">~</span>' : '';
     const gwPts    = cur?.pts != null ? `${cur.pts}${provMark}` : '—';
-    const gwRank   = cur?.mini_rank ?? '—';
-    const prevRank = prev?.mini_rank ?? '—';
+    const gwRank     = cur?.mini_rank ?? '—';
+    const gwRankTied = !!cur?.tied;
+    const prevRank     = prev?.mini_rank ?? '—';
+    const prevRankTied = !!prev?.tied;
     const rankDiff = (typeof gwRank==='number' && typeof prevRank==='number')
       ? prevRank - gwRank : 0;
     const rankMov = rankDiff===0
@@ -763,7 +796,7 @@ function renderStandings() {
 
     return `<tr>
       <td><div class="rank-cell">
-        <span class="rank-num ${rankCls}">${standing}</span>${movHtml}
+        <span class="rank-num ${rankCls}">${standingTied ? '=' : ''}${standing}</span>${movHtml}
       </div></td>
       <td><div class="team-row">
         <span class="dot" style="background:${team.color}"></span>
@@ -777,8 +810,8 @@ function renderStandings() {
       </div></td>
       <td><div class="total-pts">${total}</div></td>
       <td class="num">${gwPts}</td>
-      <td class="num" style="white-space:nowrap">${gwRank} ${rankMov}</td>
-      <td class="num">${prevRank}</td>
+      <td class="num" style="white-space:nowrap">${gwRankTied ? '=' : ''}${gwRank} ${rankMov}</td>
+      <td class="num">${prevRankTied ? '=' : ''}${prevRank}</td>
       <td class="num">${avg3!=null?avg3.toFixed(1):'—'}</td>
       <td class="num">${avg5!=null?avg5.toFixed(1):'—'}</td>
       <td><div class="chips-cell">${chipPips}</div></td>
@@ -839,7 +872,7 @@ function renderGWScores(gw) {
     }
 
     const gwRankLabel = g.mini_rank
-      ? `<span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">rank ${g.mini_rank}</span>`
+      ? `<span style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace">rank ${g.tied ? '=' : ''}${g.mini_rank}</span>`
       : '';
 
     return `<div class="score-card">
@@ -1036,7 +1069,8 @@ function renderTimeStats() {
   const teamWeeks = TEAMS.map(team => ({
     team,
     top:    team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing === 1).length,
-    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW && g.standing === TEAMS.length).length,
+    bottom: team.gws.filter(g => g.gw <= COMPLETED_GW &&
+              g.standing === (window.GLOBAL_MAX_RANK_BY_GW?.[g.gw] ?? TEAMS.length)).length,
   }));
 
   const topList    = [...teamWeeks].filter(x => x.top > 0)   .sort((a,b) => b.top    - a.top).slice(0, 3);
