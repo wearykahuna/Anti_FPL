@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anti-FPL · Players</title>
+  <title>antifpl · Players</title>
   <style>
     :root {
       --bg:#fff; --surface:#fff; --border:#e0e0e0;
@@ -65,7 +65,7 @@
 
 <header>
   <div class="logo-wrap">
-    <img src="logo_antifpl.png" alt="Anti FPL" class="logo-img">
+    <img src="logo_antifpl.png" alt="antifpl" class="logo-img">
   </div>
   <div class="meta">
     <div id="last-updated">—</div>
@@ -135,9 +135,10 @@
     if (from === 'mini_league') {
       links.push('<a class="tab" href="mini_league.html">The next Badly drawn boy</a>');
     }
-    links.push('<a class="tab" href="index.html">Overall Anti FPL</a>');
+    links.push('<a class="tab" href="index.html">Overall antifpl</a>');
     links.push('<a class="tab active" href="players.html">Players</a>');
-    links.push('<a class="tab" href="weekly_stats.html' + (from ? `?from=${from}` : '') + '">Weekly Stats</a>');
+    const statsHref = from === 'mini_league' ? 'mini_league_weekly_stats.html' : 'weekly_stats.html';
+    links.push(`<a class="tab" href="${statsHref}">Weekly Stats</a>`);
     links.push('<a class="tab" href="rules.html">Rules</a>');
     document.getElementById('tabs-bar').innerHTML = links.join('');
   })();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Anti-FPL · Overall League</title>
+  <title>antifpl · Overall League</title>
   <style>
     :root {
       --bg:#fff; --surface:#fff; --border:#e0e0e0;
@@ -32,7 +32,9 @@
     .tab:hover{color:var(--text)}
     .tab.active{color:var(--text);border-bottom-color:var(--accent)}
 
-    .gw-bar{max-width:900px;margin:0 auto 20px;display:flex;gap:12px;flex-wrap:wrap}
+    .gw-bar{max-width:900px;margin:0 auto 20px;display:flex;justify-content:space-between;
+            align-items:flex-start;gap:12px;flex-wrap:wrap}
+    .gw-pills{display:flex;gap:12px;flex-wrap:wrap}
     .gw-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;
              padding:8px 16px;font-size:0.78rem;color:var(--muted)}
     .gw-pill strong{color:var(--text);font-size:1rem;display:block}
@@ -148,7 +150,7 @@
 
 <header>
   <div class="logo-wrap">
-    <img src="logo_antifpl.png" alt="Anti FPL" class="logo-img">
+    <img src="logo_antifpl.png" alt="antifpl" class="logo-img">
   </div>
   <div class="meta">
     <div id="live-badge-wrap"></div>
@@ -157,9 +159,8 @@
 </header>
 
 <div class="tabs">
-  <a class="tab active" href="index.html">Overall Anti FPL</a>
+  <a class="tab active" href="index.html">Overall antifpl</a>
   <a class="tab" href="players.html?from=index">Players</a>
-  <a class="tab" href="weekly_stats.html?from=index">Weekly Stats</a>
   <a class="tab" href="rules.html">Rules</a>
 </div>
 
@@ -498,7 +499,7 @@
     const displayPts = scores.map(gwPtsOf);
     const best  = displayPts.length ? Math.min(...displayPts) : 0;
     const worst = displayPts.length ? Math.max(...displayPts) : 0;
-    const avg   = displayPts.length ? Math.round(displayPts.reduce((a, b) => a + b, 0) / displayPts.length) : 0;
+    const avg   = displayPts.length ? (displayPts.reduce((a, b) => a + b, 0) / displayPts.length).toFixed(1) : '0.0';
 
     // Row display order follows the clicked column header; the rank number
     // in the "#" column always reflects true Total standings (rankMap above).
@@ -527,15 +528,18 @@
     const byRank = [...scores].sort((a, b) => totalOf(a) - totalOf(b));
     const topN = byRank.length <= 30 ? Math.min(3, byRank.length) : Math.floor(byRank.length * 0.10);
     const topNPts = byRank.slice(0, topN).map(gwPtsOf);
-    const topNAvg = topNPts.length ? Math.round(topNPts.reduce((a, b) => a + b, 0) / topNPts.length) : 0;
+    const topNAvg = topNPts.length ? (topNPts.reduce((a, b) => a + b, 0) / topNPts.length).toFixed(1) : '0.0';
 
     document.getElementById('gw-bar').innerHTML = `
-      <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
-      <div class="gw-pill"><strong>${scores.length}</strong>Teams</div>
-      <div class="gw-pill"><strong>${best}</strong>Best GW score</div>
-      <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
-      <div class="gw-pill"><strong>${avg}</strong>GW average</div>
-      <div class="gw-pill"><strong>${topNAvg}</strong>Top ${topN} Avg GW Score</div>
+      <div class="gw-pills">
+        <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
+        <div class="gw-pill"><strong>${scores.length}</strong>Teams</div>
+        <div class="gw-pill"><strong>${best}</strong>Best GW score</div>
+        <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
+        <div class="gw-pill"><strong>${avg}</strong>GW average</div>
+        <div class="gw-pill"><strong>${topNAvg}</strong>Top ${topN} Avg GW Score</div>
+      </div>
+      <a class="gw-history-btn" href="weekly_stats.html?from=index" style="align-self:center">Overall antifpl weekly stats</a>
     `;
     document.getElementById('pens-header').textContent = isLive ? 'Penalty Pts' : '+Pens';
 
