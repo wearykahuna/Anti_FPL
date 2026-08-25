@@ -137,8 +137,6 @@
     }
     links.push('<a class="tab" href="index.html">Overall antifpl</a>');
     links.push('<a class="tab active" href="players.html">Players</a>');
-    const statsHref = from === 'mini_league' ? 'mini_league_weekly_stats.html' : 'weekly_stats.html';
-    links.push(`<a class="tab" href="${statsHref}">Weekly Stats</a>`);
     links.push('<a class="tab" href="rules.html">Rules</a>');
     document.getElementById('tabs-bar').innerHTML = links.join('');
   })();
