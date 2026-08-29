@@ -87,6 +87,8 @@ def build_gw_seed_row(team_id: int, gw: int, season: str, history: dict) -> dict
         "team_id":       team_id,
         "gw":            gw,
         "bank":          hist_gw.get("bank", 0) or 0,
+        "team_value":    hist_gw.get("value"),
+        "in_the_bank":   hist_gw.get("bank"),
         "fpl_xfer_cost": hist_gw.get("event_transfers_cost", 0) or 0,
         "transfers_gw":  hist_gw.get("event_transfers", 0) or 0,
         "fpl_gw_rank":   hist_gw.get("rank"),
