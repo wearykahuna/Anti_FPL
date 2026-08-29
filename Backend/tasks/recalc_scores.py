@@ -144,7 +144,6 @@ def to_gw_scores_row(
         "hit_pts":          scored.get("hit_pts", 0) or 0,
         "inactive_count":   scored.get("inactive_count"),
         "inactive_pen_pts": scored.get("inactive_pen_pts", 0) or 0,
-        "bank":             scored.get("bank"),
         "bank_pen":         scored.get("bank_pen", False) or False,
         "bank_pen_pts":     scored.get("bank_pen_pts", 0) or 0,
         "cvc_pen_pts":      scored.get("cvc_pen_pts", 0) or 0,
