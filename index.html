@@ -853,13 +853,10 @@
 
         const starterRows = selection.squad.slice(0, 11).map((pid, i) => renderPlayer(pid, i, true)).join('');
         const benchRows   = selection.squad.slice(11).map((pid, i) => renderPlayer(pid, i, false)).join('');
-        const squadValue   = selection.squad.reduce((sum, pid) => sum + (window.playerCosts?.[pid] || 0), 0);
-        const squadValueStr = `£${(squadValue / 10).toFixed(1)}m`;
-
         squadHtml = `
           <div class="squad-section">
             <div class="squad-header">
-              <span>Squad (GW${gw}) <span class="squad-legend" style="text-transform:none">&middot; ${squadValueStr}</span></span>
+              <span>Squad (GW${gw})</span>
               <span class="squad-legend" title="&#9650; auto-subbed in, &#9660; auto-subbed out — both already counted in the score above">&#9650;&#9660; auto-subs applied &middot; mins · pts · anti · cost</span>
             </div>
             ${starterRows}
@@ -902,8 +899,6 @@
     const t = tip ? ` title="${tip}"` : '';
     return `<div class="detail-item"${t}><span class="detail-label">${label}</span><span class="detail-value ${cls}">${value}</span></div>`;
   }
-
-
 
   function toggleExpand(teamId) {
     expandedTeam = (expandedTeam === teamId) ? null : teamId;
