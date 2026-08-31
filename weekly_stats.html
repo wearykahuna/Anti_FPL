@@ -33,6 +33,17 @@
 
     .gw-bar{max-width:1000px;margin:0 auto 20px;font-size:0.82rem;color:var(--muted)}
 
+    .chip-stats-bar{max-width:1000px;margin:0 auto 20px;display:flex;gap:12px;flex-wrap:wrap}
+    .chip-stat-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;
+             padding:10px 16px;font-size:0.78rem;color:var(--muted);flex:1 1 200px}
+    .chip-stat-pill .csp-label{font-weight:700;color:var(--text);font-size:0.7rem;
+             letter-spacing:0.04em;text-transform:uppercase}
+    .chip-stat-pill .csp-score{color:var(--text);font-size:1.3rem;font-family:var(--mono);
+             font-weight:600;margin-top:4px}
+    .chip-stat-pill .csp-meta{margin-top:2px}
+    .chip-stat-pill .csp-meta a{color:var(--muted);text-decoration:none}
+    .chip-stat-pill .csp-meta a:hover{color:var(--text);text-decoration:underline}
+
     .panel{max-width:1000px;margin:0 auto 20px;background:var(--surface);border:1px solid var(--border);
       border-radius:10px;padding:16px}
     .charts-toggle{display:flex;justify-content:space-between;align-items:center;cursor:pointer;user-select:none}
@@ -89,6 +100,8 @@
 <div class="tabs" id="tabs-bar"></div>
 
 <div class="gw-bar" id="gw-bar"></div>
+
+<div class="chip-stats-bar" id="chip-stats-bar"></div>
 
 <div class="panel">
   <div class="charts-toggle" id="charts-toggle">
@@ -177,11 +190,16 @@
     document.getElementById('state-msg').style.display = '';
   }
 
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+
   async function loadData() {
     try {
       const teams = await sbFetch('teams',
-        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id&limit=1000`);
+        `season=eq.${encodeURIComponent(SEASON)}&eligible=eq.true&select=team_id,team_name&limit=1000`);
       const totalTeams = teams.length;
+      const teamNameById = new Map(teams.map(t => [t.team_id, t.team_name]));
 
       // All teams, all GWs — anti_gw_pts (this week's score) + anti_total
       // (running total through this GW, used to find the current leaders for
@@ -234,6 +252,35 @@
                  chipsTotal: chips.wildcard + chips.freehit + chips.bboost + chips['3xc'] };
       });
       ROWS.sort((a, b) => a.gw - b.gw);
+
+      // Best/worst GW scores and best chip scores across the whole season,
+      // each attributed to the team and GW that achieved it. Lower is
+      // "better" — same golf-style convention as the Best/Worst table columns.
+      const ptsRows = allRows.filter(r => typeof r.anti_gw_pts === 'number');
+      const lowestOf = rows => rows.reduce((m, r) => (!m || r.anti_gw_pts < m.anti_gw_pts) ? r : m, null);
+      const highestOf = rows => rows.reduce((m, r) => (!m || r.anti_gw_pts > m.anti_gw_pts) ? r : m, null);
+      const bestGwRow  = lowestOf(ptsRows);
+      const worstGwRow = highestOf(ptsRows);
+      const bestBbRow  = lowestOf(ptsRows.filter(r => (r.active_chip || '').toLowerCase() === 'bboost'));
+      const bestFhRow  = lowestOf(ptsRows.filter(r => (r.active_chip || '').toLowerCase() === 'freehit'));
+
+      const chipStatPill = (label, row) => {
+        if (!row) return `<div class="chip-stat-pill"><div class="csp-label">${label}</div><div class="csp-score">—</div></div>`;
+        const teamName = esc(teamNameById.get(row.team_id) || row.team_id);
+        const link = `team_history.html?team_id=${row.team_id}#gw-row-${row.gw}`;
+        return `
+          <div class="chip-stat-pill">
+            <div class="csp-label">${label}</div>
+            <div class="csp-score">${row.anti_gw_pts}</div>
+            <div class="csp-meta"><a href="${link}">${teamName} (GW${row.gw})</a></div>
+          </div>`;
+      };
+
+      document.getElementById('chip-stats-bar').innerHTML =
+        chipStatPill('Best Bench Boost Score', bestBbRow) +
+        chipStatPill('Best Free Hit Score', bestFhRow) +
+        chipStatPill('Best GW Score', bestGwRow) +
+        chipStatPill('Worst GW Score', worstGwRow);
 
       document.getElementById('gw-bar').textContent =
         'These stats are for the overall antifpl table.';

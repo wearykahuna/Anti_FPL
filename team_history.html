@@ -42,6 +42,8 @@
     .gw-pill{background:var(--surface);border:1px solid var(--border);border-radius:8px;
              padding:8px 16px;font-size:0.78rem;color:var(--muted)}
     .gw-pill strong{color:var(--text);font-size:1rem;display:block}
+    .section-label{max-width:900px;margin:0 auto 8px;font-size:0.7rem;font-weight:700;
+      letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)}
 
     .panel{max-width:900px;margin:0 auto 24px;background:var(--surface);border:1px solid var(--border);
       border-radius:10px;padding:16px}
@@ -59,6 +61,7 @@
 
     .table-wrap{max-width:900px;margin:0 auto 24px;overflow-x:auto;background:var(--surface);
       border:1px solid var(--border);border-radius:10px}
+    .chip-table-wrap{max-width:280px;margin:0 0 4px}
     table{width:100%;border-collapse:collapse;font-size:0.85rem}
     thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
              color:var(--muted);border-bottom:1px solid var(--border);white-space:nowrap}
@@ -99,6 +102,43 @@
   </div>
 
   <div class="gw-bar" id="gw-bar"></div>
+
+  <div class="panel">
+    <div class="charts-toggle" id="season-stats-toggle">
+      <span class="panel-title" style="margin-bottom:0">Season Stats</span>
+      <span class="charts-toggle-label" id="season-stats-toggle-label">Show &#x25BE;</span>
+    </div>
+    <div id="season-stats-body" style="display:none">
+      <div class="table-wrap" style="margin:16px 0 16px">
+        <table>
+          <thead>
+            <tr>
+              <th class="r">Scores &lt;20</th>
+              <th class="r">Min Score</th>
+              <th class="r">Max Score</th>
+              <th class="r">Range</th>
+              <th class="r">Scores &gt;40</th>
+              <th class="r">Best GW Score</th>
+              <th class="r">Worst GW Score</th>
+            </tr>
+          </thead>
+          <tbody id="season-stats-summary"></tbody>
+        </table>
+      </div>
+      <div class="table-wrap chip-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Chip</th>
+              <th class="r">1st</th>
+              <th class="r">2nd</th>
+            </tr>
+          </thead>
+          <tbody id="season-stats-chips"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
   <div class="panel">
     <div class="charts-toggle" id="charts-toggle">
@@ -262,10 +302,46 @@
         <div class="gw-pill"><strong>${bestRank === Infinity ? '—' : bestRank}</strong>Best Global Rank</div>
       `;
 
+      const ptsRows = gwRows.filter(r => typeof r.anti_gw_pts === 'number');
+      const under20 = ptsRows.filter(r => r.anti_gw_pts < 20).length;
+      const over40  = ptsRows.filter(r => r.anti_gw_pts > 40).length;
+      const minPts  = ptsRows.length ? Math.min(...ptsRows.map(r => r.anti_gw_pts)) : null;
+      const maxPts  = ptsRows.length ? Math.max(...ptsRows.map(r => r.anti_gw_pts)) : null;
+      const range   = (minPts != null && maxPts != null) ? maxPts - minPts : null;
+      const bestRow  = ptsRows.find(r => r.anti_gw_pts === maxPts);
+      const worstRow = ptsRows.find(r => r.anti_gw_pts === minPts);
+
+      document.getElementById('season-stats-summary').innerHTML = `
+        <tr>
+          <td class="r">${under20}</td>
+          <td class="r">${minPts ?? '—'}</td>
+          <td class="r">${maxPts ?? '—'}</td>
+          <td class="r">${range ?? '—'}</td>
+          <td class="r">${over40}</td>
+          <td class="r">${bestRow ? `${maxPts} (GW${bestRow.gw})` : '—'}</td>
+          <td class="r">${worstRow ? `${minPts} (GW${worstRow.gw})` : '—'}</td>
+        </tr>
+      `;
+
+      // Chips can be played up to twice per season (once per half) — show a
+      // slot for each use, blank if not yet played.
+      const chipUses = chipKey => gwRows
+        .filter(r => r.active_chip === chipKey && typeof r.anti_gw_pts === 'number')
+        .sort((a, b) => a.gw - b.gw);
+      const chipCell = row => row ? `${row.anti_gw_pts} (GW${row.gw})` : '—';
+      const chipRow = (label, key) => {
+        const uses = chipUses(key);
+        return `<tr><td>${label}</td><td class="r">${chipCell(uses[0])}</td><td class="r">${chipCell(uses[1])}</td></tr>`;
+      };
+      document.getElementById('season-stats-chips').innerHTML =
+        chipRow('Bench Boost', 'bboost') +
+        chipRow('Free Hit', 'freehit') +
+        chipRow('Triple Captain', '3xc');
+
       document.getElementById('tbody').innerHTML = gwRows.map(r => {
         const badges = `${r.badge_star ? '⭐' : ''}${r.badge_circle ? '⚫' : ''}`;
         return `
-        <tr>
+        <tr id="gw-row-${r.gw}">
           <td>${r.gw}</td>
           <td class="r">${r.anti_gw_pts ?? '—'}</td>
           <td class="r">${r.anti_total ?? '—'}</td>
@@ -293,6 +369,14 @@
       showError(err.message);
     }
   }
+
+  document.getElementById('season-stats-toggle').addEventListener('click', () => {
+    const body = document.getElementById('season-stats-body');
+    const label = document.getElementById('season-stats-toggle-label');
+    const showing = body.style.display !== 'none';
+    body.style.display = showing ? 'none' : '';
+    label.innerHTML = showing ? 'Show &#x25BE;' : 'Hide &#x25B4;';
+  });
 
   // Charts are collapsed by default and only built the first time they're
   // expanded — Chart.js sizes itself off the canvas's rendered dimensions,
