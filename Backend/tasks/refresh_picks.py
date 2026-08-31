@@ -120,6 +120,13 @@ def build_gw_seed_row(team_id: int, gw: int, season: str, hist_gw: dict | None) 
         "team_id":       team_id,
         "gw":            gw,
         "bank":          bank,
+        # team_value/in_the_bank from main (6bc12e0): seed these at the
+        # deadline too, not just at finalize — populates the frontend's
+        # Squad Value detail item immediately instead of leaving it "—"
+        # until the GW finishes. in_the_bank mirrors `bank` (already
+        # validated non-None above) so the two can never diverge.
+        "team_value":    hist_gw.get("value"),
+        "in_the_bank":   bank,
         "fpl_xfer_cost": hist_gw.get("event_transfers_cost", 0) or 0,
         "transfers_gw":  hist_gw.get("event_transfers", 0) or 0,
         "fpl_gw_rank":   hist_gw.get("rank"),
