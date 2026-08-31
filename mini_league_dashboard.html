@@ -311,6 +311,13 @@ td.num{text-align:right;font-family:'DM Mono',monospace;font-size:12px}
       <div class="chart-legend" id="rank-legend"></div>
     </div>
 
+    <!-- Chips played per GW -->
+    <div class="panel" style="margin-bottom:20px">
+      <div class="stat-card-header">Chips Played per Gameweek</div>
+      <div class="chart-wrap-sm"><canvas id="chips-gw-chart"></canvas></div>
+      <div class="chart-legend" id="chips-gw-legend"></div>
+    </div>
+
     <!-- Time at top / bottom -->
     <div class="time-stats-grid">
       <div class="panel">
@@ -489,6 +496,7 @@ let CUR_GW = 1;
 let COMPLETED_GW = 1;
 let CHART_OBJ = null;
 let RANK_CHART_OBJ = null;
+let CHIPS_GW_CHART_OBJ = null;
 let DNA_CHART = null;
 let CHIP_SPLIT_CHART = null;
 const HIDDEN = new Set();
@@ -687,6 +695,7 @@ function renderAll() {
   renderGWScores(CUR_GW);
   renderChart();
   renderRankChart();
+  renderChipsByGwChart();
   renderTimeStats();
   renderStats();
   renderBBPC();
@@ -999,6 +1008,63 @@ function toggleTeam(teamId, el) {
     const ds = chart.data.datasets.find(d => d.label === label);
     if (ds) { ds.hidden = HIDDEN.has(teamId); chart.update(); }
   }
+}
+
+
+// ── Chips played per gameweek ────────────────────────────────────────────
+// Pure client-side fold over TEAMS[].gws, which already carries `chip` from
+// gw_scores.active_chip — no extra query, and nothing added to the live loop.
+const CHIP_SERIES = [
+  { key: 'wildcard', label: 'Wildcard',    color: '#7c3aed' },
+  { key: 'freehit',  label: 'Free Hit',    color: '#b86e00' },
+  { key: 'bboost',   label: 'Bench Boost', color: '#0891b2' },
+  { key: '3xc',      label: 'Triple Cap',  color: '#d62828' },
+];
+
+function renderChipsByGwChart() {
+  if (CHIPS_GW_CHART_OBJ) { CHIPS_GW_CHART_OBJ.destroy(); CHIPS_GW_CHART_OBJ = null; }
+  const canvas = document.getElementById('chips-gw-chart');
+  if (!canvas) return;
+
+  const labels = Array.from({length: MAX_GW}, (_, i) => `GW${i + 1}`);
+  const tally = {};
+  CHIP_SERIES.forEach(s => tally[s.key] = Array(MAX_GW).fill(0));
+  TEAMS.forEach(t => (t.gws || []).forEach(g => {
+    const c = (g.chip || '').toLowerCase();
+    if (tally[c] && g.gw >= 1 && g.gw <= MAX_GW) tally[c][g.gw - 1]++;
+  }));
+
+  CHIPS_GW_CHART_OBJ = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: CHIP_SERIES.map(s => ({
+        label: s.label, data: tally[s.key], backgroundColor: s.color,
+      })),
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor:'#0f1623', borderColor:'#1e2d44', borderWidth:1,
+          titleColor:'#e2e8f0', bodyColor:'#94a3b8', padding:10,
+          callbacks: { label: i => i.raw > 0 ? ` ${i.dataset.label}: ${i.raw}` : null },
+        },
+      },
+      scales: {
+        x: { grid:{display:false}, ticks:{color:'#64748b',font:{size:10}} },
+        // Whole teams — never render half a wildcard.
+        y: { beginAtZero:true, grid:{color:'rgba(0,0,0,.06)'},
+             ticks:{color:'#64748b',font:{size:10},precision:0,stepSize:1} },
+      },
+    },
+  });
+
+  const total = CHIP_SERIES.reduce((a, s) => a + tally[s.key].reduce((x, y) => x + y, 0), 0);
+  document.getElementById('chips-gw-legend').innerHTML =
+    CHIP_SERIES.map(s => `<div class="legend-item"><span class="legend-dot" style="background:${s.color}"></span><span>${s.label}</span></div>`).join('') +
+    `<div class="legend-item" style="margin-left:auto"><span>${total} chips played</span></div>`;
 }
 
 function renderRankChart() {

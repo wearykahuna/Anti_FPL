@@ -18,10 +18,15 @@ The scheduler also refreshes fixture states from the FPL API at the start of eac
 run so the DB doesn't go stale during an evening live window (the daily
 refresh_reference only runs at 03:00 and 14:00 UTC).
 
-Also calls refresh_picks first, every tick — self-gated to two SELECTs (~free)
-once a GW's picks are captured, so a deadline is picked up the same tick it
-passes regardless of which day it falls on, instead of relying on a separate
-cron guessing weekend-only deadline windows.
+Also calls refresh_picks first, every tick, so a deadline is picked up the
+same tick it passes regardless of which day it falls on, instead of relying on
+a separate cron guessing weekend-only deadline windows. It is self-gated, and
+memoises completion for 15 min once a GW is fully captured, so it costs
+nothing on the steady-state live path.
+
+Shared reference data (fixtures, players, teams, current GW) is fetched once
+per tick here and threaded into the tasks, rather than each of them re-reading
+it — the live tick runs every 60s, so those duplicates mattered.
 
 API calls per run: 1 fixture-state call always; 1-2 live-data calls when live;
 a burst of picks/history calls only on the first tick after a deadline passes.
@@ -165,7 +170,7 @@ def tick() -> tuple[int, str, Optional[float]]:
     # picked up automatically too, on whichever day it actually falls.
     try:
         from tasks.refresh_picks import run as run_refresh_picks
-        run_refresh_picks()
+        run_refresh_picks(current_gw=current)
     except Exception:
         log.exception("refresh_picks failed during tick — continuing with scoring pass.")
 
@@ -199,13 +204,21 @@ def tick() -> tuple[int, str, Optional[float]]:
         # need to wait for an unrelated later kickoff elsewhere in the GW.
         from tasks.refresh_live  import run as run_refresh_live
         from tasks.recalc_scores import run as run_recalc_scores
+        from db import get_players_ref, get_teams
+
+        # Fetch the shared reference data ONCE and hand it to both tasks.
+        # Each used to fetch these for itself, so a single tick was reading
+        # players/teams/fixtures two or three times over.
+        players_ref = get_players_ref(SEASON)
+        teams       = get_teams(SEASON)
 
         log.info("▶ refresh_live")
-        rc1 = run_refresh_live(fixtures=fixtures)  # already synced above this tick
+        rc1 = run_refresh_live(fixtures=fixtures, current_gw=current, players=players_ref)
         log.info("◀ refresh_live exit %d", rc1)
 
         log.info("▶ recalc_scores")
-        rc2 = run_recalc_scores()
+        rc2 = run_recalc_scores(fixtures=fixtures, current_gw=current,
+                                players_ref=players_ref, teams=teams)
         log.info("◀ recalc_scores exit %d", rc2)
 
         return max(rc1, rc2), state, next_ko
@@ -220,13 +233,18 @@ def tick() -> tuple[int, str, Optional[float]]:
     # state == "provisional"
     from tasks.refresh_live  import run_provisional_pass
     from tasks.recalc_scores import run as run_recalc_scores
+    from db import get_players_ref, get_teams
+
+    players_ref = get_players_ref(SEASON)
+    teams       = get_teams(SEASON)
 
     log.info("▶ provisional pass (GW%d)", current)
-    rc1 = run_provisional_pass(current, fixtures=fixtures)  # already synced above this tick
+    rc1 = run_provisional_pass(current, fixtures=fixtures, players=players_ref)
     log.info("◀ provisional pass exit %d", rc1)
 
     log.info("▶ recalc_scores [provisional]")
-    rc2 = run_recalc_scores(provisional=True)
+    rc2 = run_recalc_scores(provisional=True, fixtures=fixtures, current_gw=current,
+                            players_ref=players_ref, teams=teams)
     log.info("◀ recalc_scores exit %d", rc2)
 
     return max(rc1, rc2), state, next_ko

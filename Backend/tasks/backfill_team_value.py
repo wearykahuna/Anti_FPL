@@ -14,6 +14,11 @@ never INSERT a placeholder gw_scores row for a team+GW that hasn't been
 scored yet — that would trip NOT NULL constraints on unrelated columns.
 
 API calls: 1 per eligible team.
+
+DEPRECATED in favour of tasks/repair_bank.py, which writes the same fields but
+ALSO re-scores the affected GWs. This task only patches the raw values — it
+never recomputes bank_pen / bank_pen_pts / anti_gw_pts / anti_total, so on its
+own it cannot make a backfilled bank actually produce a penalty.
 """
 
 import logging
@@ -66,6 +71,9 @@ def run() -> int:
             value_rows.append({
                 "season": SEASON, "team_id": tid, "gw": gw,
                 "team_value":  value,
+                # Write both: `bank` is the column scoring reads, `in_the_bank`
+                # is the display mirror. Same source, so they cannot diverge.
+                "bank":        hist_gw.get("bank"),
                 "in_the_bank": hist_gw.get("bank"),
             })
 

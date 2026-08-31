@@ -340,11 +340,24 @@ def score_gw(
     transfers = hist_gw.get("event_transfers", 0) or 0
     fpl_raw   = hist_gw.get("points", 0) or 0
 
-    # Bank and hits — same in both live and finished branches
-    bank         = hist_gw.get("bank", 0) or 0
-    bank_pen     = bank > BANK_THRESHOLD
+    # Bank and hits — same in both live and finished branches.
+    # bank is TRI-STATE: None = never seeded (unknown), 0 = genuinely empty
+    # bank, >0 = real value. Never coerce None to 0 — doing so silently
+    # converts "we haven't fetched it yet" into "no penalty due", which is
+    # how the bank penalty went missing for whole gameweeks.
+    bank         = hist_gw.get("bank")
+    bank_known   = bank is not None
+    bank_pen     = bank_known and bank > BANK_THRESHOLD
     bank_pen_pts = BANK_PEN if bank_pen else 0
     hit_pts      = abs(xfer_cost)
+
+    if not bank_known:
+        # Mid-GW this is transient (the deadline seed lands on a later tick).
+        # For a finished GW it is a permanent data defect — run repair_bank.
+        (log.error if gw_finished else log.warning)(
+            "  bank missing team=%d gw=%d — bank penalty NOT applied%s",
+            team_id, gw, " (FINISHED GW — run repair_bank)" if gw_finished else "",
+        )
 
     if not gw_finished:
         # ── Live GW ───────────────────────────────────────────────────────────

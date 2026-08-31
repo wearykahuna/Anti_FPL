@@ -34,9 +34,17 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-LIVE_INTERVAL_S    = 90    # between ticks while matches are live / provisional
+LIVE_INTERVAL_S    = 60    # between ticks while there is anything to score
 IDLE_INTERVAL_S    = 300   # between ticks while waiting for a kickoff
 IDLE_EXIT_HORIZON  = 70    # minutes: exit-when-idle only if no kickoff within this
+ERROR_BACKOFF_S    = 30    # after a failed tick — retry soon, don't lose 5 min
+
+# Every state in which scheduler.tick() actually does scoring work deserves the
+# fast cadence. "settling" was the expensive omission: tick() runs the FULL live
+# path for it (scheduler.py), but it used to fall through to the 300s idle
+# interval — and settling is exactly the window after a block of simultaneous
+# kickoffs ends, when bonus points land and everyone is refreshing.
+FAST_STATES = ("live", "settling", "provisional", "finalize")
 
 
 def main() -> int:
@@ -58,18 +66,22 @@ def main() -> int:
     worst_rc = 0
 
     while True:
+        tick_started = time.monotonic()
         try:
             rc, state, next_ko = tick()
         except Exception:
             # One tick failing (a transient DB race, a flaky API call, ...)
             # shouldn't take down the rest of this hourly window — log it,
             # back off, and let the next tick try again.
-            log.exception("Scheduler tick raised — backing off and retrying.")
+            # Back off briefly, not for a full idle interval: a busy weekend
+            # means more transient FPL/Supabase errors, and each one used to
+            # cost 5 minutes of live coverage.
+            log.exception("Scheduler tick raised — backing off %ds and retrying.", ERROR_BACKOFF_S)
             worst_rc = max(worst_rc, 1)
-            if deadline is not None and time.monotonic() + args.idle_interval >= deadline:
+            if deadline is not None and time.monotonic() + ERROR_BACKOFF_S >= deadline:
                 log.info("Max runtime reached — exiting.")
                 return worst_rc
-            time.sleep(args.idle_interval)
+            time.sleep(ERROR_BACKOFF_S)
             continue
 
         worst_rc = max(worst_rc, rc)
@@ -80,13 +92,23 @@ def main() -> int:
                          f"in {next_ko:.0f} min" if next_ko is not None else "none this GW")
                 return worst_rc
 
-        interval = args.live_interval if state in ("live", "provisional") else args.idle_interval
-        if deadline is not None and time.monotonic() + interval >= deadline:
+        interval = args.live_interval if state in FAST_STATES else args.idle_interval
+
+        # Sleep for the remainder of the interval, not the whole thing on top
+        # of however long the tick took. At a 60s target a 30s tick would
+        # otherwise yield a real cadence of 90s.
+        elapsed  = time.monotonic() - tick_started
+        sleep_for = max(0.0, interval - elapsed)
+        if elapsed > interval:
+            log.warning("Tick took %.1fs, over the %ds interval — cadence is "
+                        "tick-bound, not sleep-bound.", elapsed, interval)
+
+        if deadline is not None and time.monotonic() + sleep_for >= deadline:
             log.info("Max runtime reached — exiting.")
             return worst_rc
 
-        log.info("State %s — next tick in %ds", state, interval)
-        time.sleep(interval)
+        log.info("State %s — tick took %.1fs, next tick in %.0fs", state, elapsed, sleep_for)
+        time.sleep(sleep_for)
 
 
 if __name__ == "__main__":

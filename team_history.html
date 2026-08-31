@@ -258,7 +258,7 @@
         <div class="gw-pill"><strong>${bestRank === Infinity ? '—' : bestRank}</strong>Best Global Rank</div>
       `;
 
-      document.getElementById('tbody').innerHTML = gwRows.slice().reverse().map(r => {
+      document.getElementById('tbody').innerHTML = gwRows.map(r => {
         const badges = `${r.badge_star ? '⭐' : ''}${r.badge_circle ? '⚫' : ''}`;
         return `
         <tr>

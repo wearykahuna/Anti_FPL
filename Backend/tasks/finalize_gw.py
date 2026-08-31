@@ -14,12 +14,18 @@ This task runs exactly once per GW, when:
 It then:
   1. Pulls final player scores from /event/{gw}/live/ (all players,
      is_live=False, is_provisional=False) — catches late bonus changes.
-  2. Re-scores every team with gw_finished=True via recalc_gw
+  2. Fetches each team's official end-of-GW history and patches team_value /
+     in_the_bank onto their gw_scores rows — BEFORE the re-score. `bank` is
+     only FILLED IN when the deadline seed never landed; it is never
+     overwritten, because bank and transfers are both known and locked at the
+     deadline and the penalty is reconciled upfront.
+  3. Re-scores every team with gw_finished=True via recalc_gw
      (applies chip penalties, final auto-subs, VC promotion) and
      recalc_fpl_raw=True so fpl_raw comes from the final player scores.
-  3. Clears is_live on the GW's team_gw_selections rows.
+  4. Patches + re-scores any row recalc_gw created that step 2 couldn't reach.
+  5. Clears is_live on the GW's team_gw_selections rows.
 
-API calls per run: 2 (fixtures + live).
+API calls per run: 2 (fixtures + live) + 1 per team (history).
 
 Note: FPL occasionally adjusts points days later (dubious-goals panel).
 Those still need a manual backfill_player_scores + recalc_gw --recalc-fpl-raw.
@@ -72,49 +78,80 @@ def run(gw: int) -> int:
     log.info("Upserting %d final player_gw_score rows...", len(rows))
     upsert("player_gw_scores", rows, on_conflict="season,player_id,gw")
 
-    # 2. Final team scoring — gw_finished=True applies chip penalties and
-    #    writes rows with is_live=False, is_provisional=False
+    # 2. End-of-GW snapshot, fetched BEFORE re-scoring so recalc_gw can see it.
+    #
+    #    IMPORTANT — `bank` is DEADLINE-LOCKED, and this only FILLS it when it
+    #    is missing; it never overwrites a value the deadline seed already
+    #    captured. Bank and transfers are both fully known the moment the
+    #    deadline passes, so the penalty is reconciled upfront and never moves
+    #    afterwards. Overwriting here would risk replacing the correct deadline
+    #    value with a later one if FPL's history row drifts once a manager
+    #    starts making transfers for the NEXT gameweek mid-GW.
+    #
+    #    team_value / in_the_bank are display-only, so those are always
+    #    refreshed to the genuine end-of-GW figures.
+    scored_this_gw = {r["team_id"] for r in
+                       select_all("gw_scores", {"season": SEASON, "gw": gw}, select="team_id")}
+    bank_known = {r["team_id"] for r in
+                  select_all("gw_scores", {"season": SEASON, "gw": gw}, select="team_id,bank")
+                  if r.get("bank") is not None}
+    hist_by_team: dict[int, dict] = {}
+    for tid in get_team_ids(SEASON):
+        history = fetch_team_history(tid)
+        hist_gw = next((g for g in (history or {}).get("current", []) if g.get("event") == gw), None)
+        if hist_gw is not None:
+            hist_by_team[tid] = hist_gw
+
+    def _value_row(tid: int, hist_gw: dict) -> dict:
+        row = {
+            "season": SEASON, "team_id": tid, "gw": gw,
+            "team_value":  hist_gw.get("value"),
+            "in_the_bank": hist_gw.get("bank"),
+        }
+        # Backfill only. A team already seeded at the deadline keeps that value.
+        if tid not in bank_known:
+            row["bank"] = hist_gw.get("bank")
+            log.info("  Filling missing bank for team %d GW%d from history (seed "
+                     "never landed).", tid, gw)
+        return row
+
+    # update_rows is a real UPDATE, never an INSERT, so it can only patch rows
+    # that already exist — hence the scored_this_gw filter (and the second
+    # pass at step 4 for rows recalc_gw is about to create).
+    value_rows = [_value_row(tid, h) for tid, h in hist_by_team.items() if tid in scored_this_gw]
+    if value_rows:
+        log.info("Patching bank/value onto %d gw_scores rows for GW%d...", len(value_rows), gw)
+        update_rows("gw_scores", value_rows, key_cols=["season", "team_id", "gw"])
+
+    # 3. Final team scoring — gw_finished=True applies chip penalties and
+    #    writes rows with is_live=False, is_provisional=False. Reads the real
+    #    bank patched in at step 2.
     from tasks.recalc_gw import run as run_recalc_gw
     rc = run_recalc_gw(gw, gw, recalc_fpl_raw=True)
     if rc != 0:
         log.error("recalc_gw failed during finalize (exit %d).", rc)
         return rc
 
-    # 3. Selections are no longer live
+    # 4. Catch teams whose gw_scores row recalc_gw just created — step 2 could
+    #    not patch those, because they had no row to UPDATE yet. Uses the
+    #    already-fetched history, so this costs no extra API calls, and is a
+    #    no-op on the normal path where a live pass ran earlier in the GW.
+    now_scored = {r["team_id"] for r in
+                  select_all("gw_scores", {"season": SEASON, "gw": gw}, select="team_id")}
+    late_rows = [_value_row(tid, h) for tid, h in hist_by_team.items()
+                 if tid in now_scored and tid not in scored_this_gw]
+    if late_rows:
+        log.info("Patching %d newly-created gw_scores rows, then re-scoring...", len(late_rows))
+        update_rows("gw_scores", late_rows, key_cols=["season", "team_id", "gw"])
+        rc = run_recalc_gw(gw, gw, recalc_fpl_raw=True)
+        if rc != 0:
+            log.error("recalc_gw failed on the late-row pass (exit %d).", rc)
+            return rc
+
+    # 5. Selections are no longer live
     sb = get_client()
     sb.from_("team_gw_selections").update({"is_live": False}) \
       .eq("season", SEASON).eq("gw", gw).execute()
-
-    # 4. Capture each team's official squad value + bank for this GW — an
-    #    end-of-GW snapshot only (not part of the live/intra-GW loop).
-    #    fetch_team_history already returns the whole season's history in
-    #    one call, so this just reads two more fields out of a payload other
-    #    tasks already fetch. team_value = FPL's "value" field verbatim
-    #    (squad selling value — it does NOT include the bank); in_the_bank
-    #    is the separate unspent-budget figure, stored alongside it.
-    # Only teams recalc_gw actually scored this GW have a row to update — this
-    # is purely an optimization to skip pointless fetches/updates for teams
-    # with nothing to patch. update_rows() below is a real UPDATE, not an
-    # upsert, so it can never INSERT a placeholder row (and trip NOT NULL
-    # constraints on unrelated columns) even if this check is stale.
-    scored_this_gw = {r["team_id"] for r in
-                       select_all("gw_scores", {"season": SEASON, "gw": gw}, select="team_id")}
-    value_rows = []
-    for tid in get_team_ids(SEASON):
-        if tid not in scored_this_gw:
-            continue
-        history = fetch_team_history(tid)
-        hist_gw = next((g for g in (history or {}).get("current", []) if g.get("event") == gw), None)
-        if hist_gw is None:
-            continue
-        value_rows.append({
-            "season": SEASON, "team_id": tid, "gw": gw,
-            "team_value":  hist_gw.get("value"),
-            "in_the_bank": hist_gw.get("bank"),
-        })
-    if value_rows:
-        log.info("Updating %d team value rows for GW%d...", len(value_rows), gw)
-        update_rows("gw_scores", value_rows, key_cols=["season", "team_id", "gw"])
 
     log.info("GW%d finalized.", gw)
     return 0

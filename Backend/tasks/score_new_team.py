@@ -34,6 +34,7 @@ from fpl_api import (
 from db       import (
     DEFAULT_SEASON,
     get_client,
+    load_excluded_team_ids,
     upsert,
 )
 from scoring  import (
@@ -150,10 +151,28 @@ def run(team_id: int) -> int:
         log.error("History fetch failed for %d", team_id)
         return 1
 
-    gw_rows = {g["event"]: g for g in history.get("current", [])}
-    has_gw1 = 1 in gw_rows
-    if not has_gw1:
-        log.warning("Team %d has no GW1 entry — will be marked INELIGIBLE", team_id)
+    # ── Eligibility gate ─────────────────────────────────────────────────────
+    # Three independent conditions, all required:
+    #   has_gw1        — the team actually has a GW1 row
+    #   started_event  — the FPL entry was created for GW1, not mid-season.
+    #                    Already present on the `info` payload fetched above,
+    #                    so this costs no extra API call.
+    #   not excluded   — not manually listed in Backend/excluded_teams.txt.
+    #                    Checked here (not only at purge time) so a purged team
+    #                    cannot resurrect itself the next time this task runs.
+    gw_rows       = {g["event"]: g for g in history.get("current", [])}
+    has_gw1       = 1 in gw_rows
+    started_event = info.get("started_event")
+    excluded      = team_id in load_excluded_team_ids()
+
+    if started_event is None:
+        log.error("Team %d: FPL returned no started_event — treating as INELIGIBLE. "
+                  "If this is a real team, check the /entry/ payload.", team_id)
+
+    eligible = has_gw1 and started_event == 1 and not excluded
+    if not eligible:
+        log.warning("Team %d INELIGIBLE (has_gw1=%s started_event=%s excluded=%s)",
+                    team_id, has_gw1, started_event, excluded)
 
     # ── Bootstrap → last_gw, live_gw, player_type ────────────────────────────
     bootstrap = fetch_bootstrap()
@@ -193,16 +212,37 @@ def run(team_id: int) -> int:
         log.info("Backfilling %d new player_gw_score rows...", len(new_player_rows))
         upsert("player_gw_scores", new_player_rows, on_conflict="season,player_id,gw")
 
+    # ── Which players' fixtures are already done? ────────────────────────────
+    # Only matters for the live GW, and it is NOT optional: score_gw does
+    # `played = finished_players or set()`, so passing None means no player
+    # counts as finished — which silently disables BOTH auto-subs and the
+    # inactive penalty for a team backfilled mid-gameweek. Derived from club
+    # fixture state (not the live payload's `explain` blocks) so a player whose
+    # club has finished is covered even if he never appeared.
+    finished_players: set[int] | None = None
+    if live_gw is not None:
+        from db import get_fixtures, get_players_ref
+        fixtures = get_fixtures(SEASON, gw=live_gw)
+        done_ids = {f["fixture_id"] for f in fixtures
+                    if f.get("finished") or f.get("finished_provisional")}
+        done_clubs = ({f["team_h"] for f in fixtures if f["fixture_id"] in done_ids} |
+                      {f["team_a"] for f in fixtures if f["fixture_id"] in done_ids})
+        finished_players = {p["player_id"] for p in get_players_ref(SEASON)
+                            if p.get("team_id") in done_clubs}
+        log.info("Live GW%d: %d/%d fixtures done -> %d players finished",
+                 live_gw, len(done_ids), len(fixtures), len(finished_players))
+
     # ── Score the team ───────────────────────────────────────────────────────
     scored = score_team_season(
-        team_id     = team_id,
-        history     = history,
-        live_cache  = live_cache,
-        pts_cache   = pts_cache,
-        picks_cache = picks_cache,
-        last_gw     = last_gw,
-        player_type = player_type,
-        live_gw     = live_gw,
+        team_id          = team_id,
+        history          = history,
+        live_cache       = live_cache,
+        pts_cache        = pts_cache,
+        picks_cache      = picks_cache,
+        last_gw          = last_gw,
+        player_type      = player_type,
+        live_gw          = live_gw,
+        finished_players = finished_players,
     )
 
     # ── Build and upsert all rows for this team ──────────────────────────────
@@ -213,7 +253,7 @@ def run(team_id: int) -> int:
         "team_name":      info.get("name", f"Team {team_id}"),
         "fpl_joined_at":  info.get("joined_time"),
         "anti_joined_at": datetime.now(timezone.utc).isoformat(),
-        "eligible":       has_gw1,
+        "eligible":       eligible,
         "chips_history":  history.get("chips", []),
     }
 
@@ -232,7 +272,7 @@ def run(team_id: int) -> int:
     upsert("gw_scores",          score_rows,       on_conflict="season,team_id,gw")
     upsert("team_gw_selections", selection_rows,   on_conflict="season,team_id,gw")
 
-    log.info("Score new team complete: %d (eligible=%s)", team_id, has_gw1)
+    log.info("Score new team complete: %d (eligible=%s)", team_id, eligible)
     return 0
 
 

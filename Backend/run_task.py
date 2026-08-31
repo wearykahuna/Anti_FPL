@@ -124,8 +124,32 @@ def _task_backfill_transfers(args):
     from tasks.backfill_transfers import run
     return run()
 
+def _task_audit_teams(args):
+    from tasks.audit_teams import run
+    leagues = [args.league] if args.league else None
+    codes   = [args.invite_code] if args.invite_code else None
+    return run(leagues, codes, args.all_db, args.no_history)
+
+def _task_purge_teams(args):
+    from tasks.purge_teams import run
+    ids = [int(x) for x in args.team_ids.split(",") if x.strip()] if args.team_ids else None
+    return run(ids, from_file=ids is None, mode=args.mode,
+               apply=args.apply, skip_rerank=args.skip_rerank)
+
+def _task_repair_bank(args):
+    from tasks.repair_bank import run
+    return run(
+        gw_from         = args.gw_from or 1,
+        gw_to           = args.gw_to,
+        apply           = args.apply,
+        also_fpl_fields = args.also_fpl_fields,
+        force_recalc    = args.force_recalc,
+        include_live    = args.include_live,
+    )
+
 
 TASKS = {
+    "audit_teams":       _task_audit_teams,
     "backfill_player_scores": _task_backfill_player_scores,
     "backfill_team_value": _task_backfill_team_value,
     "backfill_transfers": _task_backfill_transfers,
@@ -135,7 +159,9 @@ TASKS = {
     "recalc_scores":     _task_recalc_scores,
     "refresh_live":      _task_refresh_live,
     "refresh_picks":     _task_refresh_picks,
+    "purge_teams":       _task_purge_teams,
     "refresh_reference": _task_refresh_reference,
+    "repair_bank":       _task_repair_bank,
     "scheduler":         _task_scheduler,
     "score_new_team":    _task_score_new_team,
     "snapshot":          _task_snapshot,
@@ -161,6 +187,24 @@ def main() -> int:
     parser.add_argument("--gw-to",   type=int, dest="gw_to",   help="End GW (defaults to --gw-from)")
     parser.add_argument("--recalc-fpl-raw", action="store_true", dest="recalc_fpl_raw",
                         help="recalc_gw: recompute fpl_raw from player_gw_scores")
+    parser.add_argument("--apply", action="store_true",
+                        help="repair_bank: commit changes (default is a dry run)")
+    parser.add_argument("--also-fpl-fields", action="store_true", dest="also_fpl_fields",
+                        help="repair_bank: also repair xfer cost / transfers / rank / total")
+    parser.add_argument("--force-recalc", action="store_true", dest="force_recalc",
+                        help="repair_bank: re-score even when no bank values changed")
+    parser.add_argument("--include-live", action="store_true", dest="include_live",
+                        help="repair_bank: also repair the in-progress GW (patch only, no re-score)")
+    parser.add_argument("--all-db", action="store_true", dest="all_db",
+                        help="audit_teams: also audit every team already in the teams table")
+    parser.add_argument("--no-history", action="store_true", dest="no_history",
+                        help="audit_teams: skip the per-team history call")
+    parser.add_argument("--team-ids", type=str, dest="team_ids",
+                        help="purge_teams: comma-separated team ids (overrides excluded_teams.txt)")
+    parser.add_argument("--mode", choices=["soft", "hard"], default="soft",
+                        help="purge_teams: soft = eligible=false (default), hard = delete the row")
+    parser.add_argument("--skip-rerank", action="store_true", dest="skip_rerank",
+                        help="purge_teams: skip the ranking rebuild")
     args = parser.parse_args()
 
     log.info("Running task: %s", args.task)

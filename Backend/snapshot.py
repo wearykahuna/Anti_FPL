@@ -29,8 +29,16 @@ from pathlib import Path
 from dotenv import load_dotenv
 from postgrest import SyncPostgrestClient
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+# Reuse db.py's auto-detected season rather than keeping a second, independent
+# constant here. This used to be a hardcoded "2025/26" that never got bumped —
+# so every scheduled snapshot silently wrote last season's (empty) data while
+# the live site had moved on to 2026/27. db.py already solves this once, by
+# asking the FPL API at import time; importing it here means there is exactly
+# one season constant in the whole codebase to go stale, not two.
+from db import DEFAULT_SEASON
+
 # ── Config ────────────────────────────────────────────────────────────────────
-DEFAULT_SEASON   = "2025/26"
 SNAPSHOTS_DIR    = Path(__file__).parent.parent / "snapshots"
 PAGE_SIZE        = 1000   # Supabase returns max 1000 rows per request
 

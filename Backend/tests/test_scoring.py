@@ -285,6 +285,50 @@ def test_bank_penalty_boundary():
     assert r30["bank_pen_pts"] == 0
     assert r31["bank_pen_pts"] == BANK_PEN
 
+
+# ── Bank is tri-state: None (unknown) / 0 (empty) / >0 (real) ────────────────
+# Regression guard for the bug where a missing bank was coerced to 0, which
+# made "we haven't fetched it yet" indistinguishable from "no penalty due"
+# and silently disabled the penalty for a whole GW.
+
+def test_bank_unknown_applies_no_penalty_and_propagates_none():
+    r = score_gw(**base_score_kwargs(hist_gw=make_hist(bank=None)))
+    assert r["bank"] is None, "None must propagate so writers persist NULL, not 0"
+    assert r["bank_pen"] is False
+    assert r["bank_pen_pts"] == 0
+
+
+def test_bank_zero_is_distinct_from_unknown():
+    r = score_gw(**base_score_kwargs(hist_gw=make_hist(bank=0)))
+    assert r["bank"] == 0, "a genuinely empty bank must stay 0, not become None"
+    assert r["bank_pen_pts"] == 0
+
+
+def test_bank_unknown_warns(caplog):
+    import logging
+    with caplog.at_level(logging.WARNING, logger="scoring"):
+        score_gw(**base_score_kwargs(hist_gw=make_hist(bank=None), gw_finished=False))
+    assert any("bank missing" in rec.message for rec in caplog.records)
+
+
+def test_bank_unknown_on_finished_gw_is_an_error():
+    """A missing bank mid-GW is transient; on a finished GW it is a data defect."""
+    import logging
+    from unittest.mock import patch
+    with patch("scoring.log") as mock_log:
+        score_gw(**base_score_kwargs(hist_gw=make_hist(bank=None), gw_finished=True))
+    assert mock_log.error.called
+    assert not mock_log.warning.called
+
+
+def test_bank_pen_and_pen_pts_stay_in_lockstep():
+    """The leaderboards render bank_pen_pts; the dashboards count bank_pen x 25.
+    If these two ever disagree the pages report different totals."""
+    for bank in (None, 0, 1, 29, 30, 31, 100):
+        r = score_gw(**base_score_kwargs(hist_gw=make_hist(bank=bank)))
+        assert r["bank_pen_pts"] == (BANK_PEN if r["bank_pen"] else 0), f"bank={bank}"
+        assert r["bank_pen"] is (bank is not None and bank > 30), f"bank={bank}"
+
 def test_inactive_penalty_after_autosubs():
     # 106 played 0 → auto-subbed for 113 (who played) → no inactive pen.
     r = score_gw(**base_score_kwargs(mins=mins(played_zero=[106])))

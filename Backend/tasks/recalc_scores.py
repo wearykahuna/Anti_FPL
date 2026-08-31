@@ -32,6 +32,7 @@ from db       import (
     get_selections,
     get_teams,
     is_live_window_open,
+    select_all,
     upsert,
 )
 from scoring  import calc_fpl_raw, score_one_gw_for_team
@@ -219,12 +220,23 @@ def update_rankings_for_gw(season: str, gw: int) -> None:
 
 # ── Entry point ───────────────────────────────────────────────────────────────
 
-def run(provisional: bool = False) -> int:
+def run(provisional: bool = False,
+        fixtures: list[dict] | None = None,
+        current_gw: int | None = None,
+        players_ref: list[dict] | None = None,
+        teams: list[dict] | None = None) -> int:
+    """
+    fixtures / current_gw / players_ref / teams: pass already-fetched values
+    (the scheduler holds all four by the time it calls this) to skip redundant
+    Supabase reads. Standalone callers omit them and everything is fetched as
+    before. At a 60s live tick these duplicates were a meaningful share of the
+    per-tick cost.
+    """
     log.info("Recalc scores — %s%s",
              datetime.now().strftime("%Y-%m-%d %H:%M"),
              " [provisional]" if provisional else "")
 
-    is_open, current_gw = is_live_window_open(SEASON)
+    is_open, current_gw = is_live_window_open(SEASON, fixtures=fixtures, current_gw=current_gw)
 
     if not is_open:
         if not provisional:
@@ -232,7 +244,8 @@ def run(provisional: bool = False) -> int:
             return 0
         # Provisional mode: verify the provisional window is actually open
         from db import is_provisional_window_open
-        prov_open, current_gw = is_provisional_window_open(SEASON)
+        prov_open, current_gw = is_provisional_window_open(
+            SEASON, fixtures=fixtures, current_gw=current_gw)
         if not prov_open:
             log.info("Provisional window closed — exiting.")
             return 0
@@ -242,7 +255,8 @@ def run(provisional: bool = False) -> int:
 
     # Players ref — provides both player→club mapping and player_type.
     # players table is kept current by refresh_reference; no API call needed.
-    players_ref    = get_players_ref(SEASON)
+    if players_ref is None:
+        players_ref = get_players_ref(SEASON)
     player_to_club = {p["player_id"]: p.get("team_id")                       for p in players_ref}
     player_type    = {p["player_id"]: _POS_TO_TYPE.get(p.get("position"), 3) for p in players_ref}
 
@@ -253,12 +267,14 @@ def run(provisional: bool = False) -> int:
         return 0
     sel_by_team = {s["team_id"]: s for s in selections}
 
-    teams     = get_teams(SEASON)
+    if teams is None:
+        teams = get_teams(SEASON)
     team_meta = {t["team_id"]: t for t in teams}
 
     # Fetched once and reused below for both the active-club filter and the
     # finished-players calc — this table doesn't change within a single tick.
-    fixtures = get_fixtures(SEASON, gw=current_gw)
+    if fixtures is None:
+        fixtures = get_fixtures(SEASON, gw=current_gw)
 
     # Active fixture filter — in provisional mode all fixtures are done so all teams count
     if provisional:
@@ -287,12 +303,14 @@ def run(provisional: bool = False) -> int:
     finished_players = {pid for pid, club in player_to_club.items() if club in finished_clubs}
 
     # Existing current-GW scores (bank, transfer cost, FPL rank — static within GW)
-    sb = get_client()
-    existing_rows = (sb.from_("gw_scores")
-                       .select("team_id,fpl_raw_pts,fpl_xfer_cost,transfers_gw,fpl_total,fpl_gw_rank,bank")
-                       .eq("season", SEASON)
-                       .eq("gw", current_gw)
-                       .execute().data or [])
+    # select_all paginates — a raw .select() silently truncates at 1000 rows,
+    # which would drop these teams' bank/xfer seed and (now that bank is
+    # nullable) score them as "bank unknown" instead of applying the penalty.
+    existing_rows = select_all(
+        "gw_scores",
+        {"season": SEASON, "gw": current_gw},
+        select="team_id,fpl_raw_pts,fpl_xfer_cost,transfers_gw,fpl_total,fpl_gw_rank,bank",
+    )
     existing_by_team = {r["team_id"]: r for r in existing_rows}
 
     # Previous-GW anti_totals — one batch query instead of N per-team calls
@@ -335,7 +353,9 @@ def run(provisional: bool = False) -> int:
             "points":               fpl_raw,
             "event_transfers_cost": prev_row.get("fpl_xfer_cost", 0) or 0,
             "event_transfers":      prev_row.get("transfers_gw", 0) or 0,
-            "bank":                 prev_row.get("bank", 0) or 0,
+            # Pass through as-is: None means "deadline seed hasn't landed",
+            # which scoring must see as unknown, not as a £0.0m bank.
+            "bank":                 prev_row.get("bank"),
             "rank":                 prev_row.get("fpl_gw_rank"),
             "total_points":         prev_row.get("fpl_total"),
         }

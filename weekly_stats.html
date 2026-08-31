@@ -39,6 +39,13 @@
     .chart-wrap{position:relative;height:280px;margin-top:16px}
     .chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:0.72rem;color:var(--muted)}
     .chart-legend .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+    /* Chip colours, identical to the dashboards' --chip-* custom properties */
+    .chip-cell{font-weight:600}
+    .chip-cell.wc{color:#7c3aed}
+    .chip-cell.fh{color:#b86e00}
+    .chip-cell.bb{color:#0891b2}
+    .chip-cell.tc{color:#d62828}
+    .chip-col{white-space:nowrap}
 
     .table-wrap{max-width:1000px;margin:0 auto;overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:0.83rem}
@@ -87,6 +94,8 @@
   <div id="charts-body" style="display:none">
     <div class="chart-wrap"><canvas id="stats-chart"></canvas></div>
     <div class="chart-legend" id="chart-legend"></div>
+    <div class="chart-wrap"><canvas id="chips-chart"></canvas></div>
+    <div class="chart-legend" id="chips-legend"></div>
   </div>
 </div>
 
@@ -101,6 +110,10 @@
         <th class="r" data-key="worst" title="Highest (worst) GW score">Worst</th>
         <th class="r" data-key="avg">Average</th>
         <th class="r" data-key="topNAvg" title="Average GW score of the teams currently leading the table">Top N Avg</th>
+        <th class="r chip-col" data-key="wc" title="Wildcards played this GW">WC</th>
+        <th class="r chip-col" data-key="fh" title="Free Hits played this GW">FH</th>
+        <th class="r chip-col" data-key="bb" title="Bench Boosts played this GW">BB</th>
+        <th class="r chip-col" data-key="tc" title="Triple Captains played this GW">TC</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -172,7 +185,7 @@
       // whole page is a pure client-side aggregation of existing data — no
       // new table or backend computation needed.
       const allRows = await sbFetchAll('gw_scores',
-        `season=eq.${encodeURIComponent(SEASON)}&select=team_id,gw,anti_gw_pts,anti_total&order=gw.asc`);
+        `season=eq.${encodeURIComponent(SEASON)}&select=team_id,gw,anti_gw_pts,anti_total,active_chip&order=gw.asc`);
 
       const byGw = {};
       allRows.forEach(r => {
@@ -203,7 +216,18 @@
           ? leaders.reduce((sum, r) => sum + r.anti_gw_pts, 0) / leaders.length
           : null;
 
-        return { gw: Number(gw), teams: rows.length, best, worst, avg, topNAvg };
+        // Chips played this GW. active_chip is '' (not null) on a non-chip
+        // row, so a plain truthy check is safe.
+        const chips = { wildcard: 0, freehit: 0, bboost: 0, '3xc': 0 };
+        rows.forEach(r => {
+          const c = (r.active_chip || '').toLowerCase();
+          if (c in chips) chips[c]++;
+        });
+
+        return { gw: Number(gw), teams: rows.length, best, worst, avg, topNAvg,
+                 wc: chips.wildcard, fh: chips.freehit,
+                 bb: chips.bboost, tc: chips['3xc'],
+                 chipsTotal: chips.wildcard + chips.freehit + chips.bboost + chips['3xc'] };
       });
       ROWS.sort((a, b) => a.gw - b.gw);
 
@@ -243,6 +267,10 @@
         <td class="r">${r.worst}</td>
         <td class="r">${r.avg.toFixed(1)}</td>
         <td class="r">${r.topNAvg != null ? r.topNAvg.toFixed(1) : '—'}</td>
+        <td class="r chip-cell wc">${r.wc || '—'}</td>
+        <td class="r chip-cell fh">${r.fh || '—'}</td>
+        <td class="r chip-cell bb">${r.bb || '—'}</td>
+        <td class="r chip-cell tc">${r.tc || '—'}</td>
       </tr>
     `).join('');
   }
@@ -260,6 +288,7 @@
   // expanded — Chart.js sizes itself off the canvas's rendered dimensions,
   // which are meaningless while the container is display:none.
   let CHART_OBJ = null;
+  let CHIPS_CHART_OBJ = null;
   let chartsExpanded = false;
   let chartsBuilt = false;
   document.getElementById('charts-toggle').addEventListener('click', () => {
@@ -270,6 +299,7 @@
     label.innerHTML = chartsExpanded ? 'Hide &#x25B4;' : 'Show &#x25BE;';
     if (chartsExpanded && !chartsBuilt && ROWS.length) {
       renderChart();
+      renderChipsChart();
       chartsBuilt = true;
     }
   });
@@ -313,6 +343,48 @@
     document.getElementById('chart-legend').innerHTML = series.map(s => `
       <span><span class="dot" style="background:${s.color}"></span>${s.label}</span>
     `).join('');
+  }
+
+
+  // Chips played per gameweek — grouped (side-by-side) bars, GW on the x-axis.
+  // Pure client-side fold over data the page already has; no extra query.
+  const CHIP_SERIES = [
+    { key: 'wc', label: 'Wildcard',     color: '#7c3aed' },
+    { key: 'fh', label: 'Free Hit',     color: '#b86e00' },
+    { key: 'bb', label: 'Bench Boost',  color: '#0891b2' },
+    { key: 'tc', label: 'Triple Cap',   color: '#d62828' },
+  ];
+
+  function renderChipsChart() {
+    if (CHIPS_CHART_OBJ) { CHIPS_CHART_OBJ.destroy(); CHIPS_CHART_OBJ = null; }
+    const ctx = document.getElementById('chips-chart').getContext('2d');
+    CHIPS_CHART_OBJ = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ROWS.map(r => `GW${r.gw}`),
+        datasets: CHIP_SERIES.map(s => ({
+          label: s.label,
+          data: ROWS.map(r => r[s.key] || 0),
+          backgroundColor: s.color,
+        })),
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#888', font: { size: 9 } } },
+          y: { beginAtZero: true,
+               grid: { color: 'rgba(0,0,0,.06)' },
+               // Chip counts are whole teams — never show 0.5 of a wildcard.
+               ticks: { color: '#888', font: { size: 9 }, precision: 0, stepSize: 1 } },
+        },
+      },
+    });
+
+    document.getElementById('chips-legend').innerHTML =
+      CHIP_SERIES.map(s => `<span><span class="dot" style="background:${s.color}"></span>${s.label}</span>`).join('') +
+      `<span style="margin-left:auto">${ROWS.reduce((a, r) => a + (r.chipsTotal || 0), 0)} chips played this season</span>`;
   }
 
   loadData();

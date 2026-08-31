@@ -154,17 +154,19 @@ def _provisional_player_ids(
 
 # ── Entry points ──────────────────────────────────────────────────────────────
 
-def run(fixtures: list[dict] | None = None) -> int:
+def run(fixtures: list[dict] | None = None,
+        current_gw: int | None = None,
+        players: list[dict] | None = None) -> int:
     """
-    fixtures: pass an already-fresh fixture list (e.g. from the scheduler,
-    which syncs fixture state once per tick before dispatching) to skip the
-    redundant FPL API call + fixtures upsert this would otherwise do itself.
-    Standalone callers (workflow_dispatch task=refresh_live) omit it and it
-    syncs its own, unchanged.
+    fixtures / current_gw / players: pass already-fetched values (e.g. from the
+    scheduler, which syncs fixture state and resolves the current GW once per
+    tick before dispatching) to skip the redundant reads this would otherwise
+    do itself. Standalone callers (workflow_dispatch task=refresh_live) omit
+    them and everything is fetched as before.
     """
     log.info("Refresh live — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
 
-    is_open, current_gw = is_live_window_open(SEASON)
+    is_open, current_gw = is_live_window_open(SEASON, fixtures=fixtures, current_gw=current_gw)
     if not is_open:
         log.info("Live window closed — exiting (no-op).")
         return 0
@@ -174,7 +176,8 @@ def run(fixtures: list[dict] | None = None) -> int:
     # Sync fresh fixture states so scheduler can detect provisional window next cycle
     if fixtures is None:
         fixtures = sync_fixture_states(SEASON, current_gw)
-    players      = get_players_ref(SEASON)
+    if players is None:
+        players = get_players_ref(SEASON)
     relevant_ids = get_active_player_ids(SEASON, current_gw, fixtures=fixtures, players=players)
     if not relevant_ids:
         log.info("No active fixtures this GW yet — exiting.")
@@ -204,18 +207,21 @@ def run(fixtures: list[dict] | None = None) -> int:
     return 0
 
 
-def run_provisional_pass(gw: int, fixtures: list[dict] | None = None) -> int:
+def run_provisional_pass(gw: int, fixtures: list[dict] | None = None,
+                         players: list[dict] | None = None) -> int:
     """
     Fetch final player scores after all GW fixtures are finished_provisional.
     Called by the scheduler's provisional window path. No live-gate check.
 
-    fixtures: see run() — pass a pre-synced list to skip the redundant fetch.
+    fixtures / players: see run() — pass pre-fetched values to skip the
+    redundant reads.
     """
     log.info("Provisional player score pass — GW%d %s", gw, datetime.now().strftime("%Y-%m-%d %H:%M"))
 
     if fixtures is None:
         fixtures = sync_fixture_states(SEASON, gw)
-    players      = get_players_ref(SEASON)
+    if players is None:
+        players = get_players_ref(SEASON)
     relevant_ids = get_active_player_ids(SEASON, gw, fixtures=fixtures, players=players)
     prov_ids     = _provisional_player_ids(fixtures, SEASON, players=players)
 

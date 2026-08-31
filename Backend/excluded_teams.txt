@@ -1,0 +1,17 @@
+# excluded_teams.txt — manually excluded FPL team IDs.
+#
+# Honoured by:
+#   - tasks/score_new_team.py  (a listed team is never marked eligible, so it
+#                               cannot resurrect itself on a later run)
+#   - tasks/purge_teams.py     (default input list)
+#
+# The started_event == 1 gate catches teams created after the season began.
+# This file is for the ones you have to recognise by eye — entries that are
+# not genuinely playing Anti FPL.
+#
+# Format: one team_id per line. Everything after a '#' is a comment.
+# Generate candidates with:  python run_task.py audit_teams --league <id>
+#
+# Example:
+# 1234567   # "Klopp's Kids" — not an anti team
+48614 #HaHa Haaland https://fantasy.premierleague.com/en/entry/48614/event/2

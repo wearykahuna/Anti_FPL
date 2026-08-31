@@ -25,6 +25,7 @@ log = logging.getLogger(__name__)
 _FALLBACK_SEASON = "2026/27"
 BATCH_SIZE       = 500
 PAGE_SIZE        = 1000
+CLIENT_TIMEOUT_S = 15    # per-request cap; see get_client()
 
 
 def _detect_default_season() -> str:
@@ -67,6 +68,9 @@ def get_client() -> SyncPostgrestClient:
             "apikey":        key,
             "Authorization": f"Bearer {key}",
         },
+        # postgrest defaults to 120s — twice the whole live tick interval, so
+        # one hung query would stall the loop past its next two ticks.
+        timeout=CLIENT_TIMEOUT_S,
     )
     log.info("Connected to Supabase: %s", url)
     return _client
@@ -130,6 +134,37 @@ def select_all(table: str, filters: dict | None = None,
             break
         start += PAGE_SIZE
     return rows
+
+
+def load_excluded_team_ids(path: str | None = None) -> set[int]:
+    """
+    Manually excluded team_ids, read from Backend/excluded_teams.txt.
+
+    A `teams.eligible = false` tombstone is NOT self-protecting: any later
+    score_new_team or create_mini_league run upserts `eligible` back to
+    whatever the gate computes, silently resurrecting a purged team. This file
+    is the durable record — it is version-controlled, reviewable in a diff, and
+    survives a wipe_season().
+
+    Format: one team_id per line, `#` starts a comment. Missing file = no
+    exclusions.
+    """
+    if path is None:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "excluded_teams.txt")
+    if not os.path.exists(path):
+        return set()
+
+    excluded: set[int] = set()
+    with open(path, encoding="utf-8") as fh:
+        for lineno, raw in enumerate(fh, 1):
+            line = raw.split("#", 1)[0].strip()
+            if not line:
+                continue
+            try:
+                excluded.add(int(line))
+            except ValueError:
+                log.warning("excluded_teams.txt:%d — ignoring unparseable line %r", lineno, line)
+    return excluded
 
 
 def delete_where(table: str, filters: dict) -> None:
@@ -219,9 +254,16 @@ def get_team_anti_total(season: str, team_id: int, gw: int) -> int:
 
 # ── Live match window helper ──────────────────────────────────────────────────
 
-def is_live_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]:
+def is_live_window_open(season: str = DEFAULT_SEASON,
+                        fixtures: list[dict] | None = None,
+                        current_gw: int | None = None) -> tuple[bool, int | None]:
     """
     Returns (is_open, current_gw).
+
+    `fixtures` / `current_gw` let a caller that already holds freshly-synced
+    values pass them in instead of re-reading them. The scheduler syncs both at
+    the top of every tick, so threading them through removes two round trips
+    per call — and this is called twice per tick.
 
     The live window is open when:
       - There's a current GW (gameweeks.is_current=true, is_finished=false)
@@ -236,11 +278,12 @@ def is_live_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]
     """
     from datetime import datetime, timezone
 
-    current = get_current_gw(season)
+    current = current_gw if current_gw is not None else get_current_gw(season)
     if current is None:
         return False, None
 
-    fixtures = get_fixtures(season, gw=current)
+    if fixtures is None:
+        fixtures = get_fixtures(season, gw=current)
     if not fixtures:
         return False, current
 
@@ -271,7 +314,9 @@ def is_live_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]
 
 # ── Provisional window helper ─────────────────────────────────────────────────
 
-def is_provisional_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int | None]:
+def is_provisional_window_open(season: str = DEFAULT_SEASON,
+                               fixtures: list[dict] | None = None,
+                               current_gw: int | None = None) -> tuple[bool, int | None]:
     """
     Returns (is_open, current_gw).
 
@@ -279,11 +324,12 @@ def is_provisional_window_open(season: str = DEFAULT_SEASON) -> tuple[bool, int 
     hasn't been officially confirmed yet — the gap between final whistle and
     FPL's official GW confirmation (can be several hours).
     """
-    current = get_current_gw(season)
+    current = current_gw if current_gw is not None else get_current_gw(season)
     if current is None:
         return False, None
 
-    fixtures = get_fixtures(season, gw=current)
+    if fixtures is None:
+        fixtures = get_fixtures(season, gw=current)
     if not fixtures:
         return False, current
 

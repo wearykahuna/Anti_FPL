@@ -30,18 +30,67 @@ _session.headers.update({
 
 # ── Low-level HTTP ────────────────────────────────────────────────────────────
 
-def _get(url: str, retries: int = 3) -> Optional[dict]:
-    """Internal: GET with retries and exponential backoff."""
+# (connect, read). A single call must never eat a large slice of the live tick:
+# the old flat timeout=20 with 3 blind retries could block for 63s inside a
+# 60s tick.
+DEFAULT_TIMEOUT = (5, 10)
+MAX_TOTAL_S     = 25    # hard ceiling on one logical fetch, retries included
+MAX_RETRY_AFTER = 30    # never honour an absurd Retry-After
+
+
+def _retry_after_seconds(response, default: float) -> float:
+    """Parse a Retry-After header (seconds form only), clamped."""
+    raw = response.headers.get("Retry-After")
+    if not raw:
+        return default
+    try:
+        return max(0.0, min(float(raw), MAX_RETRY_AFTER))
+    except (TypeError, ValueError):
+        return default    # HTTP-date form — not worth parsing, back off normally
+
+
+def _get(url: str, retries: int = 3, timeout=DEFAULT_TIMEOUT) -> Optional[dict]:
+    """
+    Internal: GET with bounded retries.
+
+    Retries only what is actually retryable. A 4xx is permanent — retrying a
+    404 three times just burns 3 requests and 3s of sleep, and a pre-deadline
+    404 from fetch_picks is an expected, routine response.
+
+    Returns None on failure (the contract every caller relies on).
+    """
+    started = time.monotonic()
     for attempt in range(retries):
         try:
-            r = _session.get(url, timeout=20)
+            r = _session.get(url, timeout=timeout)
+
+            if r.status_code == 429:
+                wait = _retry_after_seconds(r, default=2 ** attempt)
+                log.warning("FPL rate-limited (429) [%s] — waiting %.1fs", url, wait)
+                if attempt < retries - 1:
+                    time.sleep(wait)
+                    continue
+                return None
+
+            if 400 <= r.status_code < 500:
+                # Permanent. 404 is routine (picks before a deadline), so log
+                # it quietly — it used to spam a warning per team per tick.
+                logger = log.info if r.status_code == 404 else log.warning
+                logger("FPL %d (no retry) [%s]", r.status_code, url)
+                return None
+
             r.raise_for_status()
             return r.json()
+
         except Exception as exc:
             log.warning("FPL fetch attempt %d/%d failed [%s]: %s",
                         attempt + 1, retries, url, exc)
-            if attempt < retries - 1:
-                time.sleep(2 ** attempt)
+
+        if time.monotonic() - started > MAX_TOTAL_S:
+            log.warning("FPL fetch budget (%ds) exhausted [%s] — giving up.", MAX_TOTAL_S, url)
+            return None
+        if attempt < retries - 1:
+            time.sleep(2 ** attempt)
     return None
 
 

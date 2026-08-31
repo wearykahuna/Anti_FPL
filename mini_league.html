@@ -62,10 +62,30 @@
     .chip-pill{display:inline-flex;align-items:center;justify-content:center;min-width:22px;
                padding:1px 4px;font-size:0.55rem;font-weight:700;letter-spacing:0.05em;
                border-radius:3px;line-height:1.5;border:1px solid transparent}
+    /* ── Chip colour system ───────────────────────────────────────────────
+       One source of truth: WC purple / FH amber / BB cyan / TC red, matching
+       the dashboards' --chip-* vars. Each has a pastel background and a
+       darker "ink" for text, so the same pair is used by BOTH the chip pips
+       in a team row and the "Chips active" pill breakdown. State is carried
+       by fill, not hue: available = pastel, used = drained to grey, live =
+       solid + pulsing. */
+    .chip-wc{--chip-soft:#f0e8fd;--chip-ink:#6d28d9;--chip-solid:#7c3aed}
+    .chip-fh{--chip-soft:#fdf1dd;--chip-ink:#955900;--chip-solid:#b86e00}
+    .chip-bb{--chip-soft:#e0f3f8;--chip-ink:#06708f;--chip-solid:#0891b2}
+    .chip-tc{--chip-soft:#fce8e8;--chip-ink:#b31f1f;--chip-solid:#d62828}
+
+    .chip-avail{background:var(--chip-soft);color:var(--chip-ink);border-color:#e3e3e3;
+                border-color:color-mix(in srgb, var(--chip-solid) 28%, transparent)}
+    /* Spent chips drain to grey so what's gone reads at a glance. */
     .chip-used{background:#ececec;color:#aaa;border-color:#ddd}
-    .chip-avail{background:rgba(59,130,246,0.12);color:#2563eb;border-color:rgba(59,130,246,0.3)}
-    .chip-live{background:rgba(255,176,59,0.25);color:var(--warn);border-color:rgba(255,176,59,0.5);
+    .chip-live{background:var(--chip-solid);color:#fff;border-color:var(--chip-solid);
                animation:chip-pulse 1.4s ease-in-out infinite}
+
+    /* Same pastel pair, reused in the "Chips active" summary pill. */
+    .chip-tag{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:4px;
+              font-size:0.62rem;font-weight:700;letter-spacing:0.04em;
+              background:var(--chip-soft);color:var(--chip-ink);border:1px solid #e3e3e3;
+              border-color:color-mix(in srgb, var(--chip-solid) 28%, transparent)}
     @keyframes chip-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.96)}}
 
     .badge-provisional{display:inline-block;animation:badge-flash 1.8s ease-in-out infinite}
@@ -77,7 +97,8 @@
     .gw-pts{font-family:var(--mono);font-weight:700;font-size:1rem}
     .total-pts{font-family:var(--mono);font-size:0.88rem}
     .pen-tag{font-size:0.68rem;color:var(--accent);font-family:var(--mono)}
-    .pending-tag{font-size:0.68rem;color:var(--warn);font-family:var(--mono)}
+    /* Penalties column stays red in both live and settled states. */
+    thead th.pens-col{color:var(--accent)}
     .live-score{color:var(--live)}
 
     .to-play-cell{font-family:var(--mono);font-size:0.82rem;color:var(--muted)}
@@ -93,6 +114,51 @@
                padding:4px 8px;cursor:pointer;white-space:nowrap;text-decoration:none;
                display:inline-block;margin-right:8px;transition:background 0.15s}
     .gw-history-btn:hover{background:#e6e6e6;color:var(--text)}
+
+    .gw-picker{display:flex;align-items:center;justify-content:flex-end;gap:6px;
+               flex-wrap:wrap;margin-top:6px;font-size:0.72rem;color:var(--muted)}
+    .gw-select{font-family:var(--font);font-size:0.72rem;color:var(--text);background:var(--surface);
+               border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer}
+    .gw-past-note{font-size:0.68rem;color:var(--warn);font-weight:600;width:100%;text-align:right}
+    /* ── "Busking hot seat": whoever is currently last (worst total) ──────
+       Two tapes, above and below the row, scrolling in OPPOSITE directions so
+       the text reads as orbiting it.
+
+       LAYOUT NOTE: the tape is position:absolute inside a position:relative
+       cell. That is load-bearing, not decoration — the track is nowrap and
+       far wider than the table, so if it participated in normal flow the
+       browser would size the table's columns to fit it and the whole
+       leaderboard would blow out horizontally. Absolutely-positioned content
+       contributes nothing to intrinsic width, so the table keeps its
+       original layout. */
+    .hot-seat-row > td{background:rgba(214,182,74,0.08)!important}
+    .hot-seat-row > td:first-child{box-shadow:inset 4px 0 0 0 #d9c26a}
+    .hot-seat-row > td:last-child{box-shadow:inset -4px 0 0 0 #d9c26a}
+
+    .hot-seat-band > td{padding:0!important;border:0!important;
+                        position:relative;height:16px;overflow:hidden}
+    .hot-seat-tape{position:absolute;inset:0;overflow:hidden;
+                   display:flex;align-items:center}
+    .hot-seat-track{display:inline-block;white-space:nowrap;will-change:transform;
+                    animation:hotseat-l 26s linear infinite}
+    .hot-seat-tape.rev .hot-seat-track{animation-name:hotseat-r}
+    .hot-seat-seg{font-family:var(--font);font-size:0.6rem;font-weight:800;
+                  letter-spacing:0.16em;text-transform:uppercase;padding:1px 9px}
+    /* Filled hazard tape, muted: charcoal rather than black, and a soft
+       mustard rather than a full hi-vis yellow. Each fill carries its own
+       contrasting ink, so no text outline is needed. */
+    .hot-seat-seg.a{background:#d9c26a;color:#33302a}
+    .hot-seat-seg.b{background:#4a4741;color:#e8d99b}
+    /* The track holds the phrase list twice, so -50% is a seamless loop. */
+    @keyframes hotseat-l{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    @keyframes hotseat-r{from{transform:translateX(-50%)}to{transform:translateX(0)}}
+    @media (prefers-reduced-motion:reduce){
+      .hot-seat-track{animation:none}
+    }
+    @media (max-width:600px){
+      .gw-picker{justify-content:flex-start}
+      .gw-past-note{text-align:left}
+    }
 
     tr.detail-row td{padding:0;border-bottom:1px solid var(--border)}
     .detail-inner{padding:16px 14px 16px 46px;display:grid;
@@ -157,6 +223,7 @@
   <div class="meta">
     <div id="live-badge-wrap"></div>
     <div id="last-updated">—</div>
+    <div id="gw-picker" class="gw-picker"></div>
   </div>
 </header>
 
@@ -176,10 +243,11 @@
       <tr>
         <th data-key="rank">#</th>
         <th data-key="team">Team</th>
-        <th class="r" data-key="gw">GW</th>
         <th class="r" data-key="toplay">To Play</th>
-        <th class="r" data-key="pens" id="pens-header">+Pens</th>
-        <th class="r" data-key="total">Total</th>
+        <th class="r" data-key="gw" id="gw-header">GW Pre-Pens</th>
+        <th class="r pens-col" data-key="pens" id="pens-header">GW Penalty Pts</th>
+        <th class="r" data-key="prov" id="prov-header">Provisional Score</th>
+        <th class="r" data-key="total" id="total-header">Total</th>
         <th></th>
       </tr>
     </thead>
@@ -198,6 +266,27 @@
   let lastRenderArgs = null;
   let sortKey = 'total';
   let sortDir = 1;
+
+  // Gameweek being VIEWED. null = follow the live/current GW. Must live out
+  // here, not inside loadData(), because toggleExpand() re-runs loadData and
+  // would otherwise reset it on every row expand.
+  let viewGw = null;
+  let latestGw = null;      // the real current GW, for the selector's range
+  (function readUrlState() {
+    const q = new URLSearchParams(location.search);
+    const g = parseInt(q.get('gw'), 10);
+    if (Number.isInteger(g) && g >= 1 && g <= 38) viewGw = g;
+  })();
+
+  function setViewGw(g) {
+    viewGw = (g === latestGw) ? null : g;
+    expandedTeam = null;
+    const url = new URL(location.href);
+    if (viewGw === null) url.searchParams.delete('gw');
+    else url.searchParams.set('gw', viewGw);
+    history.replaceState(null, '', url);
+    loadData();
+  }
 
   document.querySelectorAll('#leaderboard thead th[data-key]').forEach(th => {
     th.addEventListener('click', () => {
@@ -318,6 +407,17 @@
         isLive = false;
       }
 
+      // Viewing a past GW: pin to it, and force isLive false. gwPtsOf/totalOf
+      // branch on isLive and would otherwise show raw FPL points instead of
+      // anti points, and recompute Total as prevTotal + gw.
+      latestGw = currentGw;
+      // Normalise first: a ?gw= at or beyond the current GW just means "live".
+      if (viewGw !== null && viewGw >= latestGw) viewGw = null;
+      if (viewGw !== null) {
+        currentGw = viewGw;
+        isLive = false;
+      }
+
       // Get the team IDs for "The next Badly drawn boy" mini-league
       const ml = await sbFetch('mini_leagues',
         `season=eq.${encodeURIComponent(SEASON)}&invite_code=eq.KINGANTI2627&select=id&limit=1`);
@@ -405,17 +505,22 @@
       lastRenderArgs = [scores, teamInfo, prevTotal, currentGw, isLive,
                         selectionMap, playerScoreMap, chipsByTeam];
       render(...lastRenderArgs);
-      scheduleRefresh();
-
     } catch (err) {
       console.error('loadData error:', err);
       showError(err.message);
+    } finally {
+      // MUST be in `finally`. It used to be the last statement of the `try`,
+      // so a single failed poll (one transient Supabase blip) killed
+      // auto-refresh permanently until the user manually reloaded.
+      scheduleRefresh();
     }
   }
 
   function buildChipsRow(usedChips, activeChip, currentGw) {
     const chipOrder = ['wildcard', 'freehit', 'bboost', '3xc'];
     const chipShort = { wildcard: 'WC', freehit: 'FH', bboost: 'BB', '3xc': 'TC' };
+    // Per-chip colour class — see the chip colour system in the CSS above.
+    const chipCls   = { wildcard: 'chip-wc', freehit: 'chip-fh', bboost: 'chip-bb', '3xc': 'chip-tc' };
     const usedCount = {};
     const activeThisGw = {};
     usedChips.forEach(c => {
@@ -431,7 +536,7 @@
         if (i <= used && isActive && i === used) cls = 'chip-live';
         else if (i <= used) cls = 'chip-used';
         else cls = 'chip-avail';
-        items.push(`<span class="chip-pill ${cls}" title="${chipShort[name]}">${chipShort[name]}</span>`);
+        items.push(`<span class="chip-pill ${chipCls[name]} ${cls}" title="${chipShort[name]}">${chipShort[name]}</span>`);
       }
     });
     return `<div class="chips-row">${items.join('')}</div>`;
@@ -505,10 +610,7 @@
     // done, awaiting FPL's official confirmation) the backend has already
     // computed the real anti-adjusted score, so use that instead of the raw
     // live points — this is also what feeds the Total/ranking column below.
-    const gwPtsOf = s => {
-      const prov = isLive && !!s.is_provisional;
-      return prov ? (s.anti_gw_pts ?? 0) : isLive ? (s.fpl_raw_pts ?? 0) : (s.anti_gw_pts ?? 0);
-    };
+    const gwPtsOf = s => s.anti_gw_pts ?? ((s.fpl_raw_pts ?? 0) + (s.total_pens_gw ?? 0));
     const totalOf = s => isLive ? ((prevTotal[s.team_id] ?? 0) + gwPtsOf(s)) : (s.anti_total ?? 99999);
 
     // Standard competition ranking (ties share a rank; e.g. 1,2,2,4) — the
@@ -529,9 +631,10 @@
     const sortValue = s => {
       switch (sortKey) {
         case 'team':   return (teamInfo[s.team_id]?.team_name || '').toLowerCase();
-        case 'gw':     return gwPtsOf(s);
+        case 'gw':     return s.fpl_raw_pts ?? 0;
         case 'toplay': return toPlayCount(selectionMap[s.team_id]?.squad?.slice(0, 11)) ?? -1;
         case 'pens':   return s.total_pens_gw ?? 0;
+        case 'prov':   return gwPtsOf(s);
         case 'rank':
         case 'total':
         default:       return totalOf(s);
@@ -553,6 +656,24 @@
     const topNPts = byRank.slice(0, topN).map(gwPtsOf);
     const topNAvg = topNPts.length ? (topNPts.reduce((a, b) => a + b, 0) / topNPts.length).toFixed(1) : '0.0';
 
+    // Chips played THIS gameweek. active_chip is already on every score row,
+    // so this is a fold over data we have — same figures as the stats page.
+    const CHIP_PILL = [
+      { key: 'wildcard', label: 'WC', cls: 'chip-wc' },
+      { key: 'freehit',  label: 'FH', cls: 'chip-fh' },
+      { key: 'bboost',   label: 'BB', cls: 'chip-bb' },
+      { key: '3xc',      label: 'TC', cls: 'chip-tc' },
+    ];
+    const chipTally = Object.fromEntries(CHIP_PILL.map(c => [c.key, 0]));
+    scores.forEach(sc => {
+      const c = (sc.active_chip || '').toLowerCase();
+      if (c in chipTally) chipTally[c]++;
+    });
+    const chipsActive = CHIP_PILL.reduce((a, c) => a + chipTally[c.key], 0);
+    const chipBreakdown = CHIP_PILL.filter(c => chipTally[c.key] > 0)
+      .map(c => `<span class="chip-tag ${c.cls}">${chipTally[c.key]} ${c.label}</span>`)
+      .join(' ') || '<span style="opacity:.6">none</span>';
+
     document.getElementById('gw-bar').innerHTML = `
       <div class="gw-pills">
         <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
@@ -561,14 +682,87 @@
         <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
         <div class="gw-pill"><strong>${avg}</strong>GW average</div>
         <div class="gw-pill"><strong>${topNAvg}</strong>Top ${topN} Avg GW Score</div>
+        <div class="gw-pill" title="Chips played by this table's teams in GW${gw}">
+          <strong>${chipsActive}</strong>Chips active &middot; ${chipBreakdown}
+        </div>
       </div>
+
       <a class="gw-history-btn" href="mini_league_weekly_stats.html" style="align-self:center">Mini league weekly stats</a>
     `;
 
-    document.getElementById('pens-header').textContent = isLive ? 'Penalty Pts' : '+Pens';
+    // Rendered into a FIXED slot in the header (under the updated time) rather
+    // than inside the stats bar, so it never shifts around as pills reflow —
+    // which is what made it jump on mobile.
+    document.getElementById('gw-picker').innerHTML = `
+      <label for="gw-select">View</label>
+      <select class="gw-select" id="gw-select">
+        ${Array.from({length: latestGw || gw}, (_, i) => i + 1).reverse().map(n =>
+          `<option value="${n}"${n === gw ? ' selected' : ''}>GW${n}${n === latestGw ? ' (live)' : ''}</option>`
+        ).join('')}
+      </select>
+      ${viewGw !== null && viewGw !== latestGw
+        ? '<div class="gw-past-note">past GW — not auto-refreshing</div>' : ''}
+    `;
+    document.getElementById('gw-select')
+      .addEventListener('change', e => setViewGw(parseInt(e.target.value, 10)));
+
+    // Three GW columns, each a fixed, unambiguous quantity — no live/finished
+    // branching needed on VALUE any more, only on wording. This replaced a
+    // single "GW" column that silently swapped between raw and anti-adjusted
+    // depending on state, which was the actual source of confusion.
+    const gwHead   = document.getElementById('gw-header');
+    const pensHead = document.getElementById('pens-header');
+    const provHead = document.getElementById('prov-header');
+    const totHead  = document.getElementById('total-header');
+
+    const subNote = 'Auto-subs ARE included, applied progressively as each fixture finishes — '
+                  + 'a blank starter only counts once the bench player who could replace them has played.';
+
+    gwHead.title = 'Raw FPL score for the gameweek — before any anti penalties. ' + subNote;
+
+    pensHead.title = isLive
+      ? 'Anti penalties confirmed SO FAR this GW. Bank and transfer-hit penalties '
+      + 'apply immediately; inactive-player and captain/vice penalties are only '
+      + 'added once the relevant fixtures have finished, so this can still rise.'
+      : 'Final anti penalties for the gameweek.';
+
+    // "Provisional" while the GW can still move, "GW Score" once nothing about
+    // it can change any more.
+    provHead.textContent = isLive ? 'Provisional Score' : 'GW Score';
+    provHead.title = 'GW Pre-Pens + GW Penalty Pts. ' + (isLive
+      ? 'Still LIVE — will keep changing as penalties confirm and players finish. '
+        + 'Rows marked ~ have all their fixtures done and are awaiting official confirmation from FPL.'
+      : 'Final for the gameweek.');
+
+    totHead.textContent = 'Total';
+    totHead.style.color = '';        // inherit the default grey header colour
+    totHead.title = isLive
+      ? 'Running season total: previous total plus the Provisional Score on the left.'
+      : 'Season anti total, penalties and auto-subs included.';
 
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = '';
+
+    // Last place = the WORST total, which in Anti FPL is the highest one.
+    // Ties all share the hot seat. Only meaningful once there is more than
+    // one team to be last of.
+    const worstTotal = scores.length > 1 ? Math.max(...scores.map(totalOf)) : null;
+    const hotSeatIds = worstTotal == null ? new Set()
+      : new Set(scores.filter(sc => totalOf(sc) === worstTotal).map(sc => sc.team_id));
+
+    const HOT_SEAT_PHRASE = 'Busking hot seat';
+    function hotSeatBand(reverse) {
+      // Repeat enough to overflow any width, then duplicate the whole run so
+      // translateX(-50%) wraps seamlessly.
+      const once = Array.from({length: 8}, (_, i) =>
+        `<span class="hot-seat-seg ${i % 2 ? 'b' : 'a'}">&#9888; ${HOT_SEAT_PHRASE}</span>`
+      ).join('');
+      const band = document.createElement('tr');
+      band.className = 'hot-seat-band';
+      band.innerHTML = `<td colspan="8"><div class="hot-seat-tape${reverse ? ' rev' : ''}">` +
+                       `<div class="hot-seat-track">${once}${once}</div></div></td>`;
+      return band;
+    }
 
     sorted.forEach((s) => {
       const info       = teamInfo[s.team_id] || {};
@@ -593,11 +787,10 @@
       // on FPL's official confirmation) shouldn't keep offsetting this row.
       const showProvBadge = isProvisional && (toPlay == null || toPlay > 0);
       const provBadge = '<span title="Provisional — awaiting FPL official confirmation" style="font-size:9px;color:var(--muted);vertical-align:super;margin-left:2px">~</span>';
-      const displayGwRaw = isProvisional ? (s.anti_gw_pts ?? '—')
-                         : isLive        ? (s.fpl_raw_pts ?? '—')
-                         :                 (s.anti_gw_pts ?? '—');
-      const displayGw  = typeof displayGwRaw === 'number' && showProvBadge
-                         ? `${displayGwRaw}${provBadge}` : displayGwRaw;
+      // GW Provisional Score = GW Pre-Pens + GW Penalty Pts, always — see the
+      // gwPtsOf comment above for why no live/finished branch is needed here.
+      const provScore   = gwPtsOf(s);
+      const displayProv = showProvBadge ? `${provScore}${provBadge}` : provScore;
       const displayTot = isLive
         ? ((prevTot ?? 0) + gwPtsOf(s))
         : (s.anti_total ?? '—');
@@ -643,11 +836,12 @@
             </div>
           </div>
         </td>
-        <td class="r"><div class="gw-pts ${isLive && !isProvisional ? 'live-score' : ''}">${displayGw}</div></td>
         <td class="r">${toPlayHtml}</td>
+        <td class="r"><div class="gw-pts">${s.fpl_raw_pts ?? '—'}</div></td>
         <td class="r">${hasPens
-          ? `<span class="${isLive ? 'pending-tag' : 'pen-tag'}">${isLive ? '⏳' : '+'}${s.total_pens_gw}</span>`
+          ? `<span class="pen-tag">+${s.total_pens_gw}</span>`
           : '<span style="color:var(--muted)">—</span>'}</td>
+        <td class="r"><div class="gw-pts prov-pts ${isLive && !isProvisional ? 'live-score' : ''}">${displayProv}</div></td>
         <td class="r total-pts">${displayTot}</td>
         <td style="text-align:right">
           <a href="team_history.html?team_id=${s.team_id}" class="gw-history-btn" onclick="event.stopPropagation()">GW History</a>
@@ -658,7 +852,14 @@
         e.stopPropagation();
         toggleExpand(s.team_id);
       });
+      const inHotSeat = hotSeatIds.has(s.team_id);
+      if (inHotSeat) {
+        tr.classList.add('hot-seat-row');
+        tr.title = HOT_SEAT_PHRASE;
+        tbody.appendChild(hotSeatBand(false));
+      }
       tbody.appendChild(tr);
+      if (inHotSeat) tbody.appendChild(hotSeatBand(true));
 
       // ── Detail row ──
       let squadHtml = '';
@@ -742,7 +943,7 @@
           <div class="squad-section">
             <div class="squad-header">
               <span>Squad (GW${gw}) <span class="squad-legend" style="text-transform:none">&middot; ${squadValueStr}</span></span>
-              <span class="squad-legend">mins · pts · anti · cost</span>
+              <span class="squad-legend" title="&#9650; auto-subbed in, &#9660; auto-subbed out — both already counted in the score above">&#9650;&#9660; auto-subs applied &middot; mins · pts · anti · cost</span>
             </div>
             ${starterRows}
             <div class="bench-divider">Bench</div>
@@ -756,9 +957,9 @@
       detailTr.className = 'detail-row';
       detailTr.style.display = isExpanded ? '' : 'none';
       detailTr.innerHTML = `
-        <td colspan="7">
+        <td colspan="8">
           <div class="detail-inner">
-            ${detailItem('FPL Raw', s.fpl_raw_pts ?? '—')}
+            ${detailItem(`GW${gw} Pre-Pens`, s.fpl_raw_pts ?? '—', false, false, 'FPL score with auto-subs applied, before any anti penalties are added')}
             ${detailItem(penPrefix + 'Transfer Hits', s.hit_pts || 0, s.hit_pts > 0)}
             ${detailItem(penPrefix + 'Inactive Pen', s.inactive_pen_pts || 0, s.inactive_pen_pts > 0)}
             ${detailItem(penPrefix + 'Bank Pen', s.bank_pen_pts || 0, s.bank_pen_pts > 0)}
@@ -766,8 +967,9 @@
             ${detailItem(penPrefix + 'Chip Pen', s.chip_pen_pts || 0, s.chip_pen_pts > 0)}
             ${detailItem('Bank', s.bank != null ? `£${(s.bank / 10).toFixed(1)}m` : '—', false, s.bank_pen)}
             ${detailItem('Inactive Players', s.inactive_count ?? '—')}
+            ${detailItem(isLive ? `GW${gw} Provisional Score` : `GW${gw} Score`, provScore, false, false, 'GW Pre-Pens + all penalty rows above.' + (isLive ? ' Still live — will keep changing.' : ''))}
             ${detailItem('Prev Total', prevTot ?? '—')}
-            ${detailItem(isLive ? 'Current Total (Live)' : 'Anti Total', displayTot)}
+            ${detailItem('Current Total', displayTot, false, false, isLive ? 'Previous total plus the Provisional Score above.' : 'Season anti total — penalties and auto-subs included')}
             ${s.unused_chips?.length ? detailItem('Unused Chips', s.unused_chips.join(', '), true) : ''}
           </div>
           ${squadHtml}
@@ -780,10 +982,13 @@
     document.getElementById('leaderboard').style.display = '';
   }
 
-  function detailItem(label, value, isPen = false, isWarn = false) {
+  function detailItem(label, value, isPen = false, isWarn = false, tip = '') {
     const cls = (isPen || isWarn) ? 'pen' : value === 0 ? 'ok' : '';
-    return `<div class="detail-item"><span class="detail-label">${label}</span><span class="detail-value ${cls}">${value}</span></div>`;
+    const t = tip ? ` title="${tip}"` : '';
+    return `<div class="detail-item"${t}><span class="detail-label">${label}</span><span class="detail-value ${cls}">${value}</span></div>`;
   }
+
+
 
   function toggleExpand(teamId) {
     expandedTeam = (expandedTeam === teamId) ? null : teamId;
@@ -792,6 +997,8 @@
 
   function scheduleRefresh() {
     clearTimeout(refreshTimer);
+    // A finished GW never changes — polling it every 2 min is pure waste.
+    if (viewGw !== null && latestGw !== null && viewGw !== latestGw) return;
     refreshTimer = setTimeout(loadData, REFRESH_MS);
   }
 
