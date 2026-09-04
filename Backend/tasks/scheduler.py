@@ -40,12 +40,70 @@ from typing import Optional
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from db import DEFAULT_SEASON, get_current_gw, get_fixtures, has_unfinalized_scores
+from db import (
+    DEFAULT_SEASON,
+    get_fixtures,
+    has_unfinalized_scores,
+    select_all,
+    upsert,
+)
 
 log = logging.getLogger(__name__)
 
 SEASON           = DEFAULT_SEASON
 IMMINENT_MINUTES = 15   # fire live tasks if a fixture starts within this window
+
+
+def _resolve_current_gw(season: str) -> Optional[int]:
+    """
+    Self-healing stand-in for get_current_gw(), used only here in the live loop.
+
+    gameweeks.is_current is copied from FPL's bootstrap-static by
+    refresh_reference, which only runs twice a day (03:07 / 14:07 UTC). FPL
+    flips is_current the moment a GW's deadline passes — whatever time of day
+    that is — so a deadline landing between those two runs leaves the DB
+    pointing at the previous, already-finished GW for up to ~12h. During that
+    gap this loop would see nothing to do and exit, AND the site (which reads
+    the same is_current flag directly) would show the wrong GW to visitors.
+
+    gameweeks.deadline doesn't need real-time refreshing — it's known well in
+    advance — so the true current GW can be derived from data already in the
+    DB: the highest gw whose deadline has passed. When that disagrees with
+    the stored flag, correct the flag in place (one cheap read, and a write
+    only on the rare tick where it was actually wrong) so every consumer of
+    is_current — this loop, refresh_picks, the frontend — self-heals instead
+    of waiting for the next twice-daily refresh_reference run.
+    """
+    rows = select_all("gameweeks", {"season": season})
+    if not rows:
+        return None
+
+    now = datetime.now(timezone.utc)
+    passed_gws = []
+    for r in rows:
+        dl = r.get("deadline")
+        if not dl:
+            continue
+        try:
+            dl_dt = datetime.fromisoformat(dl.replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if dl_dt <= now:
+            passed_gws.append(r["gw"])
+    true_current = max(passed_gws) if passed_gws else None
+
+    flagged_gws = [r["gw"] for r in rows if r.get("is_current")]
+
+    if true_current is not None and flagged_gws != [true_current]:
+        log.warning("gameweeks.is_current stale (DB=%s, deadline-derived=%d) — correcting.",
+                    flagged_gws or "none", true_current)
+        updates = [{"season": season, "gw": gw, "is_current": False}
+                   for gw in flagged_gws if gw != true_current]
+        updates.append({"season": season, "gw": true_current, "is_current": True})
+        upsert("gameweeks", updates, on_conflict="season,gw")
+        return true_current
+
+    return flagged_gws[0] if flagged_gws else None
 
 
 def _sync_fixture_states(season: str, current: int) -> list[dict]:
@@ -158,7 +216,7 @@ def tick() -> tuple[int, str, Optional[float]]:
     """
     log.info("Scheduler — %s", datetime.now().strftime("%Y-%m-%d %H:%M"))
 
-    current = get_current_gw(SEASON)
+    current = _resolve_current_gw(SEASON)
     if current is None:
         log.info("No current GW — exiting.")
         return 0, "idle", None

@@ -156,6 +156,38 @@ def teams_already_seeded(season: str, gw: int) -> set[int]:
     return {r["team_id"] for r in rows if r.get("bank") is not None}
 
 
+def teams_with_gw_scores_row(season: str, gw: int) -> set[int]:
+    """
+    Team_ids that already have ANY gw_scores row for this GW.
+
+    recalc_scores only creates a team's row once one of its players' clubs
+    has an active fixture (the smart filter), so early in a GW some teams
+    have no row yet. A seed upsert for one of those is a bare INSERT, not an
+    UPDATE — it must carry every NOT-NULL column (anti_gw_pts etc.) or
+    Postgrest rejects the whole batch. This lets the seed builder tell the
+    two cases apart.
+    """
+    rows = select_all("gw_scores", {"season": season, "gw": gw}, select="team_id")
+    return {r["team_id"] for r in rows}
+
+
+def _zeroed_gw_scores_stub(team_id: int, gw: int, season: str) -> dict:
+    """
+    NOT-NULL-safe zero row, mirroring recalc_scores.to_gw_scores_row's
+    defaults, for seeding a team that has no gw_scores row yet this GW. Only
+    ever merged under real seed fields — never applied to a row that already
+    exists, so it can't clobber scores recalc_scores has already computed.
+    """
+    return {
+        "season": season, "team_id": team_id, "gw": gw,
+        "hit_pts": 0, "inactive_pen_pts": 0, "bank_pen": False,
+        "bank_pen_pts": 0, "cvc_pen_pts": 0, "chip_pen_pts": 0,
+        "unused_chips": [], "total_pens_gw": 0,
+        "anti_gw_pts": 0, "anti_total": 0, "captain_mult": 1,
+        "is_live": True, "is_provisional": True,
+    }
+
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int:
@@ -184,9 +216,10 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
                      current_gw, time.monotonic() - memo_at)
             return 0
 
-    all_team_ids = team_ids if team_ids is not None else get_team_ids(SEASON)
-    have_picks   = teams_already_have_picks(SEASON, current_gw)
-    have_seed    = teams_already_seeded(SEASON, current_gw)
+    all_team_ids  = team_ids if team_ids is not None else get_team_ids(SEASON)
+    have_picks    = teams_already_have_picks(SEASON, current_gw)
+    have_seed     = teams_already_seeded(SEASON, current_gw)
+    have_gw_score = teams_with_gw_scores_row(SEASON, current_gw)
 
     need_picks = [tid for tid in all_team_ids if tid not in have_picks]
     need_seed  = [tid for tid in all_team_ids if tid not in have_seed]
@@ -252,6 +285,8 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
                             tid, current_gw)
 
         if seed:
+            if tid not in have_gw_score:
+                seed = {**_zeroed_gw_scores_stub(tid, current_gw, SEASON), **seed}
             seed_rows.append(seed)
 
         # Chips only change at a deadline, so refresh them alongside picks.
