@@ -157,19 +157,35 @@ def teams_already_seeded(season: str, gw: int) -> set[int]:
     return {r["team_id"] for r in rows if r.get("bank") is not None}
 
 
-def teams_with_gw_scores_row(season: str, gw: int) -> set[int]:
+_READONLY_COLS = ("id", "created_at", "updated_at")
+
+
+def existing_gw_scores_rows(season: str, gw: int) -> dict[int, dict]:
     """
-    Team_ids that already have ANY gw_scores row for this GW.
+    Full existing gw_scores rows for this GW, keyed by team_id.
+
+    A Postgrest upsert(on_conflict=...) still compiles to a real
+    `INSERT ... ON CONFLICT DO UPDATE` — and Postgres validates NOT NULL
+    constraints against the INSERT's own column list before it ever gets to
+    conflict resolution, regardless of whether the row already exists or
+    what the DO UPDATE SET clause touches. So a "partial update" payload
+    that omits ANY not-null-no-default column fails outright, even for a
+    row that's had one for weeks — that's what actually broke the plain
+    7-key seed payload here once anti_gw_pts lost its column default.
+    Belt-and-suspenders against that (in addition to fixing the DB default):
+    the seed builder merges real seed fields on top of the row's OWN current
+    values instead of sending a bare partial row, so every column always has
+    a valid value in the payload — the update still only changes what the
+    seed fields say, since it round-trips everything else unchanged.
 
     recalc_scores only creates a team's row once one of its players' clubs
     has an active fixture (the smart filter), so early in a GW some teams
-    have no row yet. A seed upsert for one of those is a bare INSERT, not an
-    UPDATE — it must carry every NOT-NULL column (anti_gw_pts etc.) or
-    Postgrest rejects the whole batch. This lets the seed builder tell the
-    two cases apart.
+    have no row here yet — those get a zeroed stub instead (see
+    _zeroed_gw_scores_stub).
     """
-    rows = select_all("gw_scores", {"season": season, "gw": gw}, select="team_id")
-    return {r["team_id"] for r in rows}
+    rows = select_all("gw_scores", {"season": season, "gw": gw}, select="*")
+    return {r["team_id"]: {k: v for k, v in r.items() if k not in _READONLY_COLS}
+            for r in rows}
 
 
 def _zeroed_gw_scores_stub(team_id: int, gw: int, season: str, prev_anti_total: int = 0) -> dict:
@@ -230,7 +246,7 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
     all_team_ids  = team_ids if team_ids is not None else get_team_ids(SEASON)
     have_picks    = teams_already_have_picks(SEASON, current_gw)
     have_seed     = teams_already_seeded(SEASON, current_gw)
-    have_gw_score = teams_with_gw_scores_row(SEASON, current_gw)
+    existing_rows = existing_gw_scores_rows(SEASON, current_gw)
 
     need_picks = [tid for tid in all_team_ids if tid not in have_picks]
     need_seed  = [tid for tid in all_team_ids if tid not in have_seed]
@@ -250,14 +266,16 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
 
     selection_rows: list[dict] = []
     chips_updates:  list[dict] = []
-    seed_rows:      list[dict] = []
+    # Kept as two separate lists, not one — see the upsert calls below for why.
+    seed_updates:   list[dict] = []   # existing row + seed fields, team already has a gw_scores row
+    seed_inserts:   list[dict] = []   # zeroed stub + seed fields, team has no gw_scores row yet
 
     need_picks_set = set(need_picks)
     need_seed_set  = set(need_seed)
 
     # Only teams that need BOTH a stub (no gw_scores row yet) AND their
     # previous total — cheap, and skipped entirely once every team has a row.
-    needs_stub  = need_seed_set - have_gw_score
+    needs_stub  = need_seed_set - set(existing_rows)
     prev_totals = (
         {r["team_id"]: r.get("anti_total", 0) or 0
          for r in get_gw_scores(SEASON, gw=current_gw - 1)}
@@ -305,10 +323,14 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
                             tid, current_gw)
 
         if seed:
-            if tid not in have_gw_score:
+            if tid in existing_rows:
+                # Round-trip every column the row already has, with the real
+                # seed fields applied on top — never a bare partial payload
+                # (see existing_gw_scores_rows for why that's unsafe here).
+                seed_updates.append({**existing_rows[tid], **seed})
+            else:
                 stub = _zeroed_gw_scores_stub(tid, current_gw, SEASON, prev_totals.get(tid, 0))
-                seed = {**stub, **seed}
-            seed_rows.append(seed)
+                seed_inserts.append({**stub, **seed})
 
         # Chips only change at a deadline, so refresh them alongside picks.
         if tid in need_picks_set:
@@ -321,8 +343,22 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
     log.info("Upserting %d selection rows...", len(selection_rows))
     upsert("team_gw_selections", selection_rows, on_conflict="season,team_id,gw")
 
-    log.info("Seeding %d gw_scores rows (bank / xfer cost / transfers)...", len(seed_rows))
-    upsert("gw_scores", seed_rows, on_conflict="season,team_id,gw")
+    # Two separate upsert calls, not one combined batch: seed_updates rows
+    # (full existing row + seed fields) and seed_inserts rows (zeroed stub +
+    # seed fields) don't necessarily carry the exact same key set (e.g. an
+    # existing row has gw_rank/captain_pts/etc that the stub doesn't).
+    # PostgREST compiles a bulk upsert into one INSERT whose column list is
+    # the UNION of keys across every row in the payload, so mixing shapes
+    # would make any row missing one of those columns get an implicit NULL
+    # for it in its own candidate INSERT tuple — which fails immediately if
+    # that column is NOT NULL with no default (see existing_gw_scores_rows
+    # for why that's exactly what broke this seed step this GW). Keeping
+    # each call's rows uniform in shape avoids that.
+    log.info("Seeding %d gw_scores rows (bank / xfer cost / transfers)...", len(seed_updates))
+    upsert("gw_scores", seed_updates, on_conflict="season,team_id,gw")
+
+    log.info("Seeding %d new gw_scores rows (first seen this GW)...", len(seed_inserts))
+    upsert("gw_scores", seed_inserts, on_conflict="season,team_id,gw")
 
     log.info("Updating chips_history for %d teams...", len(chips_updates))
     sb = get_client()
