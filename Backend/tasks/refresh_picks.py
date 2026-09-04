@@ -40,6 +40,7 @@ from db       import (
     DEFAULT_SEASON,
     get_client,
     get_current_gw,
+    get_gw_scores,
     get_team_ids,
     select_all,
     upsert,
@@ -171,20 +172,30 @@ def teams_with_gw_scores_row(season: str, gw: int) -> set[int]:
     return {r["team_id"] for r in rows}
 
 
-def _zeroed_gw_scores_stub(team_id: int, gw: int, season: str) -> dict:
+def _zeroed_gw_scores_stub(team_id: int, gw: int, season: str, prev_anti_total: int = 0) -> dict:
     """
     NOT-NULL-safe zero row, mirroring recalc_scores.to_gw_scores_row's
     defaults, for seeding a team that has no gw_scores row yet this GW. Only
     ever merged under real seed fields — never applied to a row that already
     exists, so it can't clobber scores recalc_scores has already computed.
+
+    anti_total carries the team's previous-GW total forward (not 0): some
+    pages (e.g. global_dashboard.html) read anti_total straight off the
+    latest gw_scores row rather than recomputing it live, and would otherwise
+    show this team's running total drop to 0 until recalc_scores gives it a
+    real first pass.
     """
     return {
         "season": season, "team_id": team_id, "gw": gw,
         "hit_pts": 0, "inactive_pen_pts": 0, "bank_pen": False,
         "bank_pen_pts": 0, "cvc_pen_pts": 0, "chip_pen_pts": 0,
         "unused_chips": [], "total_pens_gw": 0,
-        "anti_gw_pts": 0, "anti_total": 0, "captain_mult": 1,
-        "is_live": True, "is_provisional": True,
+        "anti_gw_pts": 0, "anti_total": prev_anti_total, "captain_mult": 1,
+        # False, not True: this team hasn't played at all yet, so it isn't
+        # "provisional — awaiting FPL confirmation" (that badge is for a
+        # finished-but-unconfirmed score). recalc_scores sets the real flag
+        # the moment one of this team's fixtures goes active.
+        "is_live": True, "is_provisional": False,
     }
 
 
@@ -244,6 +255,15 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
     need_picks_set = set(need_picks)
     need_seed_set  = set(need_seed)
 
+    # Only teams that need BOTH a stub (no gw_scores row yet) AND their
+    # previous total — cheap, and skipped entirely once every team has a row.
+    needs_stub  = need_seed_set - have_gw_score
+    prev_totals = (
+        {r["team_id"]: r.get("anti_total", 0) or 0
+         for r in get_gw_scores(SEASON, gw=current_gw - 1)}
+        if needs_stub and current_gw > 1 else {}
+    )
+
     for i, tid in enumerate(todo_ids, 1):
         if i % 20 == 0:
             log.info("  Progress: %d / %d", i, len(todo_ids))
@@ -286,7 +306,8 @@ def run(current_gw: int | None = None, team_ids: list[int] | None = None) -> int
 
         if seed:
             if tid not in have_gw_score:
-                seed = {**_zeroed_gw_scores_stub(tid, current_gw, SEASON), **seed}
+                stub = _zeroed_gw_scores_stub(tid, current_gw, SEASON, prev_totals.get(tid, 0))
+                seed = {**stub, **seed}
             seed_rows.append(seed)
 
         # Chips only change at a deadline, so refresh them alongside picks.
