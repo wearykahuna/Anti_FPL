@@ -1,0 +1,60 @@
+name: Deploy Pages
+
+# Publishes the static site to GitHub Pages.
+#
+# The site is the root HTML files plus their images. Nothing else. The previous
+# version uploaded `path: '.'` — the entire 62 MB repo, including Backend/
+# Python source, Brief.md and 50 MB of snapshots/ JSON, all publicly served.
+# No page links to any of that, so it is staged out here.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      # Image changes never redeployed under the old '*.html'-only filter.
+      - '*.png'
+      - '*.ico'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Stage site
+        run: |
+          mkdir -p _site
+          cp ./*.html _site/
+          cp ./*.png ./*.ico _site/
+          echo "--- staged ---"
+          ls -la _site
+          du -sh _site
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '_site'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

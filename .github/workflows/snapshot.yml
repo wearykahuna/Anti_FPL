@@ -1,0 +1,52 @@
+name: Weekly snapshot
+
+# Writes a JSON archive of teams + gw_scores to snapshots/{season}/ and commits
+# it. Audit trail only — no page on the site reads these files.
+#
+# Runs Monday 02:43 UTC rather than the old Sunday 23:40. A late Sunday kickoff
+# is often still settling at 23:40, so the archive could capture provisional
+# scores. By Monday morning the GW is finalized.
+
+on:
+  schedule:
+    - cron: '43 2 * * 1'
+  workflow_dispatch:
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: anti-fpl-snapshot
+      cancel-in-progress: false
+    # The only workflow here that writes to the repo.
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Take snapshot
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        working-directory: Backend
+        run: python run_task.py snapshot
+
+      - name: Commit snapshot if any
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add snapshots/
+          git diff --cached --quiet || git commit -m "snapshot: $(date +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase origin main
+          git push

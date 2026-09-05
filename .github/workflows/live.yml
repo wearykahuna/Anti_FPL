@@ -1,0 +1,75 @@
+name: Live scoring
+
+# The live scoring loop. One job, one command, no cron-to-task dispatch.
+#
+# WHY THE CRON LOOKS LIKE THIS
+# ----------------------------
+# GitHub silently DROPS scheduled occurrences under load — it does not queue
+# them. Measured on this repo in Sept 2026: of 20 occurrences requested on a
+# Saturday, 6 were created, deferred by 30 min to 4.5 hours. The previous
+# design asked for one occurrence per hour, so every dropped one cost a full
+# hour of live coverage.
+#
+# The fix is redundancy, not smarter tiering. Twelve occurrences an hour means
+# a dropped one costs 5 minutes, and even at the observed ~30% delivery rate
+# something runs every ~15 min.
+#
+# Minutes are :02,:07,:12,... deliberately off the top of the hour — :00 is by
+# far the most contended slot and gets deferred hardest.
+
+on:
+  # TEMPORARY - remove before merging to main. Lets this workflow be tested on
+  # a branch, since `schedule` only ever fires on the default branch and
+  # `workflow_dispatch` only shows a Run button for workflows already there.
+  push:
+    branches: [chore/workflows-reset]
+
+  schedule:
+    # Dense band, same every day, UTC.
+    #   Starts at 10:00 because the GW deadline is 90 min before the first
+    #   kickoff, and scheduler.tick() captures picks/chips/bank on the first
+    #   tick after it passes — an 11:30 UTC kickoff has a 10:00 UTC deadline.
+    #   Runs to 23:57 because bonus points land 30-60 min after the final
+    #   whistle, so a 20:15 UTC kickoff is still settling at 23:00.
+    #   Wide enough in UTC to cover both BST and GMT with no seasonal edits.
+    - cron: '2-59/5 10-23 * * *'
+    # Overnight finalize sweep. Without it a GW whose last fixture ends late
+    # leaves gw_scores rows flagged is_live until the next morning.
+    - cron: '7 0-9 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    # A hung run must not hold the concurrency group. The worker caps itself at
+    # 4 minutes; this is the backstop if it wedges before that.
+    timeout-minutes: 10
+    concurrency:
+      group: anti-fpl-live
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run scheduler loop
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        working-directory: Backend
+        # --max-minutes 4 keeps the whole job (setup included) inside the 5-min
+        # gap, so a run is always finished before the next occurrence arrives
+        # and can never block it. That is what makes 5-min cadence safe.
+        # --idle-horizon 15 matches IMMINENT_MINUTES in tasks/scheduler.py: stay
+        # alive exactly when the next tick would classify the state as live,
+        # otherwise exit in ~15s so an idle run costs almost nothing.
+        run: python worker.py --max-minutes 4 --exit-when-idle --idle-horizon 15
