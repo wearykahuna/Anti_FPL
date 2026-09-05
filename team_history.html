@@ -71,6 +71,12 @@
     td{padding:10px 14px;vertical-align:middle;white-space:nowrap}
     td.r{text-align:right;font-family:var(--mono)}
 
+    /* Season Stats mini table only — its columns read as messy right-aligned
+       (same fix already applied on the GWStats tabs), the main GW-by-GW
+       table below keeps right-alignment for its numeric columns. */
+    .season-stats-table thead th.r{text-align:left}
+    .season-stats-table td.r{text-align:left}
+
     .state-msg{max-width:900px;margin:80px auto;text-align:center;color:var(--muted);
                font-family:var(--mono);font-size:0.85rem;line-height:2}
     .state-msg .big{font-size:2rem;display:block;margin-bottom:12px}
@@ -110,11 +116,12 @@
     </div>
     <div id="season-stats-body" style="display:none">
       <div class="table-wrap" style="margin:16px 0 16px">
-        <table>
+        <table class="season-stats-table">
           <thead>
             <tr>
               <th class="r">Scores &lt;20</th>
               <th class="r">Min Score</th>
+              <th class="r">Avg Score</th>
               <th class="r">Max Score</th>
               <th class="r">Range</th>
               <th class="r">Scores &gt;40</th>
@@ -296,30 +303,39 @@
       const latest = gwRows.at(-1);
       const bestRank = gwRows.reduce((min, r) =>
         r.shared_rank != null && r.shared_rank < min ? r.shared_rank : min, Infinity);
+
+      const ptsRows = gwRows.filter(r => typeof r.anti_gw_pts === 'number');
+      const avgPts  = ptsRows.length
+        ? ptsRows.reduce((sum, r) => sum + r.anti_gw_pts, 0) / ptsRows.length
+        : null;
+
       document.getElementById('gw-bar').innerHTML = `
         <div class="gw-pill"><strong>${latest?.anti_total ?? '—'}</strong>Current Total</div>
         <div class="gw-pill"><strong>${latest?.rank_tied ? '=' : ''}${latest?.shared_rank ?? '—'}</strong>Current Global Rank</div>
         <div class="gw-pill"><strong>${bestRank === Infinity ? '—' : bestRank}</strong>Best Global Rank</div>
+        <div class="gw-pill"><strong>${avgPts != null ? avgPts.toFixed(1) : '—'}</strong>Avg GW Score</div>
       `;
 
-      const ptsRows = gwRows.filter(r => typeof r.anti_gw_pts === 'number');
       const under20 = ptsRows.filter(r => r.anti_gw_pts < 20).length;
       const over40  = ptsRows.filter(r => r.anti_gw_pts > 40).length;
       const minPts  = ptsRows.length ? Math.min(...ptsRows.map(r => r.anti_gw_pts)) : null;
       const maxPts  = ptsRows.length ? Math.max(...ptsRows.map(r => r.anti_gw_pts)) : null;
       const range   = (minPts != null && maxPts != null) ? maxPts - minPts : null;
-      const bestRow  = ptsRows.find(r => r.anti_gw_pts === maxPts);
-      const worstRow = ptsRows.find(r => r.anti_gw_pts === minPts);
+      // Anti-fpl is golf-style — lower is better — so "Best" is the MIN score
+      // and "Worst" is the MAX, the opposite of a normal FPL leaderboard.
+      const bestRow  = ptsRows.find(r => r.anti_gw_pts === minPts);
+      const worstRow = ptsRows.find(r => r.anti_gw_pts === maxPts);
 
       document.getElementById('season-stats-summary').innerHTML = `
         <tr>
           <td class="r">${under20}</td>
           <td class="r">${minPts ?? '—'}</td>
+          <td class="r">${avgPts != null ? avgPts.toFixed(1) : '—'}</td>
           <td class="r">${maxPts ?? '—'}</td>
           <td class="r">${range ?? '—'}</td>
           <td class="r">${over40}</td>
-          <td class="r">${bestRow ? `${maxPts} (GW${bestRow.gw})` : '—'}</td>
-          <td class="r">${worstRow ? `${minPts} (GW${worstRow.gw})` : '—'}</td>
+          <td class="r">${bestRow ? `${minPts} (GW${bestRow.gw})` : '—'}</td>
+          <td class="r">${worstRow ? `${maxPts} (GW${worstRow.gw})` : '—'}</td>
         </tr>
       `;
 
