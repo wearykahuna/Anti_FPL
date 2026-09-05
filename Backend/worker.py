@@ -8,15 +8,18 @@ sleeping runners.
 
 The same file serves both hosting targets:
 
-  GitHub Actions (hourly cron, 55-min window):
-      python worker.py --max-minutes 55 --exit-when-idle
+  GitHub Actions (5-minute cron, 4-min window — see .github/workflows/live.yml):
+      python worker.py --max-minutes 4 --exit-when-idle --idle-horizon 15
   Render background worker (runs forever):
       python worker.py
 
 --exit-when-idle stops the loop when the state is idle AND no fixture kicks
-off within IDLE_EXIT_HORIZON minutes — the next hourly cron run will be
-back well before anything happens. Without the flag the loop just sleeps
-through idle periods (correct for an always-on worker).
+off within --idle-horizon minutes — the next cron run will be back well
+before anything happens. Without the flag the loop just sleeps through idle
+periods (correct for an always-on worker).
+
+Keep --idle-horizon in step with the cron interval that invokes this: it is
+the promise "another run will be along before that kickoff".
 """
 
 import argparse
@@ -36,7 +39,7 @@ log = logging.getLogger(__name__)
 
 LIVE_INTERVAL_S    = 60    # between ticks while there is anything to score
 IDLE_INTERVAL_S    = 300   # between ticks while waiting for a kickoff
-IDLE_EXIT_HORIZON  = 70    # minutes: exit-when-idle only if no kickoff within this
+IDLE_EXIT_HORIZON  = 70    # minutes: default for --idle-horizon (see below)
 ERROR_BACKOFF_S    = 30    # after a failed tick — retry soon, don't lose 5 min
 
 # Every state in which scheduler.tick() actually does scoring work deserves the
@@ -56,8 +59,19 @@ def main() -> int:
     p.add_argument("--idle-interval",  type=int, default=IDLE_INTERVAL_S,
                    help="Seconds between ticks while idle (default %(default)s)")
     p.add_argument("--exit-when-idle", action="store_true",
-                   help="Exit if idle and no kickoff within the next "
-                        f"{IDLE_EXIT_HORIZON} minutes (for cron-based hosts)")
+                   help="Exit if idle and no kickoff within --idle-horizon "
+                        "minutes (for cron-based hosts)")
+    # Must track the cron interval of whatever is invoking this. On the old
+    # hourly cron, 70 was right: stay alive rather than exit and leave an hour
+    # uncovered. On a 5-minute cron the same value keeps a runner idling for
+    # its whole window whenever any kickoff is within 70 min, which at ~178
+    # runs a day is pure waste. 15 lines up with IMMINENT_MINUTES in
+    # tasks/scheduler.py — stay alive exactly when the next tick would
+    # classify the state as live.
+    p.add_argument("--idle-horizon", type=float, default=IDLE_EXIT_HORIZON,
+                   dest="idle_horizon",
+                   help="Minutes: --exit-when-idle only exits if the next "
+                        "kickoff is further away than this (default %(default)s)")
     args = p.parse_args()
 
     from tasks.scheduler import tick
@@ -87,7 +101,7 @@ def main() -> int:
         worst_rc = max(worst_rc, rc)
 
         if state == "idle" and args.exit_when_idle:
-            if next_ko is None or next_ko > IDLE_EXIT_HORIZON:
+            if next_ko is None or next_ko > args.idle_horizon:
                 log.info("Idle, next kickoff %s — exiting (next cron covers it).",
                          f"in {next_ko:.0f} min" if next_ko is not None else "none this GW")
                 return worst_rc

@@ -1,0 +1,119 @@
+name: Manual task
+
+# On-demand task menu. workflow_dispatch only — nothing here is ever scheduled,
+# so there is no cron-to-task mapping that can silently fall through.
+#
+# scheduler, snapshot and refresh_reference are deliberately absent: they have
+# their own workflows (live.yml, snapshot.yml, reference.yml), each with its own
+# Run button.
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'Which task to run'
+        required: true
+        default: 'refresh_picks'
+        type: choice
+        options:
+          - full_refresh
+          - refresh_picks
+          - refresh_live
+          - recalc_scores
+          - recalc_gw
+          - finalize_gw
+          - backfill_player_scores
+          - backfill_team_value
+          - backfill_transfers
+          - score_new_team
+          - create_mini_league
+          # Read-only / dry-run-by-default. Both need --apply or --league to do
+          # anything meaningful, and neither takes that from here, so from
+          # Actions they are safe to run. purge_teams is deliberately NOT
+          # listed: it is destructive and belongs on a local terminal where you
+          # can read the dry-run output before committing to it.
+          - audit_teams
+          - repair_bank
+      team_id:
+        description: 'Team ID (only for score_new_team)'
+        required: false
+        type: string
+      league_id:
+        description: 'FPL league ID (for score_new_team bulk mode or create_mini_league)'
+        required: false
+        type: string
+      invite_code:
+        description: 'Supabase invite_code label (only for create_mini_league)'
+        required: false
+        type: string
+      gw_from:
+        description: 'GW start (only for recalc_gw)'
+        required: false
+        type: string
+      gw_to:
+        description: 'GW end (only for recalc_gw — leave blank for single GW)'
+        required: false
+        type: string
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    concurrency:
+      group: anti-fpl-manual
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run task
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        working-directory: Backend
+        timeout-minutes: 58
+        run: |
+          TASK="${{ github.event.inputs.task }}"
+          echo "Running task: $TASK"
+          if [ "$TASK" = "full_refresh" ]; then
+            python run_task.py refresh_reference
+            python run_task.py refresh_picks
+            python run_task.py recalc_scores
+          elif [ "$TASK" = "score_new_team" ]; then
+            if [ -n "${{ github.event.inputs.league_id }}" ]; then
+              python run_task.py "$TASK" --league "${{ github.event.inputs.league_id }}"
+            else
+              python run_task.py "$TASK" --team "${{ github.event.inputs.team_id }}"
+            fi
+          elif [ "$TASK" = "create_mini_league" ]; then
+            python run_task.py "$TASK" \
+              --league "${{ github.event.inputs.league_id }}" \
+              --invite-code "${{ github.event.inputs.invite_code }}"
+          elif [ "$TASK" = "audit_teams" ]; then
+            AUDIT_ARGS="--all-db"
+            [ -n "${{ github.event.inputs.league_id }}" ] && AUDIT_ARGS="$AUDIT_ARGS --league ${{ github.event.inputs.league_id }}"
+            [ -n "${{ github.event.inputs.invite_code }}" ] && AUDIT_ARGS="$AUDIT_ARGS --invite-code ${{ github.event.inputs.invite_code }}"
+            python run_task.py "$TASK" $AUDIT_ARGS
+          elif [ "$TASK" = "repair_bank" ]; then
+            # No --apply here on purpose: from Actions this is always a dry run.
+            GW_ARGS=""
+            [ -n "${{ github.event.inputs.gw_from }}" ] && GW_ARGS="--gw-from ${{ github.event.inputs.gw_from }}"
+            [ -n "${{ github.event.inputs.gw_to }}" ]   && GW_ARGS="$GW_ARGS --gw-to ${{ github.event.inputs.gw_to }}"
+            python run_task.py "$TASK" $GW_ARGS
+          elif [ "$TASK" = "recalc_gw" ] || [ "$TASK" = "finalize_gw" ] || [ "$TASK" = "backfill_player_scores" ]; then
+            GW_ARGS=""
+            [ -n "${{ github.event.inputs.gw_from }}" ] && GW_ARGS="--gw-from ${{ github.event.inputs.gw_from }}"
+            [ -n "${{ github.event.inputs.gw_to }}" ]   && GW_ARGS="$GW_ARGS --gw-to ${{ github.event.inputs.gw_to }}"
+            python run_task.py "$TASK" $GW_ARGS
+          else
+            python run_task.py "$TASK"
+          fi

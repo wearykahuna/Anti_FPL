@@ -2,27 +2,52 @@ name: Tests
 
 on:
   push:
+    # '**' matches every branch but NO tags. Without it a `git push --tags`
+    # fires this workflow too, which is pure noise.
+    branches: ['**']
     paths:
       - 'Backend/**'
       - 'requirements*.txt'
-      - '.github/workflows/tests.yml'
+      # Workflow edits get checked here too — a broken YAML edit that silently
+      # kills the schedule is exactly the failure this repo has already had.
+      - '.github/workflows/**'
   pull_request:
     paths:
       - 'Backend/**'
       - 'requirements*.txt'
+      - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+          cache: 'pip'
 
       - name: Install dependencies
         run: pip install -r requirements-dev.txt
+
+      - name: Check workflow YAML parses
+        run: |
+          pip install pyyaml
+          python - <<'PY'
+          import pathlib, sys, yaml
+          bad = 0
+          for p in sorted(pathlib.Path(".github/workflows").glob("*.yml")):
+              try:
+                  yaml.safe_load(p.read_text(encoding="utf-8"))
+                  print(f"ok    {p}")
+              except Exception as e:
+                  print(f"FAIL  {p}: {e}")
+                  bad = 1
+          sys.exit(bad)
+          PY
 
       - name: Run tests
         run: python -m pytest Backend/tests -q

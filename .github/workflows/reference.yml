@@ -1,0 +1,45 @@
+name: Reference refresh
+
+# Pulls the FPL bootstrap: fixtures, kickoff times, players, teams, gameweek
+# deadlines and chip definitions. Everything that is known in advance.
+#
+# A deferred or dropped run here is not fatal. _resolve_current_gw() in
+# Backend/tasks/scheduler.py re-derives the current GW from stored deadlines on
+# every live tick and corrects gameweeks.is_current in place, so the site never
+# waits on this job to notice a deadline has passed.
+
+on:
+  schedule:
+    # Twice daily, off the top of the hour. The afternoon run catches
+    # post-deadline GW transitions for midweek and rearranged fixtures.
+    - cron: '17 3 * * *'
+    - cron: '17 13 * * *'
+
+  workflow_dispatch:
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: anti-fpl-reference
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Refresh reference data
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        working-directory: Backend
+        run: python run_task.py refresh_reference
