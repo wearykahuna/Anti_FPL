@@ -9,10 +9,6 @@ name: Reference refresh
 # waits on this job to notice a deadline has passed.
 
 on:
-  # TEMPORARY - remove before merging to main. See live.yml for why.
-  push:
-    branches: [chore/workflows-reset]
-
   schedule:
     # Twice daily, off the top of the hour. The afternoon run catches
     # post-deadline GW transitions for midweek and rearranged fixtures.

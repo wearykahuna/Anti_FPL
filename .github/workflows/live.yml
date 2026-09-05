@@ -18,12 +18,6 @@ name: Live scoring
 # far the most contended slot and gets deferred hardest.
 
 on:
-  # TEMPORARY - remove before merging to main. Lets this workflow be tested on
-  # a branch, since `schedule` only ever fires on the default branch and
-  # `workflow_dispatch` only shows a Run button for workflows already there.
-  push:
-    branches: [chore/workflows-reset]
-
   schedule:
     # Dense band, same every day, UTC.
     #   Starts at 10:00 because the GW deadline is 90 min before the first

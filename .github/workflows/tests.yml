@@ -2,6 +2,9 @@ name: Tests
 
 on:
   push:
+    # '**' matches every branch but NO tags. Without it a `git push --tags`
+    # fires this workflow too, which is pure noise.
+    branches: ['**']
     paths:
       - 'Backend/**'
       - 'requirements*.txt'
