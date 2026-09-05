@@ -30,6 +30,8 @@
          border-bottom:2px solid transparent;cursor:pointer;text-decoration:none;transition:all 0.2s}
     .tab:hover{color:var(--text)}
     .tab.active{color:var(--text);border-bottom-color:var(--accent)}
+    .tab .gw-part{color:var(--text)}
+    .tab .stats-part{color:var(--accent)}
 
     .gw-bar{max-width:1000px;margin:0 auto 20px;font-size:0.82rem;color:var(--muted)}
 
@@ -131,6 +133,9 @@
         <th class="r chip-col" data-key="fh" title="Free Hits played this GW">FH</th>
         <th class="r chip-col" data-key="bb" title="Bench Boosts played this GW">BB</th>
         <th class="r chip-col" data-key="tc" title="Triple Captains played this GW">TC</th>
+        <th data-key="topCaptCount" title="Most-picked captain this GW">Top Capt</th>
+        <th data-key="topVcCount" title="Most-picked vice-captain this GW">Top VC</th>
+        <th data-key="worstCaptPts" title="Captain(s) with the most points this GW — the anti-fpl pick that backfired hardest">Worst Capt</th>
       </tr>
     </thead>
     <tbody id="tbody"></tbody>
@@ -150,16 +155,23 @@
   // Nav is context-sensitive: only show the mini-league link if we arrived via
   // mini_league.html's own "?from=mini_league" — otherwise a global (Overall)
   // visitor could use this page as a back door into a mini-league they weren't
-  // given the invite code for.
+  // given the invite code for. GWStats itself sits right after whichever tab
+  // is the actual origin (mini-league or overall), rather than in a fixed
+  // slot, so the nav reads as "you came from X, here's X's GW stats".
   (function renderNav() {
     const from = new URLSearchParams(location.search).get('from');
+    const gwStatsTab = '<a class="tab active" href="weekly_stats.html' + (from ? `?from=${from}` : '') +
+      '"><span class="gw-part">GW</span><span class="stats-part">Stats</span></a>';
     const links = [];
     if (from === 'mini_league') {
       links.push('<a class="tab" href="mini_league.html">The next Badly drawn boy</a>');
+      links.push(gwStatsTab);
+      links.push('<a class="tab" href="index.html">Overall antifpl</a>');
+    } else {
+      links.push('<a class="tab" href="index.html">Overall antifpl</a>');
+      links.push(gwStatsTab);
     }
-    links.push('<a class="tab" href="index.html">Overall antifpl</a>');
     links.push('<a class="tab" href="players.html' + (from ? `?from=${from}` : '') + '">Players</a>');
-    links.push('<a class="tab active" href="weekly_stats.html' + (from ? `?from=${from}` : '') + '">Weekly Stats</a>');
     links.push('<a class="tab" href="rules.html">Rules</a>');
     document.getElementById('tabs-bar').innerHTML = links.join('');
   })();
@@ -209,6 +221,106 @@
       const allRows = await sbFetchAll('gw_scores',
         `season=eq.${encodeURIComponent(SEASON)}&select=team_id,gw,anti_gw_pts,anti_total,active_chip&order=gw.asc`);
 
+      // Captain/VC picks per GW — same table players.html reads for its
+      // current-GW captain counts, here folded across the whole season.
+      // Pure client-side aggregation, no new backend query shape.
+      const players = await sbFetchAll('players',
+        `season=eq.${encodeURIComponent(SEASON)}&select=player_id,web_name`);
+      const nameById = new Map(players.map(p => [p.player_id, p.web_name]));
+
+      const selections = await sbFetchAll('team_gw_selections',
+        `season=eq.${encodeURIComponent(SEASON)}&select=gw,captain_id,vice_captain_id`);
+
+      const bySelGw = {};
+      selections.forEach(s => (bySelGw[s.gw] ||= []).push(s));
+
+      // Mode of a list of ids, tie-broken by joining all leaders' names —
+      // ties are common early season, so pick just one leader would mislead.
+      function topPick(rows, key) {
+        const counts = new Map();
+        rows.forEach(s => {
+          const id = s[key];
+          if (id == null) return;
+          counts.set(id, (counts.get(id) || 0) + 1);
+        });
+        if (!counts.size) return { leaders: [], max: 0 };
+        const max = Math.max(...counts.values());
+        const leaders = [...counts.entries()].filter(([, c]) => c === max).map(([id]) => id);
+        return { leaders, max };
+      }
+
+      const topCaptByGw = {}, topVcByGw = {};
+      Object.entries(bySelGw).forEach(([gw, rows]) => {
+        topCaptByGw[gw] = topPick(rows, 'captain_id');
+        topVcByGw[gw]   = topPick(rows, 'vice_captain_id');
+      });
+
+      // Raw (un-doubled) points those leaders actually scored, shown only for
+      // GWs FPL has finished — a live GW's base_pts is still climbing, so
+      // showing it there would look final when it isn't. Only fetch the
+      // leaders' own rows (not every player's), since there are only a
+      // handful of them across the whole season.
+      const gwMeta = await sbFetchAll('gameweeks',
+        `season=eq.${encodeURIComponent(SEASON)}&select=gw,is_finished`);
+      const finishedGws = new Set(gwMeta.filter(g => g.is_finished).map(g => g.gw));
+
+      // Worst Captain needs every captained player's points (to find the
+      // minimum), not just the most-picked one, so the fetch below covers
+      // every distinct captain/VC ever picked — still a small set (a
+      // season's worth of players anyone actually captained), not the full
+      // player pool.
+      const leaderIds = new Set();
+      selections.forEach(s => {
+        if (s.captain_id != null)      leaderIds.add(s.captain_id);
+        if (s.vice_captain_id != null) leaderIds.add(s.vice_captain_id);
+      });
+
+      const leaderScores = leaderIds.size
+        ? await sbFetchAll('player_gw_scores',
+            `season=eq.${encodeURIComponent(SEASON)}&player_id=in.(${[...leaderIds].join(',')})&select=player_id,gw,base_pts`)
+        : [];
+      const basePtsByKey = new Map(leaderScores.map(r => [`${r.gw}:${r.player_id}`, r.base_pts]));
+
+      // Worst Captain: the captained player(s) with the MOST points that GW
+      // — same golf-style "worst = highest" convention as the Best/Worst
+      // columns. Anti-fpl rewards a captain who blanks, so the pick that
+      // backfired hardest is whoever actually hauled (e.g. a "safe" Mendy/
+      // Ajayi pick that unexpectedly returned big). Each tied player keeps
+      // their own pick-count — unlike Top Capt, tied "worst" players don't
+      // necessarily share the same pick-count.
+      function formatWorstCapt(gw) {
+        if (!finishedGws.has(Number(gw))) return { label: '—', pts: null };
+        const rows = bySelGw[gw] || [];
+        const counts = new Map();
+        rows.forEach(s => {
+          if (s.captain_id != null) counts.set(s.captain_id, (counts.get(s.captain_id) || 0) + 1);
+        });
+        if (!counts.size) return { label: '—', pts: null };
+        let worstPts = null;
+        counts.forEach((_, id) => {
+          const pts = basePtsByKey.get(`${gw}:${id}`);
+          if (pts != null && (worstPts == null || pts > worstPts)) worstPts = pts;
+        });
+        if (worstPts == null) return { label: '—', pts: null };
+        const label = [...counts.entries()]
+          .filter(([id]) => basePtsByKey.get(`${gw}:${id}`) === worstPts)
+          .map(([id, count]) => `${count} × ${esc(nameById.get(id) || id)} (${worstPts}pt${worstPts === 1 ? '' : 's'})`)
+          .join(' / ');
+        return { label, pts: worstPts };
+      }
+
+      function formatPick({ leaders, max }, gw) {
+        if (!leaders.length) return '—';
+        const finished = finishedGws.has(Number(gw));
+        const names = leaders.map(id => {
+          const name = esc(nameById.get(id) || id);
+          if (!finished) return name;
+          const pts = basePtsByKey.get(`${gw}:${id}`);
+          return pts != null ? `${name} (${pts}pt${pts === 1 ? '' : 's'})` : name;
+        });
+        return `${max} × ${names.join(' / ')}`;
+      }
+
       const byGw = {};
       allRows.forEach(r => {
         if (typeof r.anti_gw_pts !== 'number') return;
@@ -246,10 +358,17 @@
           if (c in chips) chips[c]++;
         });
 
+        const topCapt   = topCaptByGw[gw] || { leaders: [], max: 0 };
+        const topVc     = topVcByGw[gw]   || { leaders: [], max: 0 };
+        const worstCapt = formatWorstCapt(gw);
+
         return { gw: Number(gw), teams: rows.length, best, worst, avg, topNAvg,
                  wc: chips.wildcard, fh: chips.freehit,
                  bb: chips.bboost, tc: chips['3xc'],
-                 chipsTotal: chips.wildcard + chips.freehit + chips.bboost + chips['3xc'] };
+                 chipsTotal: chips.wildcard + chips.freehit + chips.bboost + chips['3xc'],
+                 topCaptLabel: formatPick(topCapt, gw), topCaptCount: topCapt.max,
+                 topVcLabel: formatPick(topVc, gw), topVcCount: topVc.max,
+                 worstCaptLabel: worstCapt.label, worstCaptPts: worstCapt.pts };
       });
       ROWS.sort((a, b) => a.gw - b.gw);
 
@@ -322,6 +441,9 @@
         <td class="r chip-cell fh">${r.fh || '—'}</td>
         <td class="r chip-cell bb">${r.bb || '—'}</td>
         <td class="r chip-cell tc">${r.tc || '—'}</td>
+        <td>${r.topCaptLabel}</td>
+        <td>${r.topVcLabel}</td>
+        <td>${r.worstCaptLabel}</td>
       </tr>
     `).join('');
   }

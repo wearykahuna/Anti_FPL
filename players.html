@@ -113,8 +113,11 @@
         <th class="r" data-key="capCount">Captain</th>
         <th class="r" data-key="vcCount">VC</th>
         <th class="r" data-key="matches">Matches</th>
-        <th class="r" data-key="minutes">Minutes</th>
+        <th class="r" data-key="minutes">Total Minutes</th>
+        <th class="r" data-key="avgMinutes" title="Total minutes / matches played">Avg Mins</th>
+        <th class="r" data-key="lastGwMinutes" title="Minutes played in the most recent GW with data">Last GW Mins</th>
         <th class="r" data-key="totalAnti">Total Anti Pts</th>
+        <th class="r" data-key="lastGwAnti" title="Anti points scored in the most recent GW with data">Last GW Anti Pts</th>
         <th class="r" data-key="form5">5GW Form</th>
       </tr>
     </thead>
@@ -217,7 +220,7 @@
       // Season totals + 5-GW form + matches/minutes played
       const byPlayer = {};
       seasonScores.forEach(r => (byPlayer[r.player_id] ||= []).push(r));
-      const totalAnti = {}, form5 = {}, matches = {}, minutesPlayed = {};
+      const totalAnti = {}, form5 = {}, matches = {}, minutesPlayed = {}, lastGwMinutes = {}, lastGwAnti = {};
       Object.entries(byPlayer).forEach(([pid, rows]) => {
         rows.sort((a, b) => a.gw - b.gw);
         totalAnti[pid] = rows.reduce((sum, r) => sum + (r.anti_pts ?? 0), 0);
@@ -225,6 +228,8 @@
         form5[pid] = last5.length ? last5.reduce((a, b) => a + b, 0) / last5.length : null;
         matches[pid] = rows.filter(r => (r.minutes ?? 0) > 0).length;
         minutesPlayed[pid] = rows.reduce((sum, r) => sum + (r.minutes ?? 0), 0);
+        lastGwMinutes[pid] = rows[rows.length - 1]?.minutes ?? 0;
+        lastGwAnti[pid] = rows[rows.length - 1]?.anti_pts ?? null;
       });
 
       ROWS = players.map(p => ({
@@ -236,7 +241,10 @@
         vcCount:    vc[p.player_id] || 0,
         matches:    matches[p.player_id] ?? 0,
         minutes:    minutesPlayed[p.player_id] ?? 0,
+        avgMinutes: matches[p.player_id] ? minutesPlayed[p.player_id] / matches[p.player_id] : 0,
+        lastGwMinutes: lastGwMinutes[p.player_id] ?? 0,
         totalAnti:  totalAnti[p.player_id] ?? 0,
+        lastGwAnti: lastGwAnti[p.player_id] ?? null,
         form5:      form5[p.player_id],
       }));
 
@@ -305,7 +313,10 @@
         <td class="r">${r.vcCount}</td>
         <td class="r">${r.matches}</td>
         <td class="r">${r.minutes}</td>
+        <td class="r">${r.avgMinutes.toFixed(0)}</td>
+        <td class="r">${r.lastGwMinutes}</td>
         <td class="r">${r.totalAnti}</td>
+        <td class="r">${r.lastGwAnti != null ? r.lastGwAnti : '—'}</td>
         <td class="r">${r.form5 != null ? r.form5.toFixed(1) : '—'}</td>
       </tr>
     `).join('');

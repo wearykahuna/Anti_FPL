@@ -43,6 +43,12 @@
              padding:8px 16px;font-size:0.78rem;color:var(--muted)}
     .gw-pill strong{color:var(--text);font-size:1rem;display:block}
 
+    .gwstats-pill{display:flex;align-items:center;justify-content:center;text-decoration:none;
+             font-size:1rem;font-weight:700;transition:border-color 0.15s,box-shadow 0.15s}
+    .gwstats-pill:hover{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+    .gwstats-pill .gw-part{color:var(--text)}
+    .gwstats-pill .stats-part{color:var(--accent)}
+
     .table-wrap{max-width:900px;margin:0 auto;overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:0.85rem}
     thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
@@ -631,7 +637,7 @@
 
     document.getElementById('gw-bar').innerHTML = `
       <div class="gw-pills">
-        <div class="gw-pill"><strong>${gw}</strong>Gameweek</div>
+        <a class="gw-pill gwstats-pill" href="weekly_stats.html?from=index"><span class="gw-part">GW</span><span class="stats-part">Stats</span></a>
         <div class="gw-pill"><strong>${scores.length}</strong>Teams</div>
         <div class="gw-pill"><strong>${best}</strong>Best GW score</div>
         <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
@@ -641,8 +647,6 @@
           <strong>${chipsActive}</strong>Chips active &middot; ${chipBreakdown}
         </div>
       </div>
-
-      <a class="gw-history-btn" href="weekly_stats.html?from=index" style="align-self:center">Overall antifpl weekly stats</a>
     `;
     // Rendered into a FIXED slot in the header (under the updated time) rather
     // than inside the stats bar, so it never shifts around as pills reflow —
