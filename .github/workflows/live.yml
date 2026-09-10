@@ -18,18 +18,6 @@ name: Live scoring
 # far the most contended slot and gets deferred hardest.
 
 on:
-  schedule:
-    # Dense band, same every day, UTC.
-    #   Starts at 10:00 because the GW deadline is 90 min before the first
-    #   kickoff, and scheduler.tick() captures picks/chips/bank on the first
-    #   tick after it passes — an 11:30 UTC kickoff has a 10:00 UTC deadline.
-    #   Runs to 23:57 because bonus points land 30-60 min after the final
-    #   whistle, so a 20:15 UTC kickoff is still settling at 23:00.
-    #   Wide enough in UTC to cover both BST and GMT with no seasonal edits.
-    - cron: '2-59/5 10-23 * * *'
-    # Overnight finalize sweep. Without it a GW whose last fixture ends late
-    # leaves gw_scores rows flagged is_live until the next morning.
-    - cron: '7 0-9 * * *'
 
   workflow_dispatch:
 
