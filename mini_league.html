@@ -648,7 +648,11 @@
       switch (sortKey) {
         case 'team':   return (teamInfo[s.team_id]?.team_name || '').toLowerCase();
         case 'gw':     return s.fpl_raw_pts ?? 0;
-        case 'toplay': return toPlayCount(selectionMap[s.team_id]?.squad?.slice(0, 11)) ?? -1;
+        case 'toplay': {
+          const sel = selectionMap[s.team_id];
+          const isBB = (s.active_chip || '').toLowerCase() === 'bboost';
+          return toPlayCount(isBB ? sel?.squad : sel?.squad?.slice(0, 11)) ?? -1;
+        }
         case 'pens':   return s.total_pens_gw ?? 0;
         case 'prov':   return gwPtsOf(s);
         case 'rank':
@@ -790,7 +794,9 @@
       const prevTot    = prevTotal[s.team_id];
       const selection  = selectionMap[s.team_id];
 
-      const toPlay = toPlayCount(selection?.squad?.slice(0, 11));
+      const toPlay = toPlayCount(
+        activeChip.toLowerCase() === 'bboost' ? selection?.squad : selection?.squad?.slice(0, 11)
+      );
       const toPlayHtml = toPlay == null ? '—'
         : `<span class="to-play-cell ${toPlay > 0 ? 'has-some' : ''}">${toPlay} to play</span>`;
 
