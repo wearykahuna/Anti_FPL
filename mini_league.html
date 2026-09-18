@@ -49,6 +49,13 @@
     .gwstats-pill .gw-part{color:var(--text)}
     .gwstats-pill .stats-part{color:var(--accent)}
 
+    .search-bar{max-width:900px;margin:0 auto 14px}
+    .search-input{width:100%;max-width:260px;display:block;font-family:var(--font);
+                  font-size:0.82rem;padding:9px 12px;
+                  border:1px solid var(--border);border-radius:8px;color:var(--text);
+                  background:#fff;outline:none;transition:border-color 0.15s}
+    .search-input:focus{border-color:var(--accent)}
+
     .table-wrap{max-width:900px;margin:0 auto;overflow-x:auto}
     table{width:100%;border-collapse:collapse;font-size:0.85rem}
     thead th{text-align:left;padding:10px 14px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;
@@ -97,11 +104,19 @@
     .chip-live{background:var(--chip-solid);color:#fff;border-color:var(--chip-solid);
                animation:chip-pulse 1.4s ease-in-out infinite}
 
-    /* Same pastel pair, reused in the "Chips active" summary pill. */
+    /* Same pastel pair, reused in the "Chips active" summary pill. Also
+       doubles as a clickable filter toggle for the table below it. */
     .chip-tag{display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:4px;
               font-size:0.62rem;font-weight:700;letter-spacing:0.04em;
               background:var(--chip-soft);color:var(--chip-ink);border:1px solid #e3e3e3;
-              border-color:color-mix(in srgb, var(--chip-solid) 28%, transparent)}
+              border-color:color-mix(in srgb, var(--chip-solid) 28%, transparent);
+              cursor:pointer}
+    .chip-tag:hover{filter:brightness(0.96)}
+    .chip-tag.active{background:var(--chip-solid);color:#fff;border-color:var(--chip-solid)}
+    .chip-clear-btn{background:none;border:none;padding:0;margin-left:6px;font-size:0.62rem;
+                    font-weight:600;color:var(--muted);text-decoration:underline;cursor:pointer;
+                    font-family:inherit}
+    .chip-clear-btn:hover{color:var(--text)}
     @keyframes chip-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.96)}}
 
     .badge-provisional{display:inline-block;animation:badge-flash 1.8s ease-in-out infinite}
@@ -252,6 +267,10 @@
 
 <div class="gw-bar" id="gw-bar"></div>
 
+<div class="search-bar">
+  <input type="text" id="team-search" class="search-input" placeholder="Search team, manager, or player...">
+</div>
+
 <div class="table-wrap">
   <div id="state-msg" class="state-msg">Loading leaderboard...</div>
   <table id="leaderboard" style="display:none">
@@ -282,6 +301,8 @@
   let lastRenderArgs = null;
   let sortKey = 'total';
   let sortDir = 1;
+  let chipFilter = null;   // null = show all; else one of CHIP_PILL's keys
+  let searchQuery = '';    // lowercased; matched against team name + manager name
 
   // Gameweek being VIEWED. null = follow the live/current GW. Must live out
   // here, not inside loadData(), because toggleExpand() re-runs loadData and
@@ -311,6 +332,28 @@
       else { sortKey = key; sortDir = 1; }
       if (lastRenderArgs) render(...lastRenderArgs);
     });
+  });
+
+  // Delegated (not re-bound each render, since #gw-bar's innerHTML is replaced
+  // every render() call): click a chip count to filter the table down to just
+  // that chip's teams for this GW, click it again (or "clear") to reset.
+  document.getElementById('gw-bar').addEventListener('click', (e) => {
+    const clearBtn = e.target.closest('.chip-clear-btn');
+    if (clearBtn) {
+      chipFilter = null;
+      if (lastRenderArgs) render(...lastRenderArgs);
+      return;
+    }
+    const tag = e.target.closest('.chip-tag[data-chip]');
+    if (!tag) return;
+    const chip = tag.dataset.chip;
+    chipFilter = chipFilter === chip ? null : chip;
+    if (lastRenderArgs) render(...lastRenderArgs);
+  });
+
+  document.getElementById('team-search').addEventListener('input', (e) => {
+    searchQuery = e.target.value.trim().toLowerCase();
+    if (lastRenderArgs) render(...lastRenderArgs);
   });
 
   async function sbFetch(table, params = '') {
@@ -690,9 +733,14 @@
       if (c in chipTally) chipTally[c]++;
     });
     const chipsActive = CHIP_PILL.reduce((a, c) => a + chipTally[c.key], 0);
+    // Reset a filter that's no longer valid for this GW (e.g. switched to a
+    // GW where nobody played that chip) rather than silently showing nothing.
+    if (chipFilter && !chipTally[chipFilter]) chipFilter = null;
     const chipBreakdown = CHIP_PILL.filter(c => chipTally[c.key] > 0)
-      .map(c => `<span class="chip-tag ${c.cls}">${chipTally[c.key]} ${c.label}</span>`)
+      .map(c => `<span class="chip-tag ${c.cls}${chipFilter === c.key ? ' active' : ''}" data-chip="${c.key}" title="Click to show only ${c.label} teams">${chipTally[c.key]} ${c.label}</span>`)
       .join(' ') || '<span style="opacity:.6">none</span>';
+    const chipClearHtml = chipFilter
+      ? `<button type="button" class="chip-clear-btn">✕ clear</button>` : '';
 
     document.getElementById('gw-bar').innerHTML = `
       <div class="gw-pills">
@@ -702,8 +750,8 @@
         <div class="gw-pill"><strong>${worst}</strong>Worst GW score</div>
         <div class="gw-pill"><strong>${avg}</strong>GW average</div>
         <div class="gw-pill"><strong>${topNAvg}</strong>Top ${topN} Avg GW Score</div>
-        <div class="gw-pill" title="Chips played by this table's teams in GW${gw}">
-          <strong>${chipsActive}</strong>Chips active &middot; ${chipBreakdown}
+        <div class="gw-pill" title="Chips played by this table's teams in GW${gw} — click a count to filter the table">
+          <strong>${chipsActive}</strong>Chips active &middot; ${chipBreakdown}${chipClearHtml}
         </div>
       </div>
     `;
@@ -782,7 +830,31 @@
       return band;
     }
 
-    sorted.forEach((s) => {
+    // Filtering (chip and search) only changes which rows are DRAWN —
+    // rank/best/worst/avg/hot seat above stay computed on the full table,
+    // same as sort already leaves rank alone.
+    let displayRows = chipFilter
+      ? sorted.filter(s => (s.active_chip || '').toLowerCase() === chipFilter)
+      : sorted;
+    if (searchQuery) {
+      displayRows = displayRows.filter(s => {
+        const info = teamInfo[s.team_id] || {};
+        if ((info.team_name || '').toLowerCase().includes(searchQuery)) return true;
+        if ((info.manager   || '').toLowerCase().includes(searchQuery)) return true;
+        // Player names — this GW's squad (bench included), same scope as the
+        // rest of the page. Doesn't search ownership history.
+        const squad = selectionMap[s.team_id]?.squad || [];
+        return squad.some(pid => (window.playerNames?.[pid] || '').toLowerCase().includes(searchQuery));
+      });
+    }
+
+    if (!displayRows.length) {
+      tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:28px">
+        No teams match${searchQuery ? ` "${searchQuery}"` : ' this filter'}.
+      </td></tr>`;
+    }
+
+    displayRows.forEach((s) => {
       const info       = teamInfo[s.team_id] || {};
       const pos        = rankMap.rank(s);
       const posTied    = rankMap.tied(s);
