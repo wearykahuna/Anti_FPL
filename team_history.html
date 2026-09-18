@@ -176,6 +176,7 @@
         <tr>
           <th>GW</th>
           <th class="r">Anti Score</th>
+          <th class="r" title="Rank among all teams for THIS gameweek's score alone — golf-style, lower is better. Not the same as Global Rank, which is the cumulative total.">GW Rank</th>
           <th class="r">Running Total</th>
           <th class="r">Global Rank</th>
           <th>Badges</th>
@@ -273,11 +274,13 @@
         (byGw[r.gw] ||= []).push(r);
       });
       const rankByGw = {};
+      const gwRankByGw = {};   // rank on THIS gw's score alone, not the cumulative total
       const badgeByGw = {};
       Object.entries(byGw).forEach(([gw, rows]) => {
         rankByGw[gw] = competitionRank(rows, r => r.anti_total);
         const ptsRows = rows.filter(r => typeof r.anti_gw_pts === 'number');
         if (ptsRows.length) {
+          gwRankByGw[gw] = competitionRank(ptsRows, r => r.anti_gw_pts);
           const best  = Math.min(...ptsRows.map(r => r.anti_gw_pts));
           const worst = Math.max(...ptsRows.map(r => r.anti_gw_pts));
           badgeByGw[gw] = { best, worst };
@@ -289,6 +292,10 @@
         if (thisRow && rankByGw[r.gw]) {
           r.shared_rank = rankByGw[r.gw].rank(thisRow);
           r.rank_tied   = rankByGw[r.gw].tied(thisRow);
+        }
+        if (thisRow && gwRankByGw[r.gw]) {
+          r.gw_rank      = gwRankByGw[r.gw].rank(thisRow);
+          r.gw_rank_tied = gwRankByGw[r.gw].tied(thisRow);
         }
         const bw = badgeByGw[r.gw];
         r.badge_star   = !!(bw && r.anti_gw_pts === bw.best);
@@ -360,6 +367,7 @@
         <tr id="gw-row-${r.gw}">
           <td>${r.gw}</td>
           <td class="r">${r.anti_gw_pts ?? '—'}</td>
+          <td class="r">${r.gw_rank_tied ? '=' : ''}${r.gw_rank ?? '—'}</td>
           <td class="r">${r.anti_total ?? '—'}</td>
           <td class="r">${r.rank_tied ? '=' : ''}${r.shared_rank ?? '—'}</td>
           <td>${badges}</td>
