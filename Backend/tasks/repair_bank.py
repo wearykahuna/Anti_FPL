@@ -107,15 +107,22 @@ def run(gw_from: int = 1,
     log.info("Repair bank — season %s, GW%d-%d, mode=%s",
              SEASON, gw_from, gw_to, "APPLY" if apply else "DRY RUN")
 
+    # FPL-field columns are included here too now: a row can be wrong on
+    # transfers_gw/fpl_xfer_cost/etc while bank is already correct (the GW2
+    # transfers_gw freeze — recalc_scores stub-wrote 0 before refresh_picks'
+    # seed landed — is exactly this shape), and the old bank-only compare
+    # below used to skip such rows entirely, so --also-fpl-fields could never
+    # actually reach them.
     existing = {(r["team_id"], r["gw"]): r for r in select_all(
         "gw_scores", {"season": SEASON},
-        select="team_id,gw,bank,bank_pen,bank_pen_pts,anti_gw_pts")}
+        select="team_id,gw,bank,bank_pen,bank_pen_pts,anti_gw_pts,"
+               "fpl_xfer_cost,transfers_gw,fpl_gw_rank,fpl_total")}
 
     team_ids = get_team_ids(SEASON)
     log.info("Fetching history for %d eligible teams...", len(team_ids))
 
     value_rows: list[dict] = []
-    diffs: list[tuple] = []
+    diffs: list[dict] = []
     no_history = 0
     skipped = 0
 
@@ -142,42 +149,84 @@ def run(gw_from: int = 1,
                 continue
 
             stored_bank = row.get("bank")
-            if stored_bank == true_bank:
+            bank_changed = stored_bank != true_bank
+
+            # FPL-field mismatches, detected independently of bank — a field
+            # is only compared (and so only ever repaired) when FPL actually
+            # has a value for it, so a transient None never overwrites good
+            # stored data.
+            fpl_diffs: dict[str, tuple] = {}
+            if also_fpl_fields:
+                for col, src in _FPL_FIELDS.items():
+                    new_val = hist_gw.get(src)
+                    if new_val is None:
+                        continue
+                    old_val = row.get(col)
+                    if old_val != new_val:
+                        fpl_diffs[col] = (old_val, new_val)
+
+            if not bank_changed and not fpl_diffs:
                 continue
 
             was = bool(row.get("bank_pen"))
             now = _would_pen(true_bank)
-            diffs.append((tid, gw, stored_bank, true_bank, was, now,
-                          (BANK_PEN if now else 0) - (BANK_PEN if was else 0)))
+            diffs.append({
+                "team_id": tid, "gw": gw,
+                "bank_changed": bank_changed,
+                "stored_bank": stored_bank, "true_bank": true_bank,
+                "was_pen": was, "now_pen": now,
+                "pen_delta": (BANK_PEN if now else 0) - (BANK_PEN if was else 0),
+                "fpl_diffs": fpl_diffs,
+            })
 
             new_row = {
                 "season": SEASON, "team_id": tid, "gw": gw,
                 "bank":        true_bank,
                 "in_the_bank": true_bank,
             }
-            if also_fpl_fields:
-                for col, src in _FPL_FIELDS.items():
-                    new_row[col] = hist_gw.get(src)
+            for col, (_old_val, new_val) in fpl_diffs.items():
+                new_row[col] = new_val
             value_rows.append(new_row)
 
     # Diff report — always printed, dry run or not.
+    bank_diffs = [d for d in diffs if d["bank_changed"]]
+    fpl_diff_rows = [d for d in diffs if d["fpl_diffs"]]
+
     print()
+    print("Bank differences:")
     print("%8s  %3s  %7s  %7s  %7s  %7s  %6s"
           % ("team_id", "gw", "stored", "true", "was_pen", "now_pen", "delta"))
     print("-" * 60)
-    for tid, gw, stored, true, was, now, delta in sorted(diffs, key=lambda d: (d[1], d[0])):
+    for d in sorted(bank_diffs, key=lambda d: (d["gw"], d["team_id"])):
+        stored = d["stored_bank"]
         s_str = "NULL" if stored is None else "%.1fm" % (stored / 10)
         print("%8d  %3d  %7s  %6.1fm  %7s  %7s  %+6d"
-              % (tid, gw, s_str, true / 10, was, now, delta))
+              % (d["team_id"], d["gw"], s_str, d["true_bank"] / 10,
+                 d["was_pen"], d["now_pen"], d["pen_delta"]))
     print("-" * 60)
+    if not bank_diffs:
+        print("(none)")
 
-    gained = sum(1 for d in diffs if d[6] > 0)
-    lost = sum(1 for d in diffs if d[6] < 0)
-    earliest = min((d[1] for d in diffs), default=None)
-    log.info("%d rows differ (%d penalties gained, %d lost). "
-             "Earliest changed GW: %s. %d rows skipped (no gw_scores row), "
-             "%d teams had no history.",
-             len(diffs), gained, lost, earliest or "-", skipped, no_history)
+    if also_fpl_fields:
+        print()
+        print("FPL field differences (transfers / xfer cost / rank / total):")
+        print("%8s  %3s  %-14s  %10s  %10s" % ("team_id", "gw", "field", "stored", "true"))
+        print("-" * 60)
+        for d in sorted(fpl_diff_rows, key=lambda d: (d["gw"], d["team_id"])):
+            for col, (old_val, new_val) in d["fpl_diffs"].items():
+                print("%8d  %3d  %-14s  %10s  %10s" % (d["team_id"], d["gw"], col, old_val, new_val))
+        print("-" * 60)
+        if not fpl_diff_rows:
+            print("(none)")
+
+    gained = sum(1 for d in diffs if d["pen_delta"] > 0)
+    lost = sum(1 for d in diffs if d["pen_delta"] < 0)
+    earliest = min((d["gw"] for d in diffs), default=None)
+    log.info("%d rows differ (%d bank changes, %d fpl-field-only changes; "
+             "%d penalties gained, %d lost). Earliest changed GW: %s. "
+             "%d rows skipped (no gw_scores row), %d teams had no history.",
+             len(diffs), len(bank_diffs), len(fpl_diff_rows), gained, lost,
+             earliest or "-", skipped, no_history)
 
     if not apply:
         log.info("DRY RUN — nothing written. Re-run with --apply to commit.")
@@ -192,9 +241,9 @@ def run(gw_from: int = 1,
     # Re-score ascending from the earliest change through the last FINISHED GW.
     # Changes confined to the live GW need no recalc_gw at all — recalc_scores
     # picks them up on its next tick.
-    finished_changes = [d for d in diffs if d[1] <= last_finished]
+    finished_changes = [d for d in diffs if d["gw"] <= last_finished]
     if finished_changes:
-        recalc_start = min(min(d[1] for d in finished_changes), gw_from)
+        recalc_start = min(min(d["gw"] for d in finished_changes), gw_from)
     elif force_recalc and gw_from <= last_finished:
         recalc_start = gw_from
     else:
